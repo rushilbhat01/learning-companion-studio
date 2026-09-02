@@ -5,133 +5,194 @@ import Course from '../models/Course.js';
 
 await connectDatabase();
 await Promise.all([User.deleteMany(), Course.deleteMany()]);
-const admin = await User.create({ name: 'Platform Admin', email: 'admin@learningcompanion.studio', passwordHash: await User.hashPassword('AdminPass123!'), role: 'admin' });
-const learner = await User.create({ name: 'Harvey Learner', email: 'companion@learningcompanion.studio', passwordHash: await User.hashPassword('LearnerPass123!') });
+
+const admin = await User.create({ 
+  name: 'Platform Facilitator', 
+  email: 'admin@learningcompanion.studio', 
+  passwordHash: await User.hashPassword('AdminPass123!'), 
+  role: 'admin' 
+});
+
+const learner = await User.create({ 
+  name: 'Volunteer Companion', 
+  email: 'companion@learningcompanion.studio', 
+  passwordHash: await User.hashPassword('LearnerPass123!') 
+});
 
 const coursesData = [
   {
-    title: 'Introduction to Machine Learning',
-    description: 'Build a confident foundation in the concepts behind modern machine learning.',
-    category: 'Data Science',
-    level: 'Beginner',
+    title: 'Module 1: Foundations of Neurodiversity & Inclusive Mentorship',
+    description: 'Learn fundamental strategies for mentoring children on the Autism Spectrum, ADHD, and sensory processing differences.',
+    category: 'Inclusive Education',
+    level: 'Foundational',
     accent: 'indigo',
     lessons: [
       { 
-        title: 'What is Machine Learning?', 
-        summary: 'The key idea: learn patterns from examples.', 
-        content: 'Machine learning is a way to build systems that improve their predictions by finding patterns in data. Instead of writing a fixed rule for every situation, we show a model examples and evaluate how well it generalises to new data.', 
-        videoUrl: 'https://www.youtube.com/embed/f_uwKZIAeM0', 
-        durationMinutes: 12, 
+        title: 'Submodule 1.1: Understanding Neurodiversity & Strength-Based Mentoring', 
+        summary: 'Shift from a deficit model to a strength-based approach when supporting neurodivergent mentees.', 
+        content: `Neurodiversity recognizes that brain differences are natural variations of human cognition. When mentoring neurodivergent children, companions must move away from a deficit model (trying to fix or normalize behavior) to a strength-based model.
+
+Key Principles for Learning Companions:
+1. Respect communication preferences (verbal, non-verbal, AAC, or visual cards).
+2. Recognize sensory processing differences and environmental triggers.
+3. Validate emotional regulation and allow processing time without rushing responses.`, 
+        videoUrl: 'https://www.youtube-nocookie.com/embed/RbwrrVILvkg', 
+        durationMinutes: 15, 
         order: 1,
         led: {
-          videoUrl: 'https://www.youtube.com/embed/f_uwKZIAeM0',
-          transcript: 'Welcome to Machine Learning! Machine learning enables systems to learn from data examples.',
-          reflectionSpot: { timestampSeconds: 45, prompt: 'How does learning from examples differ from hardcoded rules?' }
+          videoUrl: 'https://www.youtube-nocookie.com/embed/RbwrrVILvkg',
+          transcript: 'Welcome to Inclusive Mentorship Training! In this session, we examine how to recognize diverse cognitive profiles and adapt mentoring techniques for neurodivergent children.',
+          reflectionSpots: [
+            { timestampSeconds: 45, prompt: 'Pause & Reflect: How does a strength-based mentoring approach differ from traditional deficit-focused instruction?' },
+            { timestampSeconds: 120, prompt: 'Checkpoint: Identify two sensory factors in a classroom that might cause overload for an autistic learner.' }
+          ]
         },
         lbd: {
           mcqs: [
             {
-              question: 'What is the key idea behind machine learning?',
-              choices: ['Hardcoding rules for every situation', 'Learning patterns from examples', 'Deleting databases to free up space', 'Manually designing webpage graphics'],
+              question: 'What is the primary goal of strength-based mentoring for neurodivergent mentees?',
+              choices: [
+                'Forcing the child to mimic neurotypical social behaviors at all times',
+                'Identifying and building upon the child’s unique interests while providing sensory accommodations',
+                'Ignoring individual learning needs and keeping a rigid strict timeline',
+                'Preventing the child from using non-verbal communication aids'
+              ],
               correctIndex: 1,
               feedbacks: [
-                'Incorrect. Hardcoding rules is traditional programming, not machine learning.',
-                'Correct! Machine learning algorithms automatically learn patterns from data examples.',
-                'Incorrect. Database deletion is unrelated to pattern recognition.',
-                'Incorrect. Graphic design is a creative manual process.'
+                'Incorrect. Forcing masking causes high anxiety and burnout for neurodivergent children.',
+                'Correct! Strength-based mentoring fosters trust, builds confidence, and accommodates individual sensory profiles.',
+                'Incorrect. Rigid timelines without flexibility increase overwhelm and frustration.',
+                'Incorrect. Non-verbal communication tools (PECS, AAC) should always be encouraged.'
               ]
             }
           ],
-          subjective: {
-            prompt: 'Explain in your own words why machine learning models require separate training and evaluation datasets.',
-            exemplarAnswer: 'Exemplar: Evaluation datasets test generalisation to unseen data. If we evaluate on training data, the model might just memorize it (overfitting) without learning true patterns.'
-          }
+          subjectives: [
+            {
+              prompt: 'Describe how you would modify your mentoring tone and environment if a mentee shows signs of sensory overload during an activity.',
+              exemplarAnswer: 'Author Exemplar Answer: I would lower my voice tone, reduce background noise/bright lighting, pause the current task, offer a low-stimulation quiet break, and provide clear visual choices without pressing for immediate verbal explanations.'
+            }
+          ]
         },
         lxt: [
-          { title: 'Interactive ML Visualization Tool (Teachable Machine)', url: 'https://teachablemachine.withgoogle.com/', resourceType: 'link' }
+          { title: 'NPTEL Course: Inclusive Education Practices & Assistive Tech', url: 'https://nptel.ac.in/courses/109106155', extraType: 'link' }
         ],
         lxi: {
-          weeklyFocusPrompt: 'Discuss with your peer companion: Give an example of a daily app you use that relies on Machine Learning.'
+          question: 'Discuss with your peer companion: Share a strategy you have used to build rapport with a child who communicates non-verbally.'
         }
       },
-      { title: 'Supervised Learning', summary: 'Learning with labelled examples.', content: 'In supervised learning, every training example includes an input and the correct answer. A spam filter learns from emails that have already been labelled spam or not spam. Classification predicts categories; regression predicts numeric values.', videoUrl: 'https://www.youtube.com/embed/VwVg9jCtqaU', durationMinutes: 16, order: 2 },
-      { title: 'Measuring Model Quality', summary: 'Use metrics that match the problem.', content: 'Accuracy is useful when classes are balanced. Precision, recall and F1 score tell a richer story when errors have different costs. Always evaluate with data that was not used to train the model.', videoUrl: 'https://www.youtube.com/embed/85dtiMz9tSo', durationMinutes: 14, order: 3 }
+      { 
+        title: 'Submodule 1.2: Visual Schedules & Structured Predictability', 
+        summary: 'Using visual prompts, PECS, and structured routines to reduce anxiety.', 
+        content: `Predictability creates psychological safety for neurodivergent children. Using visual schedules, icon cards, and transition warnings helps children anticipate changes and reduces task-switching anxiety.`, 
+        videoUrl: 'https://www.youtube-nocookie.com/embed/VwVg9jCtqaU', 
+        durationMinutes: 18, 
+        order: 2,
+        led: {
+          videoUrl: 'https://www.youtube-nocookie.com/embed/VwVg9jCtqaU',
+          transcript: 'Structuring sessions with clear visual cues empowers mentees to navigate learning tasks with greater independence.',
+          reflectionSpots: [
+            { timestampSeconds: 60, prompt: 'Reflection: Why are transition warnings (e.g. 5-minute countdown cards) crucial before changing activities?' }
+          ]
+        },
+        lbd: {
+          mcqs: [
+            {
+              question: 'Why are visual schedules effective for children with ADHD or Autism?',
+              choices: [
+                'They reduce cognitive load and provide clear, predictable expectations',
+                'They replace the need for mentor interaction',
+                'They make sessions longer and more complicated',
+                'They are only useful for non-readers'
+              ],
+              correctIndex: 0,
+              feedbacks: [
+                'Correct! Visual schedules lower anxiety by clearly setting expectations and aiding working memory.',
+                'Incorrect. Visual schedules enhance companion-mentee collaboration.',
+                'Incorrect. Visual schedules simplify transitions and save time.',
+                'Incorrect. Visual schedules benefit learners of all reading levels.'
+              ]
+            }
+          ],
+          subjectives: [
+            {
+              prompt: 'How would you prepare a mentee for an unexpected schedule change during a mentoring session?',
+              exemplarAnswer: 'Author Exemplar Answer: Use a visual "Change Card", explain the update calmly with visual prompts, highlight what remains unchanged to preserve security, and allow time for the mentee to process the transition.'
+            }
+          ]
+        },
+        lxt: [
+          { title: 'Visual Schedule Creator Templates', url: 'https://www.autism.org.uk/advice-and-guidance/topics/communication/visual-supports', extraType: 'link' }
+        ],
+        lxi: {
+          question: 'Discuss: How can companions effectively co-create visual session agendas with their mentees?'
+        }
+      }
     ]
   },
   {
-    title: 'React for Beginners',
-    description: 'Learn the fundamentals of React, the most popular library for building user interfaces.',
-    category: 'Web Development',
-    level: 'Beginner',
-    accent: 'blue',
-    lessons: [
-      { title: 'What is React?', summary: 'Introduction to React and components.', content: 'React is a library for building user interfaces. It lets you compose complex UIs from small and isolated pieces of code called components.', videoUrl: 'https://www.youtube.com/embed/bMknfKXIFA8', durationMinutes: 10, order: 1 },
-      { title: 'Components and Props', summary: 'Passing data between components.', content: 'Components are like JavaScript functions. They accept arbitrary inputs (called "props") and return React elements describing what should appear on the screen.', videoUrl: 'https://www.youtube.com/embed/Y2hgEGPzTZY', durationMinutes: 15, order: 2 },
-      { title: 'State and Hooks', summary: 'Managing state in functional components.', content: 'State allows React components to change their output over time in response to user actions, network responses, and anything else. Hooks let you use state and other React features without writing a class.', videoUrl: 'https://www.youtube.com/embed/O6P86uwfdR0', durationMinutes: 18, order: 3 }
-    ]
-  },
-  {
-    title: 'Backend Basics with Node.js',
-    description: 'Understand how to build scalable backend applications using Node.js and Express.',
-    category: 'Backend',
+    title: 'Module 2: Behavioral Support & De-escalation Techniques',
+    description: 'Master de-escalation, sensory regulation, and positive reinforcement strategies for companions.',
+    category: 'Mentorship Skills',
     level: 'Intermediate',
     accent: 'emerald',
     lessons: [
-      { title: 'Introduction to Node.js', summary: 'What is Node.js and why use it?', content: 'Node.js is a JavaScript runtime built on Chrome\'s V8 JavaScript engine. It allows you to run JavaScript on the server side.', videoUrl: 'https://www.youtube.com/embed/ENrzD9HAZK4', durationMinutes: 12, order: 1 },
-      { title: 'Building APIs with Express', summary: 'Creating RESTful APIs easily.', content: 'Express is a minimal and flexible Node.js web application framework that provides a robust set of features for web and mobile applications.', videoUrl: 'https://www.youtube.com/embed/L72fhGm1tfE', durationMinutes: 20, order: 2 },
-      { title: 'Database Integration', summary: 'Connecting your app to a database.', content: 'Most backend applications need to store data persistently. You can connect Node.js apps to various databases like MongoDB, PostgreSQL, and MySQL.', videoUrl: 'https://www.youtube.com/embed/f2EqECiTBL8', durationMinutes: 16, order: 3 }
+      { 
+        title: 'Submodule 2.1: Differentiating Meltdowns vs. Tantrums & Co-regulation', 
+        summary: 'Understanding sensory meltdowns and practicing calm co-regulation.', 
+        content: `A sensory meltdown is an involuntary response to sensory or emotional overload, unlike a goal-driven behavioral tantrum. Companions must prioritize safety, calm co-regulation, and zero demands during a meltdown.`, 
+        videoUrl: 'https://www.youtube-nocookie.com/embed/aircAruvnKk', 
+        durationMinutes: 20, 
+        order: 1,
+        led: {
+          videoUrl: 'https://www.youtube-nocookie.com/embed/aircAruvnKk',
+          transcript: 'Co-regulation means using your calm presence to help a mentee regain emotional balance when overwhelmed.',
+          reflectionSpots: [
+            { timestampSeconds: 50, prompt: 'Reflection: Why is asking verbal reasoning questions ineffective during an active sensory meltdown?' }
+          ]
+        },
+        lbd: {
+          mcqs: [
+            {
+              question: 'What is the companion’s primary role during a mentee’s sensory meltdown?',
+              choices: [
+                'Ensuring physical safety, reducing sensory input, and maintaining a calm presence',
+                'Demanding immediate verbal explanations for the behavior',
+                'Imposing strict immediate academic penalties',
+                'Crowding around the child with multiple loud volunteers'
+              ],
+              correctIndex: 0,
+              feedbacks: [
+                'Correct! Safety, calm presence, and reducing stimulation are essential for de-escalation.',
+                'Incorrect. Verbal demands overload an already overwhelmed central nervous system.',
+                'Incorrect. Penalties during a meltdown increase distress and break trust.',
+                'Incorrect. Crowding increases sensory overwhelm.'
+              ]
+            }
+          ],
+          subjectives: [
+            {
+              prompt: 'Draft a post-meltdown recovery plan to help a mentee safely rejoin mentoring activities.',
+              exemplarAnswer: 'Author Exemplar Answer: Allow adequate quiet recovery time, offer water or a sensory tool, avoid analyzing the incident immediately, and gently invite the mentee back with a low-pressure preferred activity.'
+            }
+          ]
+        },
+        lxt: [
+          { title: 'De-escalation Checklist for Learning Companions', url: 'https://nptel.ac.in/courses', extraType: 'link' }
+        ],
+        lxi: {
+          question: 'Discuss: What self-care or grounding techniques help companions stay calm during intense de-escalation?'
+        }
+      }
     ]
   }
 ];
 
-const mlQuizzes = [
-  { lessonIndex: 0, questions: [
-    { prompt: 'What is the key idea behind machine learning?', options: ['Hardcoding rules for every situation', 'Learning patterns from examples', 'Deleting databases to free up space', 'Manually designing webpage graphics'], answer: 1 },
-    { prompt: 'A model is evaluated based on how well it generalises to...', options: ['Old training data', 'Empty variables', 'New unseen data', 'The source code'], answer: 2 }
-  ]},
-  { lessonIndex: 1, questions: [
-    { prompt: 'What distinguishes supervised learning?', options: ['It has labelled examples', 'It never uses data', 'It only predicts images', 'It has no evaluation'], answer: 0 },
-    { prompt: 'Which task predicts a numeric value?', options: ['Classification', 'Regression', 'Clustering', 'Ranking'], answer: 1 },
-  ]},
-  { lessonIndex: 2, questions: [
-    { prompt: 'When is accuracy most useful as a metric?', options: ['When data classes are balanced', 'When data classes are highly imbalanced', 'When there are no test labels', 'When precision is zero'], answer: 0 },
-  ]}
-];
-
-const reactQuizzes = [
-  { lessonIndex: 0, questions: [
-    { prompt: 'What is React primarily used for?', options: ['Database management', 'Building user interfaces', 'Server-side routing', 'Machine learning'], answer: 1 }
-  ]},
-  { lessonIndex: 1, questions: [
-    { prompt: 'What are props in React?', options: ['Methods to fetch data', 'Arbitrary inputs passed to components', 'Built-in styling objects', 'Functions to update state'], answer: 1 }
-  ]},
-  { lessonIndex: 2, questions: [
-    { prompt: 'Which hook is used to manage state in functional components?', options: ['useEffect', 'useState', 'useContext', 'useReducer'], answer: 1 }
-  ]}
-];
-
-const nodeQuizzes = [
-  { lessonIndex: 0, questions: [
-    { prompt: 'What engine does Node.js run on?', options: ['SpiderMonkey', 'V8', 'Chakra', 'JavaScriptCore'], answer: 1 }
-  ]},
-  { lessonIndex: 1, questions: [
-    { prompt: 'What is Express?', options: ['A database', 'A web application framework for Node.js', 'A frontend library', 'A testing tool'], answer: 1 }
-  ]},
-  { lessonIndex: 2, questions: [
-    { prompt: 'Which of the following is a NoSQL database commonly used with Node.js?', options: ['MySQL', 'PostgreSQL', 'MongoDB', 'SQLite'], answer: 2 }
-  ]}
-];
-
-const quizzesData = [mlQuizzes, reactQuizzes, nodeQuizzes];
+const quizzesData = [[], []];
 
 for (let i = 0; i < coursesData.length; i++) {
   const course = await Course.create(coursesData[i]);
-  course.quizzes = quizzesData[i].map(quiz => ({
-    lessonId: course.lessons[quiz.lessonIndex]._id,
-    questions: quiz.questions
-  }));
   await course.save();
 }
 
-console.log(`Seeded ${admin.email} and ${learner.email} and courses with videos`);
+console.log(`Seeded ${admin.email} and ${learner.email} with Neurodivergent Mentoring training modules`);
 process.exit(0);
