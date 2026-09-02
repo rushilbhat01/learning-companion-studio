@@ -23,7 +23,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <ThemeProvider>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<LearningCompanionStudio />} />
+            <Route path="/" element={secure(<LearningCompanionStudio />)} />
             <Route path="/login" element={<AuthPage />} />
             <Route path="/register" element={<AuthPage register />} />
             <Route path="/dashboard" element={secure(<Dashboard />)} />
@@ -37,4 +37,5 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </BrowserRouter>
   </React.StrictMode>
 );
+
 
