@@ -11,7 +11,11 @@ const lessonSchema = new mongoose.Schema({
   led: {
     videoUrl: String,
     transcript: String,
-    reflectionSpot: { timestampSeconds: Number, prompt: String }
+    reflectionSpots: [{
+      timestampSeconds: { type: Number, default: 45 },
+      prompt: String,
+      spotType: { type: String, default: 'reflection' } // 'reflection' | 'mcq' | 'subjective'
+    }]
   },
   lbd: {
     mcqs: [{
@@ -20,18 +24,19 @@ const lessonSchema = new mongoose.Schema({
       correctIndex: Number,
       feedbacks: [String]
     }],
-    subjective: {
+    subjectives: [{
       prompt: String,
       exemplarAnswer: String
-    }
+    }]
   },
   lxt: [{
     title: String,
     url: String,
-    resourceType: { type: String, default: 'link' }
+    summary: String,
+    extraType: { type: String, default: 'video' } // 'video' | 'link' | 'practice'
   }],
   lxi: {
-    weeklyFocusPrompt: String
+    question: String
   }
 }, { _id: true });
 

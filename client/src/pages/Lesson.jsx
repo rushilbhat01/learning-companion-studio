@@ -12,25 +12,22 @@ export default function Lesson() {
   const scrolled = useRef(false);
   const lesson = data?.lesson;
 
-  // LbD Interactive State
-  const [selectedMcqChoice, setSelectedMcqChoice] = useState(null);
-  const [subjectiveInput, setSubjectiveInput] = useState('');
-  const [showExemplar, setShowExemplar] = useState(false);
+  // LbD Interactive Multi-MCQ & Subjective State
+  const [selectedChoices, setSelectedChoices] = useState({});
+  const [subjectiveAnswers, setSubjectiveAnswers] = useState({});
+  const [revealedExemplars, setRevealedExemplars] = useState({});
 
-  // Fetch current lesson data
   useEffect(() => {
     api.get(`/courses/${courseId}/lessons/${lessonId}`)
       .then((r) => setData(r.data))
       .catch(() => setData({ error: true }));
   }, [courseId, lessonId]);
 
-  // Fetch course details for syllabus outline sidebar
   useEffect(() => {
     api.get(`/courses/${courseId}`)
       .then((r) => setCourseDetails(r.data));
   }, [courseId]);
 
-  // Handle scroll tracking with reset on lessonId change
   useEffect(() => {
     scrolled.current = false;
     if (!lesson) return;
@@ -52,7 +49,6 @@ export default function Lesson() {
     return () => window.removeEventListener('scroll', onScroll);
   }, [lesson, lessonId]);
 
-  // Track video interactions
   const handleVideoPlay = () => {
     if (!lesson) return;
     track('VIDEO_PLAYED', {
@@ -128,10 +124,11 @@ export default function Lesson() {
 
   const led = lesson.led || {};
   const lbd = lesson.lbd || {};
-  const mcq = lbd.mcqs?.[0];
-  const subjective = lbd.subjective;
+  const reflectionSpots = led.reflectionSpots || (led.reflectionSpot?.prompt ? [led.reflectionSpot] : []);
+  const mcqs = lbd.mcqs || [];
+  const subjectives = lbd.subjectives || (lbd.subjective?.prompt ? [lbd.subjective] : []);
   const lxtList = lesson.lxt || [];
-  const lxi = lesson.lxi || {};
+  const lxiQuestion = lesson.lxi?.question || lesson.lxi?.weeklyFocusPrompt;
 
   return (
     <Layout>
@@ -144,7 +141,7 @@ export default function Lesson() {
       </Link>
 
       <div className="grid gap-8 lg:grid-cols-4">
-        {/* Syllabus Outline Sidebar */}
+        {/* Syllabus Sidebar */}
         <aside className="lg:col-span-1 space-y-4 order-2 lg:order-1">
           <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
             <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-4">
@@ -181,21 +178,21 @@ export default function Lesson() {
             </div>
           </div>
 
-          {/* LxI Peer Discussion Prompt Sidebar Widget */}
-          {lxi.weeklyFocusPrompt && (
+          {/* LxI Author Question Widget */}
+          {lxiQuestion && (
             <div className="rounded-2xl border border-indigo-100 dark:border-indigo-900/60 bg-indigo-50/50 dark:bg-indigo-950/30 p-5 space-y-3">
               <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold text-xs uppercase tracking-wider">
                 <MessageSquare size={16} />
-                <span>LxI Peer Focus Prompt</span>
+                <span>LxI Author Question</span>
               </div>
               <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
-                {lxi.weeklyFocusPrompt}
+                {lxiQuestion}
               </p>
             </div>
           )}
         </aside>
 
-        {/* Main Lesson Content */}
+        {/* Main Content */}
         <section className="lg:col-span-3 order-1 lg:order-2 space-y-8">
           <article className="rounded-2xl border border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-6 md:p-8 shadow-sm space-y-6">
             <header>
@@ -212,7 +209,7 @@ export default function Lesson() {
               </p>
             </header>
 
-            {/* LeD: Video Container & Reflection Checkpoint */}
+            {/* LeD: Video & Reflection Checkpoints */}
             {(lesson.videoUrl || led.videoUrl) && (
               <div className="space-y-4">
                 <div className="overflow-hidden rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-900 shadow-md">
@@ -227,61 +224,61 @@ export default function Lesson() {
                   ></iframe>
                 </div>
 
-                {/* LeD Reflection Checkpoint Overlay Card */}
-                {led.reflectionSpot?.prompt && (
-                  <div className="p-5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/80 flex items-start gap-4">
+                {/* Reflection Checkpoint List */}
+                {reflectionSpots.map((spot, idx) => (
+                  <div key={idx} className="p-5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/80 flex items-start gap-4">
                     <div className="p-2.5 rounded-xl bg-brand text-white shrink-0">
                       <HelpCircle size={20} />
                     </div>
                     <div>
                       <span className="text-[11px] font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-                        LeD Reflection Checkpoint (At ~{led.reflectionSpot.timestampSeconds || 45}s)
+                        LeD Reflection Spot #{idx + 1} (At ~{spot.timestampSeconds || 45}s)
                       </span>
                       <p className="text-sm font-semibold text-slate-900 dark:text-white mt-0.5">
-                        {led.reflectionSpot.prompt}
+                        {spot.prompt}
                       </p>
                     </div>
                   </div>
-                )}
+                ))}
               </div>
             )}
 
-            {/* Text Lesson Content */}
+            {/* Content Text / Transcript */}
             <div className="prose dark:prose-invert max-w-none pt-4 border-t border-slate-100 dark:border-slate-800">
               <p className="whitespace-pre-line text-slate-700 dark:text-slate-300 text-lg leading-8">
-                {lesson.content}
+                {lesson.content || led.transcript}
               </p>
             </div>
 
-            {/* LbD: Interactive Quiz & Self-Assessment Desks */}
+            {/* LbD Quiz & Subjective Desks */}
             <div className="pt-8 border-t border-slate-200 dark:border-slate-800 space-y-8">
               <div className="flex items-center gap-2">
                 <CheckSquare className="text-brand dark:text-indigo-400" size={24} />
-                <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">LbD: Learning by Doing Practice Desk</h3>
+                <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">LbD Practice & Quiz Desk</h3>
               </div>
 
-              {/* LbD MCQ Section with Author Feedback */}
-              {mcq?.question && (
-                <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 space-y-4">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Multiple Choice Practice</span>
-                  <h4 className="text-base font-bold text-slate-900 dark:text-white">{mcq.question}</h4>
+              {/* MCQs */}
+              {mcqs.map((mcqItem, mIdx) => (
+                <div key={mIdx} className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 space-y-4">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Multiple Choice Question #{mIdx + 1}</span>
+                  <h4 className="text-base font-bold text-slate-900 dark:text-white">{mcqItem.question}</h4>
                   
                   <div className="grid gap-3">
-                    {mcq.choices?.map((choice, i) => {
-                      const isSelected = selectedMcqChoice === i;
-                      const isCorrect = mcq.correctIndex === i;
-                      const feedback = mcq.feedbacks?.[i];
+                    {mcqItem.choices?.map((choice, cIdx) => {
+                      const isSelected = selectedChoices[mIdx] === cIdx;
+                      const isCorrect = mcqItem.correctIndex === cIdx;
+                      const feedback = mcqItem.feedbacks?.[cIdx];
 
                       return (
-                        <div key={i} className="space-y-2">
+                        <div key={cIdx} className="space-y-2">
                           <button
                             type="button"
                             onClick={() => {
-                              setSelectedMcqChoice(i);
+                              setSelectedChoices({ ...selectedChoices, [mIdx]: cIdx });
                               track('MCQ_ANSWERED', {
                                 component: 'LbDQuiz',
                                 eventContext: choice,
-                                metadata: { optionIndex: i, isCorrect }
+                                metadata: { questionIndex: mIdx, optionIndex: cIdx, isCorrect }
                               });
                             }}
                             className={`w-full text-left p-4 rounded-xl font-medium text-sm transition-all border ${
@@ -298,10 +295,9 @@ export default function Lesson() {
                             </div>
                           </button>
 
-                          {/* Render Author Feedback for Selected Choice */}
                           {isSelected && feedback && (
                             <div className={`p-3 rounded-lg text-xs font-medium ${isCorrect ? 'bg-emerald-100/60 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300' : 'bg-rose-100/60 dark:bg-rose-900/30 text-rose-800 dark:text-rose-300'}`}>
-                              <strong>Author Feedback:</strong> {feedback}
+                              <strong>Author Feedback for Option {cIdx + 1}:</strong> {feedback}
                             </div>
                           )}
                         </div>
@@ -309,58 +305,61 @@ export default function Lesson() {
                     })}
                   </div>
                 </div>
-              )}
+              ))}
 
-              {/* LbD Subjective Self-Assessment Desk */}
-              {subjective?.prompt && (
-                <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 space-y-4">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Subjective Reflection Desk</span>
-                  <h4 className="text-base font-bold text-slate-900 dark:text-white">{subjective.prompt}</h4>
+              {/* Subjectives */}
+              {subjectives.map((sub, sIdx) => (
+                <div key={sIdx} className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 space-y-4">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Subjective Reflection Question #{sIdx + 1}</span>
+                  <h4 className="text-base font-bold text-slate-900 dark:text-white">{sub.prompt}</h4>
                   
                   <textarea
                     rows={3}
-                    value={subjectiveInput}
-                    onChange={(e) => setSubjectiveInput(e.target.value)}
-                    placeholder="Type your explanation here..."
+                    value={subjectiveAnswers[sIdx] || ''}
+                    onChange={(e) => setSubjectiveAnswers({ ...subjectiveAnswers, [sIdx]: e.target.value })}
+                    placeholder="Type your answer here..."
                     className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 text-sm text-slate-900 dark:text-white"
                   />
 
                   <button
                     type="button"
-                    onClick={() => setShowExemplar(!showExemplar)}
+                    onClick={() => setRevealedExemplars({ ...revealedExemplars, [sIdx]: !revealedExemplars[sIdx] })}
                     className="inline-flex items-center gap-2 text-xs font-bold text-brand dark:text-indigo-400 hover:underline"
                   >
-                    {showExemplar ? <EyeOff size={14} /> : <Eye size={14} />}
-                    {showExemplar ? 'Hide Author Exemplar Answer' : 'View Author Exemplar Answer & Self-Evaluate'}
+                    {revealedExemplars[sIdx] ? <EyeOff size={14} /> : <Eye size={14} />}
+                    {revealedExemplars[sIdx] ? 'Hide Author Feedback / Correct Answer' : 'View Author Feedback / Correct Exemplar Answer'}
                   </button>
 
-                  {showExemplar && (
+                  {revealedExemplars[sIdx] && (
                     <div className="p-4 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 text-xs text-indigo-900 dark:text-indigo-200 leading-relaxed font-medium">
-                      <strong>Author Exemplar Response:</strong>
-                      <p className="mt-1">{subjective.exemplarAnswer}</p>
+                      <strong>Author Feedback & Correct Answer:</strong>
+                      <p className="mt-1">{sub.exemplarAnswer}</p>
                     </div>
                   )}
                 </div>
-              )}
+              ))}
             </div>
 
-            {/* LxT: Extension Resource Links */}
-            {lxtList.length > 0 && lxtList[0].url && (
+            {/* LxT Extra Material Trajectories */}
+            {lxtList.length > 0 && lxtList[0].title && (
               <div className="pt-6 border-t border-slate-200 dark:border-slate-800 space-y-4">
                 <div className="flex items-center gap-2">
                   <Link2 className="text-brand dark:text-indigo-400" size={20} />
-                  <h4 className="font-extrabold text-base text-slate-900 dark:text-white">LxT: Learning Extension Trajectories</h4>
+                  <h4 className="font-extrabold text-base text-slate-900 dark:text-white">LxT: Extension Trajectories & Extra Material</h4>
                 </div>
                 <div className="grid gap-3">
                   {lxtList.map((item, i) => (
                     <a
                       key={i}
-                      href={item.url}
+                      href={item.url || '#'}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-4 rounded-xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 hover:border-brand flex items-center justify-between transition-all"
                     >
-                      <span className="text-sm font-semibold text-slate-900 dark:text-white">{item.title}</span>
+                      <div>
+                        <span className="text-sm font-semibold text-slate-900 dark:text-white">{item.title}</span>
+                        <span className="ml-2 text-[10px] uppercase font-bold text-brand bg-brand/10 px-2 py-0.5 rounded-full">{item.extraType || 'Resource'}</span>
+                      </div>
                       <ArrowRight size={16} className="text-brand dark:text-indigo-400" />
                     </a>
                   ))}
@@ -368,7 +367,7 @@ export default function Lesson() {
               </div>
             )}
 
-            {/* Footer Navigation */}
+            {/* Footer Nav */}
             <footer className="mt-10 pt-6 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-4">
               {prevLesson ? (
                 <button
