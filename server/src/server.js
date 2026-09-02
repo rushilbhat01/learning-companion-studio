@@ -16,4 +16,14 @@ app.use(morgan('dev'));
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/api/auth', authRoutes); app.use('/api/courses', courseRoutes); app.use('/api/events', eventRoutes); app.use('/api/analytics', analyticsRoutes); app.use('/api/author', authorRoutes);
 app.use((error, _req, res, _next) => { console.error(error); res.status(500).json({ message: 'Something went wrong.' }); });
-connectDatabase().then(() => app.listen(process.env.PORT || 5050, () => console.log('API listening'))).catch((error) => { console.error('Database connection failed:', error.message); process.exit(1); });
+const PORT = process.env.PORT || 5050;
+
+app.listen(PORT, () => {
+  console.log(`🚀 API server listening on http://localhost:${PORT}`);
+  connectDatabase()
+    .then(() => console.log('✅ MongoDB connected successfully.'))
+    .catch((error) => {
+      console.warn(`⚠️ Database connection offline (${error.message}). Express API server running in standalone mode.`);
+    });
+});
+
