@@ -55,13 +55,12 @@
   <!-- Main Container -->
   <main class="max-w-7xl mx-auto px-6 py-8 flex-grow w-full">
 
-    <div id="publish-toast" class="hidden mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-semibold flex items-center justify-between">
-      <span>🎉 <strong>Published!</strong> All changes published to LC View.</span>
-      <button onclick="switchView('student')" class="text-xs bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold hover:bg-emerald-600">Companion View →</button>
-    </div>
-
     <!-- ==================== VIEW 1: AUTHORING DESK ==================== -->
     <section id="view-author" class="hidden space-y-6">
+      <div id="publish-toast" class="hidden mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-semibold flex items-center justify-between">
+        <span>🎉 <strong>Published!</strong> All changes published to LC View.</span>
+        <button onclick="switchView('student')" class="text-xs bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold hover:bg-emerald-600">Switch to Companion View →</button>
+      </div>
       <div class="rounded-3xl bg-slate-900 text-white p-8 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <span class="text-xs font-bold uppercase tracking-wider text-teal-400">Creator Desk</span>
