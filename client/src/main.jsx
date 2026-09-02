@@ -11,6 +11,7 @@ import Lesson from './pages/Lesson';
 import Quiz from './pages/Quiz';
 import Analytics from './pages/Analytics';
 import AuthorDesk from './pages/AuthorDesk';
+import LearningCompanionStudio from './pages/LearningCompanionStudio';
 
 const secure = (node, admin = false) => (
   <ProtectedRoute admin={admin}>{node}</ProtectedRoute>
@@ -22,9 +23,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <ThemeProvider>
         <AuthProvider>
           <Routes>
+            <Route path="/" element={<LearningCompanionStudio />} />
             <Route path="/login" element={<AuthPage />} />
             <Route path="/register" element={<AuthPage register />} />
-            <Route path="/" element={secure(<Dashboard />)} />
+            <Route path="/dashboard" element={secure(<Dashboard />)} />
             <Route path="/courses/:courseId/lessons/:lessonId" element={secure(<Lesson />)} />
             <Route path="/courses/:courseId/quiz/:lessonId" element={secure(<Quiz />)} />
             <Route path="/author" element={secure(<AuthorDesk />, true)} />
@@ -35,3 +37,4 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </BrowserRouter>
   </React.StrictMode>
 );
+
