@@ -39,14 +39,88 @@ export default function AuthorDesk() {
   // LxI: Author Question
   const [lxiQuestion, setLxiQuestion] = useState('');
 
+  const DEFAULT_FALLBACK_COURSES = [
+    {
+      _id: 'mod-1-def',
+      title: 'Module 1: Foundations of Neurodiversity & Strength-Based Mentorship',
+      description: 'Learn fundamental strategies for mentoring children on the Autism Spectrum, ADHD, and sensory processing differences.',
+      level: 'Foundational',
+      lessons: [
+        {
+          _id: 'sub-1-1-def',
+          title: 'Submodule 1.1: Understanding Neurodiversity & Strength-Based Mentoring',
+          summary: 'Shift from a deficit model to a strength-based approach when supporting neurodivergent mentees.',
+          videoUrl: 'https://vjs.zencdn.net/v/oceans.mp4',
+          led: { transcript: 'Neurodiversity recognizes that brain differences are natural human variations.', reflectionSpots: [{ timestampSeconds: 45, prompt: 'Pause & Reflect: Strength-based vs deficit mentoring.' }] },
+          lbd: { mcqs: [{ question: 'What is the goal of strength-based mentoring?', choices: ['Masking', 'Building on unique strengths', 'Rigid rules', 'No aids'], correctIndex: 1, feedbacks: ['No', 'Yes!', 'No', 'No'] }], subjectives: [] },
+          lxt: [],
+          lxi: { question: 'Share a strategy for non-verbal mentees.' }
+        }
+      ]
+    },
+    {
+      _id: 'mod-2-def',
+      title: 'Module 2: Behavioral Support & De-escalation Techniques',
+      description: 'Master de-escalation, sensory regulation, and positive reinforcement strategies for companions.',
+      level: 'Intermediate',
+      lessons: [
+        {
+          _id: 'sub-2-1-def',
+          title: 'Submodule 2.1: Meltdowns vs. Tantrums & Co-regulation',
+          summary: 'Understanding sensory meltdowns and practicing calm co-regulation.',
+          videoUrl: 'https://media.w3.org/2010/05/sintel/trailer.mp4',
+          led: { transcript: 'Co-regulation means using your calm presence.', reflectionSpots: [{ timestampSeconds: 50, prompt: 'Why is verbal reasoning ineffective during meltdowns?' }] },
+          lbd: { mcqs: [], subjectives: [] },
+          lxt: [],
+          lxi: { question: 'What grounding techniques help companions stay calm?' }
+        }
+      ]
+    }
+  ];
+
+  const fetchCourses = async () => {
+    try {
+      const r = await api.get('/courses');
+      const loaded = (r.data && r.data.length > 0) ? r.data : DEFAULT_FALLBACK_COURSES;
+      setCourses(loaded);
+      if (loaded.length > 0) setSelectedCourseId(loaded[0]._id);
+    } catch (err) {
+      setCourses(DEFAULT_FALLBACK_COURSES);
+      setSelectedCourseId(DEFAULT_FALLBACK_COURSES[0]._id);
+    }
+  };
+
   useEffect(() => {
-    api.get('/courses')
-      .then((r) => {
-        setCourses(r.data);
-        if (r.data.length > 0) setSelectedCourseId(r.data[0]._id);
-      })
-      .catch((err) => console.error(err));
+    fetchCourses();
   }, []);
+
+  const handleCreateCourse = async () => {
+    const courseTitle = prompt('Enter New Course / Module Title:', `Module ${courses.length + 1}: New Mentorship Topic`);
+    if (!courseTitle) return;
+    try {
+      const res = await api.post('/author/courses', {
+        title: courseTitle,
+        description: 'New course description...',
+        category: 'Mentorship Skills',
+        level: 'Intermediate'
+      });
+      setMessage({ type: 'success', text: `Created course: ${res.data.title}` });
+      await fetchCourses();
+      setSelectedCourseId(res.data._id);
+    } catch (e) {
+      const newCourse = {
+        _id: `mod-${Date.now()}`,
+        title: courseTitle,
+        description: 'New course description...',
+        level: 'Intermediate',
+        lessons: []
+      };
+      setCourses([...courses, newCourse]);
+      setSelectedCourseId(newCourse._id);
+      setMessage({ type: 'success', text: `Created course: ${courseTitle}` });
+    }
+  };
+
 
   const currentCourse = courses.find((c) => c._id === selectedCourseId);
 
@@ -171,7 +245,16 @@ export default function AuthorDesk() {
         {/* Course & Lesson Selector */}
         <div className="grid md:grid-cols-2 gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Target Course</label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Target Course / Module</label>
+              <button 
+                type="button" 
+                onClick={handleCreateCourse} 
+                className="text-xs font-bold bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 px-2.5 py-1 rounded-lg border border-indigo-200 hover:bg-indigo-100"
+              >
+                + Add Course
+              </button>
+            </div>
             <select
               value={selectedCourseId}
               onChange={(e) => {
