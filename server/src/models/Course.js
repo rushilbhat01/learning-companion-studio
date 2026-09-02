@@ -6,7 +6,33 @@ const lessonSchema = new mongoose.Schema({
   content: { type: String, required: true },
   videoUrl: String,
   durationMinutes: { type: Number, default: 10 },
-  order: { type: Number, required: true }
+  order: { type: Number, required: true },
+  // LCM Pedagogical Fields
+  led: {
+    videoUrl: String,
+    transcript: String,
+    reflectionSpot: { timestampSeconds: Number, prompt: String }
+  },
+  lbd: {
+    mcqs: [{
+      question: String,
+      choices: [String],
+      correctIndex: Number,
+      feedbacks: [String]
+    }],
+    subjective: {
+      prompt: String,
+      exemplarAnswer: String
+    }
+  },
+  lxt: [{
+    title: String,
+    url: String,
+    resourceType: { type: String, default: 'link' }
+  }],
+  lxi: {
+    weeklyFocusPrompt: String
+  }
 }, { _id: true });
 
 const courseSchema = new mongoose.Schema({

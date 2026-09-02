@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { BookOpen, BarChart3, LogOut, Sun, Moon } from 'lucide-react';
+import { BookOpen, BarChart3, LogOut, Sun, Moon, Edit3 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
@@ -37,10 +37,16 @@ export default function Layout({ children }) {
             </NavLink>
             
             {user?.role === 'admin' && (
-              <NavLink to="/analytics" className={navLinkClass}>
-                <BarChart3 size={15} />
-                <span>Analytics</span>
-              </NavLink>
+              <>
+                <NavLink to="/author" className={navLinkClass}>
+                  <Edit3 size={15} />
+                  <span>Author Desk</span>
+                </NavLink>
+                <NavLink to="/analytics" className={navLinkClass}>
+                  <BarChart3 size={15} />
+                  <span>Analytics</span>
+                </NavLink>
+              </>
             )}
 
             <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1 hidden sm:block" />

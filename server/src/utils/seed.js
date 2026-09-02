@@ -16,7 +16,44 @@ const coursesData = [
     level: 'Beginner',
     accent: 'indigo',
     lessons: [
-      { title: 'What is Machine Learning?', summary: 'The key idea: learn patterns from examples.', content: 'Machine learning is a way to build systems that improve their predictions by finding patterns in data. Instead of writing a fixed rule for every situation, we show a model examples and evaluate how well it generalises to new data.', videoUrl: 'https://www.youtube.com/embed/f_uwKZIAeM0', durationMinutes: 12, order: 1 },
+      { 
+        title: 'What is Machine Learning?', 
+        summary: 'The key idea: learn patterns from examples.', 
+        content: 'Machine learning is a way to build systems that improve their predictions by finding patterns in data. Instead of writing a fixed rule for every situation, we show a model examples and evaluate how well it generalises to new data.', 
+        videoUrl: 'https://www.youtube.com/embed/f_uwKZIAeM0', 
+        durationMinutes: 12, 
+        order: 1,
+        led: {
+          videoUrl: 'https://www.youtube.com/embed/f_uwKZIAeM0',
+          transcript: 'Welcome to Machine Learning! Machine learning enables systems to learn from data examples.',
+          reflectionSpot: { timestampSeconds: 45, prompt: 'How does learning from examples differ from hardcoded rules?' }
+        },
+        lbd: {
+          mcqs: [
+            {
+              question: 'What is the key idea behind machine learning?',
+              choices: ['Hardcoding rules for every situation', 'Learning patterns from examples', 'Deleting databases to free up space', 'Manually designing webpage graphics'],
+              correctIndex: 1,
+              feedbacks: [
+                'Incorrect. Hardcoding rules is traditional programming, not machine learning.',
+                'Correct! Machine learning algorithms automatically learn patterns from data examples.',
+                'Incorrect. Database deletion is unrelated to pattern recognition.',
+                'Incorrect. Graphic design is a creative manual process.'
+              ]
+            }
+          ],
+          subjective: {
+            prompt: 'Explain in your own words why machine learning models require separate training and evaluation datasets.',
+            exemplarAnswer: 'Exemplar: Evaluation datasets test generalisation to unseen data. If we evaluate on training data, the model might just memorize it (overfitting) without learning true patterns.'
+          }
+        },
+        lxt: [
+          { title: 'Interactive ML Visualization Tool (Teachable Machine)', url: 'https://teachablemachine.withgoogle.com/', resourceType: 'link' }
+        ],
+        lxi: {
+          weeklyFocusPrompt: 'Discuss with your peer companion: Give an example of a daily app you use that relies on Machine Learning.'
+        }
+      },
       { title: 'Supervised Learning', summary: 'Learning with labelled examples.', content: 'In supervised learning, every training example includes an input and the correct answer. A spam filter learns from emails that have already been labelled spam or not spam. Classification predicts categories; regression predicts numeric values.', videoUrl: 'https://www.youtube.com/embed/VwVg9jCtqaU', durationMinutes: 16, order: 2 },
       { title: 'Measuring Model Quality', summary: 'Use metrics that match the problem.', content: 'Accuracy is useful when classes are balanced. Precision, recall and F1 score tell a richer story when errors have different costs. Always evaluate with data that was not used to train the model.', videoUrl: 'https://www.youtube.com/embed/85dtiMz9tSo', durationMinutes: 14, order: 3 }
     ]
