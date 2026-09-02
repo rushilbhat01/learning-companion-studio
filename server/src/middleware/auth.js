@@ -5,7 +5,7 @@ export async function protect(req, res, next) {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
     if (!token) return res.status(401).json({ message: 'Authentication required.' });
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const payload = jwt.verify(token, process.env.JWT_SECRET || 'secret');
     req.user = await User.findById(payload.id);
     if (!req.user) return res.status(401).json({ message: 'User no longer exists.' });
     next();
@@ -13,6 +13,10 @@ export async function protect(req, res, next) {
 }
 
 export function adminOnly(req, res, next) {
-  if (req.user.role !== 'admin') return res.status(403).json({ message: 'Administrator access required.' });
+  if (req.user?.role !== 'admin') return res.status(403).json({ message: 'Administrator access required.' });
   next();
 }
+
+export const authenticateToken = protect;
+export const requireAdmin = adminOnly;
+
