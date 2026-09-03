@@ -840,6 +840,10 @@
             });
 
             ytProgressInterval = setInterval(() => {
+              if (currentActiveInVideoCheckpoint) {
+                pauseVideoPlayback(isLxT);
+                return;
+              }
               if (activeYtPlayer && typeof activeYtPlayer.getCurrentTime === 'function' && typeof activeYtPlayer.getDuration === 'function') {
                 const cur = activeYtPlayer.getCurrentTime();
                 const dur = activeYtPlayer.getDuration();
@@ -853,7 +857,7 @@
                   }
                 }
               }
-            }, 500);
+            }, 250);
           } catch (e) {
             console.warn("YouTube tracker initialized.");
           }
@@ -1075,6 +1079,10 @@
     }
 
     function onVideoProgress(vPlayer) {
+      if (currentActiveInVideoCheckpoint) {
+        try { vPlayer.pause(); } catch(e) {}
+        return;
+      }
       if (vPlayer.currentTime) {
         checkInVideoPlayback(vPlayer.currentTime, false);
       }
@@ -1299,6 +1307,13 @@
     }
 
     function onLxTVideoProgress(vPlayer) {
+      if (currentActiveInVideoCheckpoint) {
+        try { vPlayer.pause(); } catch(e) {}
+        return;
+      }
+      if (vPlayer.currentTime) {
+        checkInVideoPlayback(vPlayer.currentTime, true);
+      }
       const stepKey = `lxt_${selectedSubmodule.id}_${activeLxTVideoStepIndex}`;
       if (lxtVideoCompletedMap[stepKey]) return;
       if (vPlayer.ended || (vPlayer.duration && vPlayer.currentTime >= vPlayer.duration - 1)) {
