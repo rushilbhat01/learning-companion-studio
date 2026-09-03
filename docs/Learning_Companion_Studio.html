@@ -1971,144 +1971,178 @@
       const container = document.getElementById('author-video-steps-container');
       const steps = sub.videoSteps || [];
 
-      container.innerHTML = steps.map((vStep, vIdx) => `
-        <div class="p-6 bg-slate-50 rounded-3xl border border-slate-200 space-y-6">
-          <div class="flex items-center justify-between border-b border-slate-200 pb-3">
-            <span class="text-xs font-black uppercase text-teal-800">Main Video Link #${vIdx + 1}</span>
-            ${steps.length > 1 ? `<button onclick="deleteVideoStep(${vIdx})" class="text-xs font-bold text-rose-500">Delete Video Link</button>` : ''}
-          </div>
+      container.innerHTML = steps.map((vStep, vIdx) => {
+        const ivcCount = vStep.inVideoCheckpoints?.length || 0;
+        const mcqCount = vStep.mcqs?.length || 0;
+        const subjCount = vStep.subjectives?.length || 0;
 
-          <div class="grid md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Video Title</label>
-              <input type="text" value="${vStep.title}" onchange="selectedSubmodule.videoSteps[${vIdx}].title = this.value" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold bg-white" placeholder="Video title..." />
-            </div>
-            <div>
-              <label class="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Video URL (MP4 Stream or YouTube)</label>
-              <input type="text" value="${vStep.videoUrl}" onchange="selectedSubmodule.videoSteps[${vIdx}].videoUrl = this.value" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-900 bg-white" placeholder="Paste any MP4 or YouTube video URL..." />
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Lecture Notes</label>
-            <textarea onchange="selectedSubmodule.videoSteps[${vIdx}].transcript = this.value" rows="2" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs bg-white" placeholder="Notes...">${vStep.transcript}</textarea>
-          </div>
-
-          <!-- Mid-Video In-Video Checkpoints (Pause Video at Timestamp) -->
-          <div class="pt-4 border-t border-slate-200 space-y-4">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-black uppercase text-amber-700">⏱️ Mid-Video Checkpoints (Pause Video at Min:Sec)</span>
-              <button type="button" onclick="addInVideoCheckpoint(${vIdx}, false)" class="text-xs font-bold bg-amber-50 text-amber-800 px-3 py-1.5 rounded-lg border border-amber-200 hover:bg-amber-100 cursor-pointer">+ Add Mid-Video Checkpoint</button>
+        return `
+        <details class="group bg-slate-50 border border-slate-200 rounded-3xl overflow-hidden shadow-sm transition-all" ${vIdx === 0 ? 'open' : ''}>
+          <summary class="flex items-center justify-between p-5 bg-white border-b border-slate-200 cursor-pointer select-none font-bold text-slate-800 hover:bg-slate-50/80 transition-all">
+            <div class="flex items-center gap-3">
+              <span class="text-xs font-black uppercase text-teal-800 bg-teal-50 px-2.5 py-1 rounded-lg border border-teal-200">Main Video Link #${vIdx + 1}</span>
+              <span class="text-sm font-extrabold text-slate-900">${vStep.title || 'Untitled Video Link'}</span>
             </div>
 
-            ${(vStep.inVideoCheckpoints || []).map((ivc, ivIdx) => `
-              <div class="p-4 bg-amber-50/70 rounded-2xl border border-amber-200 space-y-3">
-                <div class="flex items-center justify-between">
-                  <span class="text-[10px] font-black uppercase text-amber-800">Mid-Video Checkpoint #${ivIdx + 1}</span>
-                  <button type="button" onclick="deleteInVideoCheckpoint(${vIdx}, ${ivIdx}, false)" class="text-[10px] font-bold text-rose-500 hover:underline cursor-pointer">Delete Checkpoint</button>
-                </div>
-
-                <div class="grid md:grid-cols-3 gap-3">
-                  <div>
-                    <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Pause Minute (Min)</label>
-                    <input type="number" min="0" value="${ivc.timeMin || 0}" onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].timeMin = Number(this.value)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-white font-bold" />
-                  </div>
-                  <div>
-                    <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Pause Second (Sec)</label>
-                    <input type="number" min="0" max="59" value="${ivc.timeSec || 0}" onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].timeSec = Number(this.value)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-white font-bold" />
-                  </div>
-                  <div>
-                    <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Question Type</label>
-                    <select onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].type = this.value; renderAuthorVideoSteps(selectedSubmodule)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-white font-bold cursor-pointer">
-                      <option value="mcq" ${ivc.type === 'mcq' || !ivc.type ? 'selected' : ''}>Multiple Choice Question (MCQ)</option>
-                      <option value="subjective" ${ivc.type === 'subjective' ? 'selected' : ''}>Subjective Question</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Question Prompt</label>
-                  <input type="text" value="${ivc.question}" onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].question = this.value" class="w-full rounded-lg border border-amber-200 px-3 py-1.5 text-xs bg-white font-bold" placeholder="Question prompt..." />
-                </div>
-
-                ${ivc.type === 'subjective' ? `
-                  <div>
-                    <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Author Exemplar Feedback</label>
-                    <textarea onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].exemplar = this.value" rows="2" class="w-full rounded-lg border border-amber-200 px-3 py-1.5 text-xs bg-white" placeholder="Author Exemplar Feedback...">${ivc.exemplar || ''}</textarea>
-                  </div>
-                ` : `
-                  <div class="grid md:grid-cols-2 gap-2">
-                    ${(ivc.choices || ['Option A', 'Option B', 'Option C', 'Option D']).map((choice, cIdx) => `
-                      <div class="p-2 bg-white rounded-lg border border-amber-200 space-y-1">
-                        <div class="flex items-center justify-between">
-                          <span class="text-[9px] font-bold text-slate-400">Choice ${cIdx + 1}</span>
-                          <label class="text-[9px] font-bold text-teal-700 flex items-center gap-1 cursor-pointer">
-                            <input type="radio" name="auth_ivc_${vIdx}_${ivIdx}" ${ivc.correctIndex === cIdx ? 'checked' : ''} onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].correctIndex = ${cIdx}" /> Correct
-                          </label>
-                        </div>
-                        <input type="text" value="${choice}" onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].choices[${cIdx}] = this.value" class="w-full rounded-lg border border-amber-200 px-2 py-1 text-xs bg-slate-50" placeholder="Choice..." />
-                      </div>
-                    `).join('')}
-                  </div>
-                `}
+            <div class="flex items-center gap-3">
+              <div class="hidden sm:flex items-center gap-2 text-[11px] font-bold text-slate-500">
+                <span class="px-2 py-0.5 rounded-md bg-amber-100/70 text-amber-800 border border-amber-200">⏱️ ${ivcCount} Checkpoint(s)</span>
+                <span class="px-2 py-0.5 rounded-md bg-teal-100/70 text-teal-800 border border-teal-200">❓ ${mcqCount} MCQ(s)</span>
+                <span class="px-2 py-0.5 rounded-md bg-indigo-100/70 text-indigo-800 border border-indigo-200">✍️ ${subjCount} Subjective(s)</span>
               </div>
-            `).join('')}
-          </div>
+              ${steps.length > 1 ? `<button type="button" onclick="deleteVideoStep(${vIdx})" class="text-xs font-bold text-rose-500 hover:underline mr-2">Delete</button>` : ''}
+              <span class="text-xs font-extrabold text-teal-700 transition-transform duration-200 group-open:rotate-180">▼</span>
+            </div>
+          </summary>
 
-          <!-- Reflections for Video Link -->
-          <div class="pt-4 border-t border-slate-200 space-y-4">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-extrabold uppercase text-teal-700">Video Link #${vIdx + 1} Reflections</span>
-              <div class="flex items-center gap-2">
-                <button type="button" onclick="addVideoStepMCQ(${vIdx})" class="text-xs font-bold bg-teal-50 text-teal-700 px-3 py-1.5 rounded-lg border border-teal-200">+ Add MCQ</button>
-                <button type="button" onclick="addVideoStepSubjective(${vIdx})" class="text-xs font-bold bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-lg border border-indigo-200">+ Add Subjective</button>
+          <div class="p-6 space-y-6">
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Video Title</label>
+                <input type="text" value="${vStep.title}" onchange="selectedSubmodule.videoSteps[${vIdx}].title = this.value; renderAuthorVideoSteps(selectedSubmodule)" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold bg-white" placeholder="Video title..." />
+              </div>
+              <div>
+                <label class="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Video URL (MP4 Stream or YouTube)</label>
+                <input type="text" value="${vStep.videoUrl}" onchange="selectedSubmodule.videoSteps[${vIdx}].videoUrl = this.value" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-900 bg-white" placeholder="Paste any MP4 or YouTube video URL..." />
               </div>
             </div>
 
-            <!-- MCQs -->
-            <div class="space-y-3">
-              ${(vStep.mcqs || []).map((m, mIdx) => `
-                <div class="p-4 bg-white rounded-2xl border border-slate-200 space-y-3">
-                  <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-extrabold uppercase text-slate-400">Video Link ${vIdx + 1} MCQ #${mIdx + 1}</span>
-                    <button onclick="deleteVideoStepMCQ(${vIdx}, ${mIdx})" class="text-[10px] font-bold text-rose-500">Delete</button>
-                  </div>
-                  <input type="text" value="${m.question}" onchange="selectedSubmodule.videoSteps[${vIdx}].mcqs[${mIdx}].question = this.value" class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-bold bg-slate-50" placeholder="Question..." />
-                  
-                  <div class="grid md:grid-cols-2 gap-2">
-                    ${m.choices.map((choice, cIdx) => `
-                      <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
-                        <div class="flex items-center justify-between">
-                          <span class="text-[9px] font-bold text-slate-400">Choice ${cIdx + 1}</span>
-                          <label class="text-[10px] font-bold text-teal-700 flex items-center gap-1 cursor-pointer">
-                            <input type="radio" name="auth_step_${vIdx}_mcq_${mIdx}" ${m.correctIndex === cIdx ? 'checked' : ''} onchange="selectedSubmodule.videoSteps[${vIdx}].mcqs[${mIdx}].correctIndex = ${cIdx}" /> Correct
-                          </label>
-                        </div>
-                        <input type="text" value="${choice}" onchange="selectedSubmodule.videoSteps[${vIdx}].mcqs[${mIdx}].choices[${cIdx}] = this.value" class="w-full rounded-lg border border-slate-200 px-2.5 py-1 text-xs bg-white" placeholder="Choice..." />
-                        <input type="text" value="${m.feedbacks?.[cIdx] || ''}" onchange="selectedSubmodule.videoSteps[${vIdx}].mcqs[${mIdx}].feedbacks[${cIdx}] = this.value" class="w-full rounded-lg border border-slate-200 px-2.5 py-1 text-[10px] text-slate-600 bg-white" placeholder="Feedback..." />
-                      </div>
-                    `).join('')}
-                  </div>
-                </div>
-              `).join('')}
+            <div>
+              <label class="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Lecture Notes</label>
+              <textarea onchange="selectedSubmodule.videoSteps[${vIdx}].transcript = this.value" rows="2" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs bg-white" placeholder="Notes...">${vStep.transcript}</textarea>
             </div>
 
-            <!-- Subjectives -->
-            <div class="space-y-3">
-              ${(vStep.subjectives || []).map((s, sIdx) => `
-                <div class="p-4 bg-white rounded-2xl border border-slate-200 space-y-2">
-                  <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-extrabold uppercase text-slate-400">Video Link ${vIdx + 1} Subjective #${sIdx + 1}</span>
-                    <button onclick="deleteVideoStepSubjective(${vIdx}, ${sIdx})" class="text-[10px] font-bold text-rose-500">Delete</button>
-                  </div>
-                  <input type="text" value="${s.prompt}" onchange="selectedSubmodule.videoSteps[${vIdx}].subjectives[${sIdx}].prompt = this.value" class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold bg-slate-50" placeholder="Subjective Prompt..." />
-                  <textarea onchange="selectedSubmodule.videoSteps[${vIdx}].subjectives[${sIdx}].exemplar = this.value" rows="2" class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs bg-slate-50" placeholder="Author Exemplar Feedback...">${s.exemplar}</textarea>
+            <!-- Mid-Video In-Video Checkpoints Accordion -->
+            <details class="group/ivc bg-amber-50/60 border border-amber-200 rounded-2xl overflow-hidden" open>
+              <summary class="flex items-center justify-between p-4 cursor-pointer select-none font-bold text-xs text-amber-800 hover:bg-amber-100/50">
+                <div class="flex items-center gap-2">
+                  <span>⏱️ Mid-Video Checkpoints (Pause Video at Min:Sec)</span>
+                  <span class="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[10px]">${ivcCount} Active</span>
                 </div>
-              `).join('')}
-            </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="addInVideoCheckpoint(${vIdx}, false)" class="text-xs font-bold bg-amber-700 text-white px-3 py-1 rounded-lg hover:bg-amber-800 shadow-sm">+ Add Checkpoint</button>
+                  <span class="text-xs font-bold text-amber-700 transition-transform group-open/ivc:rotate-180">▼</span>
+                </div>
+              </summary>
+
+              <div class="p-4 space-y-3 border-t border-amber-200/60">
+                ${(vStep.inVideoCheckpoints || []).map((ivc, ivIdx) => `
+                  <div class="p-4 bg-white rounded-2xl border border-amber-200 space-y-3">
+                    <div class="flex items-center justify-between">
+                      <span class="text-[10px] font-black uppercase text-amber-800">Mid-Video Checkpoint #${ivIdx + 1}</span>
+                      <button type="button" onclick="deleteInVideoCheckpoint(${vIdx}, ${ivIdx}, false)" class="text-[10px] font-bold text-rose-500 hover:underline">Delete</button>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-3">
+                      <div>
+                        <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Pause Min</label>
+                        <input type="number" min="0" value="${ivc.timeMin || 0}" onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].timeMin = Number(this.value)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-slate-50 font-bold" />
+                      </div>
+                      <div>
+                        <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Pause Sec</label>
+                        <input type="number" min="0" max="59" value="${ivc.timeSec || 0}" onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].timeSec = Number(this.value)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-slate-50 font-bold" />
+                      </div>
+                      <div>
+                        <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Question Type</label>
+                        <select onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].type = this.value; renderAuthorVideoSteps(selectedSubmodule)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-slate-50 font-bold cursor-pointer">
+                          <option value="mcq" ${ivc.type === 'mcq' || !ivc.type ? 'selected' : ''}>Multiple Choice Question (MCQ)</option>
+                          <option value="subjective" ${ivc.type === 'subjective' ? 'selected' : ''}>Subjective Question</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Question Prompt</label>
+                      <input type="text" value="${ivc.question}" onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].question = this.value" class="w-full rounded-lg border border-amber-200 px-3 py-1.5 text-xs bg-slate-50 font-bold" placeholder="Question prompt..." />
+                    </div>
+
+                    ${ivc.type === 'subjective' ? `
+                      <div>
+                        <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Author Exemplar Feedback</label>
+                        <textarea onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].exemplar = this.value" rows="2" class="w-full rounded-lg border border-amber-200 px-3 py-1.5 text-xs bg-slate-50" placeholder="Exemplar Feedback...">${ivc.exemplar || ''}</textarea>
+                      </div>
+                    ` : `
+                      <div class="grid md:grid-cols-2 gap-2">
+                        ${(ivc.choices || ['Option A', 'Option B', 'Option C', 'Option D']).map((choice, cIdx) => `
+                          <div class="p-2 bg-slate-50 rounded-lg border border-amber-200 space-y-1">
+                            <div class="flex items-center justify-between">
+                              <span class="text-[9px] font-bold text-slate-400">Choice ${cIdx + 1}</span>
+                              <label class="text-[9px] font-bold text-teal-700 flex items-center gap-1 cursor-pointer">
+                                <input type="radio" name="auth_ivc_${vIdx}_${ivIdx}" ${ivc.correctIndex === cIdx ? 'checked' : ''} onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].correctIndex = ${cIdx}" /> Correct
+                              </label>
+                            </div>
+                            <input type="text" value="${choice}" onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].choices[${cIdx}] = this.value" class="w-full rounded-lg border border-amber-200 px-2 py-1 text-xs bg-white" placeholder="Choice..." />
+                          </div>
+                        `).join('')}
+                      </div>
+                    `}
+                  </div>
+                `).join('')}
+              </div>
+            </details>
+
+            <!-- Reflections Accordion -->
+            <details class="group/refl bg-teal-50/50 border border-teal-200 rounded-2xl overflow-hidden" open>
+              <summary class="flex items-center justify-between p-4 cursor-pointer select-none font-bold text-xs text-teal-800 hover:bg-teal-100/50">
+                <div class="flex items-center gap-2">
+                  <span>💬 Post-Video Reflections</span>
+                  <span class="px-2 py-0.5 rounded-full bg-teal-200 text-teal-900 text-[10px]">${mcqCount} MCQs | ${subjCount} Subjectives</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="addVideoStepMCQ(${vIdx})" class="text-xs font-bold bg-teal-700 text-white px-3 py-1 rounded-lg hover:bg-teal-800 shadow-sm">+ Add MCQ</button>
+                  <button type="button" onclick="addVideoStepSubjective(${vIdx})" class="text-xs font-bold bg-indigo-700 text-white px-3 py-1 rounded-lg hover:bg-indigo-800 shadow-sm">+ Add Subjective</button>
+                  <span class="text-xs font-bold text-teal-700 transition-transform group-open/refl:rotate-180">▼</span>
+                </div>
+              </summary>
+
+              <div class="p-4 space-y-4 border-t border-teal-200/60">
+                <!-- MCQs -->
+                <div class="space-y-3">
+                  ${(vStep.mcqs || []).map((m, mIdx) => `
+                    <div class="p-4 bg-white rounded-2xl border border-teal-200 space-y-3">
+                      <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-extrabold uppercase text-teal-700">MCQ #${mIdx + 1}</span>
+                        <button type="button" onclick="deleteVideoStepMCQ(${vIdx}, ${mIdx})" class="text-[10px] font-bold text-rose-500 hover:underline">Delete</button>
+                      </div>
+                      <input type="text" value="${m.question}" onchange="selectedSubmodule.videoSteps[${vIdx}].mcqs[${mIdx}].question = this.value" class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-bold bg-slate-50" placeholder="Question..." />
+                      
+                      <div class="grid md:grid-cols-2 gap-2">
+                        ${m.choices.map((choice, cIdx) => `
+                          <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                            <div class="flex items-center justify-between">
+                              <span class="text-[9px] font-bold text-slate-400">Choice ${cIdx + 1}</span>
+                              <label class="text-[10px] font-bold text-teal-700 flex items-center gap-1 cursor-pointer">
+                                <input type="radio" name="auth_step_${vIdx}_mcq_${mIdx}" ${m.correctIndex === cIdx ? 'checked' : ''} onchange="selectedSubmodule.videoSteps[${vIdx}].mcqs[${mIdx}].correctIndex = ${cIdx}" /> Correct
+                              </label>
+                            </div>
+                            <input type="text" value="${choice}" onchange="selectedSubmodule.videoSteps[${vIdx}].mcqs[${mIdx}].choices[${cIdx}] = this.value" class="w-full rounded-lg border border-slate-200 px-2.5 py-1 text-xs bg-white" placeholder="Choice..." />
+                            <input type="text" value="${m.feedbacks?.[cIdx] || ''}" onchange="selectedSubmodule.videoSteps[${vIdx}].mcqs[${mIdx}].feedbacks[${cIdx}] = this.value" class="w-full rounded-lg border border-slate-200 px-2.5 py-1 text-[10px] text-slate-600 bg-white" placeholder="Feedback..." />
+                          </div>
+                        `).join('')}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+
+                <!-- Subjectives -->
+                <div class="space-y-3">
+                  ${(vStep.subjectives || []).map((s, sIdx) => `
+                    <div class="p-4 bg-white rounded-2xl border border-indigo-200 space-y-2">
+                      <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-extrabold uppercase text-indigo-700">Subjective #${sIdx + 1}</span>
+                        <button type="button" onclick="deleteVideoStepSubjective(${vIdx}, ${sIdx})" class="text-[10px] font-bold text-rose-500 hover:underline">Delete</button>
+                      </div>
+                      <input type="text" value="${s.prompt}" onchange="selectedSubmodule.videoSteps[${vIdx}].subjectives[${sIdx}].prompt = this.value" class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold bg-slate-50" placeholder="Subjective Prompt..." />
+                      <textarea onchange="selectedSubmodule.videoSteps[${vIdx}].subjectives[${sIdx}].exemplar = this.value" rows="2" class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs bg-slate-50" placeholder="Author Exemplar Feedback...">${s.exemplar}</textarea>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </details>
           </div>
-        </div>
-      `).join('');
+        </details>
+      `;
+      }).join('');
     }
 
     function renderAuthorLxTExtension(sub) {
@@ -2118,144 +2152,178 @@
       const container = document.getElementById('author-lxt-steps-container');
       const steps = ext.videoSteps || [];
 
-      container.innerHTML = steps.map((vStep, vIdx) => `
-        <div class="p-6 bg-white rounded-3xl border border-teal-200 space-y-6">
-          <div class="flex items-center justify-between border-b border-teal-200/60 pb-3">
-            <span class="text-xs font-black uppercase text-teal-800">LxT Extension Video Link #${vIdx + 1}</span>
-            ${steps.length > 1 ? `<button onclick="deleteLxTVideoLink(${vIdx})" class="text-xs font-bold text-rose-500">Delete LxT Video Link</button>` : ''}
-          </div>
+      container.innerHTML = steps.map((vStep, vIdx) => {
+        const ivcCount = vStep.inVideoCheckpoints?.length || 0;
+        const mcqCount = vStep.mcqs?.length || 0;
+        const subjCount = vStep.subjectives?.length || 0;
 
-          <div class="grid md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">LxT Video Title</label>
-              <input type="text" value="${vStep.title}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].title = this.value" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold bg-slate-50" placeholder="Title..." />
-            </div>
-            <div>
-              <label class="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">LxT Video URL</label>
-              <input type="text" value="${vStep.videoUrl}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].videoUrl = this.value" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs bg-slate-50" placeholder="MP4 Stream or YouTube URL..." />
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">LxT Lecture Notes</label>
-            <textarea onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].transcript = this.value" rows="2" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs bg-slate-50" placeholder="Notes...">${vStep.transcript}</textarea>
-          </div>
-
-          <!-- Mid-Video In-Video Checkpoints for LxT -->
-          <div class="pt-4 border-t border-teal-100 space-y-4">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-black uppercase text-amber-700">⏱️ Mid-Video Checkpoints (Pause Video at Min:Sec)</span>
-              <button type="button" onclick="addInVideoCheckpoint(${vIdx}, true)" class="text-xs font-bold bg-amber-50 text-amber-800 px-3 py-1.5 rounded-lg border border-amber-200 hover:bg-amber-100 cursor-pointer">+ Add Mid-Video Checkpoint</button>
+        return `
+        <details class="group bg-teal-50/30 border border-teal-200 rounded-3xl overflow-hidden shadow-sm transition-all" ${vIdx === 0 ? 'open' : ''}>
+          <summary class="flex items-center justify-between p-5 bg-white border-b border-teal-200/80 cursor-pointer select-none font-bold text-slate-800 hover:bg-teal-50/50 transition-all">
+            <div class="flex items-center gap-3">
+              <span class="text-xs font-black uppercase text-teal-800 bg-teal-100 px-2.5 py-1 rounded-lg border border-teal-300">LxT Video Link #${vIdx + 1}</span>
+              <span class="text-sm font-extrabold text-slate-900">${vStep.title || 'Untitled LxT Link'}</span>
             </div>
 
-            ${(vStep.inVideoCheckpoints || []).map((ivc, ivIdx) => `
-              <div class="p-4 bg-amber-50/70 rounded-2xl border border-amber-200 space-y-3">
-                <div class="flex items-center justify-between">
-                  <span class="text-[10px] font-black uppercase text-amber-800">LxT Checkpoint #${ivIdx + 1}</span>
-                  <button type="button" onclick="deleteInVideoCheckpoint(${vIdx}, ${ivIdx}, true)" class="text-[10px] font-bold text-rose-500 hover:underline cursor-pointer">Delete Checkpoint</button>
-                </div>
-
-                <div class="grid md:grid-cols-3 gap-3">
-                  <div>
-                    <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Pause Minute (Min)</label>
-                    <input type="number" min="0" value="${ivc.timeMin || 0}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].timeMin = Number(this.value)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-white font-bold" />
-                  </div>
-                  <div>
-                    <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Pause Second (Sec)</label>
-                    <input type="number" min="0" max="59" value="${ivc.timeSec || 0}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].timeSec = Number(this.value)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-white font-bold" />
-                  </div>
-                  <div>
-                    <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Question Type</label>
-                    <select onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].type = this.value; renderAuthorLxTExtension(selectedSubmodule)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-white font-bold cursor-pointer">
-                      <option value="mcq" ${ivc.type === 'mcq' || !ivc.type ? 'selected' : ''}>Multiple Choice Question (MCQ)</option>
-                      <option value="subjective" ${ivc.type === 'subjective' ? 'selected' : ''}>Subjective Question</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Question Prompt</label>
-                  <input type="text" value="${ivc.question}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].question = this.value" class="w-full rounded-lg border border-amber-200 px-3 py-1.5 text-xs bg-white font-bold" placeholder="Question prompt..." />
-                </div>
-
-                ${ivc.type === 'subjective' ? `
-                  <div>
-                    <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Author Exemplar Feedback</label>
-                    <textarea onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].exemplar = this.value" rows="2" class="w-full rounded-lg border border-amber-200 px-3 py-1.5 text-xs bg-white" placeholder="Author Exemplar Feedback...">${ivc.exemplar || ''}</textarea>
-                  </div>
-                ` : `
-                  <div class="grid md:grid-cols-2 gap-2">
-                    ${(ivc.choices || ['Option A', 'Option B', 'Option C', 'Option D']).map((choice, cIdx) => `
-                      <div class="p-2 bg-white rounded-lg border border-amber-200 space-y-1">
-                        <div class="flex items-center justify-between">
-                          <span class="text-[9px] font-bold text-slate-400">Choice ${cIdx + 1}</span>
-                          <label class="text-[9px] font-bold text-teal-700 flex items-center gap-1 cursor-pointer">
-                            <input type="radio" name="auth_lxt_ivc_${vIdx}_${ivIdx}" ${ivc.correctIndex === cIdx ? 'checked' : ''} onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].correctIndex = ${cIdx}" /> Correct
-                          </label>
-                        </div>
-                        <input type="text" value="${choice}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].choices[${cIdx}] = this.value" class="w-full rounded-lg border border-amber-200 px-2 py-1 text-xs bg-slate-50" placeholder="Choice..." />
-                      </div>
-                    `).join('')}
-                  </div>
-                `}
+            <div class="flex items-center gap-3">
+              <div class="hidden sm:flex items-center gap-2 text-[11px] font-bold text-slate-500">
+                <span class="px-2 py-0.5 rounded-md bg-amber-100/70 text-amber-800 border border-amber-200">⏱️ ${ivcCount} Checkpoint(s)</span>
+                <span class="px-2 py-0.5 rounded-md bg-teal-100/70 text-teal-800 border border-teal-200">❓ ${mcqCount} MCQ(s)</span>
+                <span class="px-2 py-0.5 rounded-md bg-indigo-100/70 text-indigo-800 border border-indigo-200">✍️ ${subjCount} Subjective(s)</span>
               </div>
-            `).join('')}
-          </div>
+              ${steps.length > 1 ? `<button type="button" onclick="deleteLxTVideoLink(${vIdx})" class="text-xs font-bold text-rose-500 hover:underline mr-2">Delete</button>` : ''}
+              <span class="text-xs font-extrabold text-teal-700 transition-transform duration-200 group-open:rotate-180">▼</span>
+            </div>
+          </summary>
 
-          <!-- Reflections for LxT Video Link -->
-          <div class="pt-4 border-t border-teal-100 space-y-4">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-extrabold uppercase text-teal-700">LxT Video Link #${vIdx + 1} Reflections</span>
-              <div class="flex items-center gap-2">
-                <button type="button" onclick="addLxTStepMCQ(${vIdx})" class="text-xs font-bold bg-teal-50 text-teal-700 px-3 py-1.5 rounded-lg border border-teal-200">+ Add MCQ</button>
-                <button type="button" onclick="addLxTStepSubjective(${vIdx})" class="text-xs font-bold bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-lg border border-indigo-200">+ Add Subjective</button>
+          <div class="p-6 space-y-6">
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">LxT Video Title</label>
+                <input type="text" value="${vStep.title}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].title = this.value; renderAuthorLxTExtension(selectedSubmodule)" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold bg-white" placeholder="Title..." />
+              </div>
+              <div>
+                <label class="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">LxT Video URL</label>
+                <input type="text" value="${vStep.videoUrl}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].videoUrl = this.value" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs bg-white" placeholder="MP4 Stream or YouTube URL..." />
               </div>
             </div>
 
-            <!-- MCQs -->
-            <div class="space-y-3">
-              ${(vStep.mcqs || []).map((m, mIdx) => `
-                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
-                  <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-extrabold uppercase text-slate-400">LxT Video ${vIdx + 1} MCQ #${mIdx + 1}</span>
-                    <button onclick="deleteLxTStepMCQ(${vIdx}, ${mIdx})" class="text-[10px] font-bold text-rose-500">Delete</button>
-                  </div>
-                  <input type="text" value="${m.question}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].mcqs[${mIdx}].question = this.value" class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-bold bg-white" placeholder="Question..." />
-                  
-                  <div class="grid md:grid-cols-2 gap-2">
-                    ${m.choices.map((choice, cIdx) => `
-                      <div class="p-2.5 bg-white rounded-xl border border-slate-200 space-y-1">
-                        <div class="flex items-center justify-between">
-                          <span class="text-[9px] font-bold text-slate-400">Choice ${cIdx + 1}</span>
-                          <label class="text-[10px] font-bold text-teal-700 flex items-center gap-1 cursor-pointer">
-                            <input type="radio" name="auth_lxt_step_${vIdx}_mcq_${mIdx}" ${m.correctIndex === cIdx ? 'checked' : ''} onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].mcqs[${mIdx}].correctIndex = ${cIdx}" /> Correct
-                          </label>
-                        </div>
-                        <input type="text" value="${choice}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].mcqs[${mIdx}].choices[${cIdx}] = this.value" class="w-full rounded-lg border border-slate-200 px-2.5 py-1 text-xs bg-slate-50" placeholder="Choice..." />
-                        <input type="text" value="${m.feedbacks?.[cIdx] || ''}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].mcqs[${mIdx}].feedbacks[${cIdx}] = this.value" class="w-full rounded-lg border border-slate-200 px-2.5 py-1 text-[10px] text-slate-600 bg-slate-50" placeholder="Feedback..." />
-                      </div>
-                    `).join('')}
-                  </div>
-                </div>
-              `).join('')}
+            <div>
+              <label class="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">LxT Lecture Notes</label>
+              <textarea onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].transcript = this.value" rows="2" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs bg-white" placeholder="Notes...">${vStep.transcript}</textarea>
             </div>
 
-            <!-- Subjectives -->
-            <div class="space-y-3">
-              ${(vStep.subjectives || []).map((s, sIdx) => `
-                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                  <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-extrabold uppercase text-slate-400">LxT Video ${vIdx + 1} Subjective #${sIdx + 1}</span>
-                    <button onclick="deleteLxTStepSubjective(${vIdx}, ${sIdx})" class="text-[10px] font-bold text-rose-500">Delete</button>
-                  </div>
-                  <input type="text" value="${s.prompt}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].subjectives[${sIdx}].prompt = this.value" class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold bg-white" placeholder="Prompt..." />
-                  <textarea onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].subjectives[${sIdx}].exemplar = this.value" rows="2" class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs bg-white" placeholder="Author Exemplar Feedback...">${s.exemplar}</textarea>
+            <!-- Mid-Video In-Video Checkpoints for LxT -->
+            <details class="group/lxtivc bg-amber-50/60 border border-amber-200 rounded-2xl overflow-hidden" open>
+              <summary class="flex items-center justify-between p-4 cursor-pointer select-none font-bold text-xs text-amber-800 hover:bg-amber-100/50">
+                <div class="flex items-center gap-2">
+                  <span>⏱️ Mid-Video Checkpoints (Pause Video at Min:Sec)</span>
+                  <span class="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[10px]">${ivcCount} Active</span>
                 </div>
-              `).join('')}
-            </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="addInVideoCheckpoint(${vIdx}, true)" class="text-xs font-bold bg-amber-700 text-white px-3 py-1 rounded-lg hover:bg-amber-800 shadow-sm">+ Add Checkpoint</button>
+                  <span class="text-xs font-bold text-amber-700 transition-transform group-open/lxtivc:rotate-180">▼</span>
+                </div>
+              </summary>
+
+              <div class="p-4 space-y-3 border-t border-amber-200/60">
+                ${(vStep.inVideoCheckpoints || []).map((ivc, ivIdx) => `
+                  <div class="p-4 bg-white rounded-2xl border border-amber-200 space-y-3">
+                    <div class="flex items-center justify-between">
+                      <span class="text-[10px] font-black uppercase text-amber-800">LxT Checkpoint #${ivIdx + 1}</span>
+                      <button type="button" onclick="deleteInVideoCheckpoint(${vIdx}, ${ivIdx}, true)" class="text-[10px] font-bold text-rose-500 hover:underline">Delete</button>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-3">
+                      <div>
+                        <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Pause Min</label>
+                        <input type="number" min="0" value="${ivc.timeMin || 0}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].timeMin = Number(this.value)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-slate-50 font-bold" />
+                      </div>
+                      <div>
+                        <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Pause Sec</label>
+                        <input type="number" min="0" max="59" value="${ivc.timeSec || 0}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].timeSec = Number(this.value)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-slate-50 font-bold" />
+                      </div>
+                      <div>
+                        <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Question Type</label>
+                        <select onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].type = this.value; renderAuthorLxTExtension(selectedSubmodule)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-slate-50 font-bold cursor-pointer">
+                          <option value="mcq" ${ivc.type === 'mcq' || !ivc.type ? 'selected' : ''}>Multiple Choice Question (MCQ)</option>
+                          <option value="subjective" ${ivc.type === 'subjective' ? 'selected' : ''}>Subjective Question</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Question Prompt</label>
+                      <input type="text" value="${ivc.question}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].question = this.value" class="w-full rounded-lg border border-amber-200 px-3 py-1.5 text-xs bg-slate-50 font-bold" placeholder="Question prompt..." />
+                    </div>
+
+                    ${ivc.type === 'subjective' ? `
+                      <div>
+                        <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Author Exemplar Feedback</label>
+                        <textarea onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].exemplar = this.value" rows="2" class="w-full rounded-lg border border-amber-200 px-3 py-1.5 text-xs bg-slate-50" placeholder="Exemplar Feedback...">${ivc.exemplar || ''}</textarea>
+                      </div>
+                    ` : `
+                      <div class="grid md:grid-cols-2 gap-2">
+                        ${(ivc.choices || ['Option A', 'Option B', 'Option C', 'Option D']).map((choice, cIdx) => `
+                          <div class="p-2 bg-slate-50 rounded-lg border border-amber-200 space-y-1">
+                            <div class="flex items-center justify-between">
+                              <span class="text-[9px] font-bold text-slate-400">Choice ${cIdx + 1}</span>
+                              <label class="text-[9px] font-bold text-teal-700 flex items-center gap-1 cursor-pointer">
+                                <input type="radio" name="auth_lxt_ivc_${vIdx}_${ivIdx}" ${ivc.correctIndex === cIdx ? 'checked' : ''} onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].correctIndex = ${cIdx}" /> Correct
+                              </label>
+                            </div>
+                            <input type="text" value="${choice}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].choices[${cIdx}] = this.value" class="w-full rounded-lg border border-amber-200 px-2 py-1 text-xs bg-white" placeholder="Choice..." />
+                          </div>
+                        `).join('')}
+                      </div>
+                    `}
+                  </div>
+                `).join('')}
+              </div>
+            </details>
+
+            <!-- Reflections for LxT Video Link -->
+            <details class="group/lxtrefl bg-teal-50/50 border border-teal-200 rounded-2xl overflow-hidden" open>
+              <summary class="flex items-center justify-between p-4 cursor-pointer select-none font-bold text-xs text-teal-800 hover:bg-teal-100/50">
+                <div class="flex items-center gap-2">
+                  <span>💬 LxT Post-Video Reflections</span>
+                  <span class="px-2 py-0.5 rounded-full bg-teal-200 text-teal-900 text-[10px]">${mcqCount} MCQs | ${subjCount} Subjectives</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="addLxTStepMCQ(${vIdx})" class="text-xs font-bold bg-teal-700 text-white px-3 py-1 rounded-lg hover:bg-teal-800 shadow-sm">+ Add MCQ</button>
+                  <button type="button" onclick="addLxTStepSubjective(${vIdx})" class="text-xs font-bold bg-indigo-700 text-white px-3 py-1 rounded-lg hover:bg-indigo-800 shadow-sm">+ Add Subjective</button>
+                  <span class="text-xs font-bold text-teal-700 transition-transform group-open/lxtrefl:rotate-180">▼</span>
+                </div>
+              </summary>
+
+              <div class="p-4 space-y-4 border-t border-teal-200/60">
+                <!-- MCQs -->
+                <div class="space-y-3">
+                  ${(vStep.mcqs || []).map((m, mIdx) => `
+                    <div class="p-4 bg-white rounded-2xl border border-teal-200 space-y-3">
+                      <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-extrabold uppercase text-teal-700">LxT MCQ #${mIdx + 1}</span>
+                        <button type="button" onclick="deleteLxTStepMCQ(${vIdx}, ${mIdx})" class="text-[10px] font-bold text-rose-500 hover:underline">Delete</button>
+                      </div>
+                      <input type="text" value="${m.question}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].mcqs[${mIdx}].question = this.value" class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-bold bg-slate-50" placeholder="Question..." />
+                      
+                      <div class="grid md:grid-cols-2 gap-2">
+                        ${m.choices.map((choice, cIdx) => `
+                          <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                            <div class="flex items-center justify-between">
+                              <span class="text-[9px] font-bold text-slate-400">Choice ${cIdx + 1}</span>
+                              <label class="text-[10px] font-bold text-teal-700 flex items-center gap-1 cursor-pointer">
+                                <input type="radio" name="auth_lxt_step_${vIdx}_mcq_${mIdx}" ${m.correctIndex === cIdx ? 'checked' : ''} onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].mcqs[${mIdx}].correctIndex = ${cIdx}" /> Correct
+                              </label>
+                            </div>
+                            <input type="text" value="${choice}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].mcqs[${mIdx}].choices[${cIdx}] = this.value" class="w-full rounded-lg border border-slate-200 px-2.5 py-1 text-xs bg-white" placeholder="Choice..." />
+                            <input type="text" value="${m.feedbacks?.[cIdx] || ''}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].mcqs[${mIdx}].feedbacks[${cIdx}] = this.value" class="w-full rounded-lg border border-slate-200 px-2.5 py-1 text-[10px] text-slate-600 bg-white" placeholder="Feedback..." />
+                          </div>
+                        `).join('')}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+
+                <!-- Subjectives -->
+                <div class="space-y-3">
+                  ${(vStep.subjectives || []).map((s, sIdx) => `
+                    <div class="p-4 bg-white rounded-2xl border border-indigo-200 space-y-2">
+                      <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-extrabold uppercase text-indigo-700">LxT Subjective #${sIdx + 1}</span>
+                        <button type="button" onclick="deleteLxTStepSubjective(${vIdx}, ${sIdx})" class="text-[10px] font-bold text-rose-500 hover:underline">Delete</button>
+                      </div>
+                      <input type="text" value="${s.prompt}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].subjectives[${sIdx}].prompt = this.value" class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold bg-slate-50" placeholder="Prompt..." />
+                      <textarea onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].subjectives[${sIdx}].exemplar = this.value" rows="2" class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs bg-slate-50" placeholder="Author Exemplar Feedback...">${s.exemplar}</textarea>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </details>
           </div>
-        </div>
-      `).join('');
+        </details>
+      `;
+      }).join('');
     }
 
     function addLxTVideoLink() {
@@ -2370,51 +2438,57 @@
     function renderAuthorMasterQuiz(mod) {
       const container = document.getElementById('author-master-quiz-list');
       container.innerHTML = (mod.masterQuiz || []).map((m, mIdx) => {
-        if (m.type === 'subjective') {
-          return `
-            <div class="p-5 bg-indigo-50/60 rounded-2xl border border-indigo-100 space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-extrabold uppercase text-indigo-700">Master Subjective Question #${mIdx + 1}</span>
-                <button onclick="deleteAuthorMasterQuestion(${mIdx})" class="text-xs text-rose-500 font-bold">Delete</button>
-              </div>
-              <div>
-                <label class="block text-[10px] font-extrabold uppercase text-indigo-800 mb-1">Subjective Prompt</label>
-                <input type="text" value="${m.prompt}" onchange="db.find(x=>x.id==='${mod.id}').masterQuiz[${mIdx}].prompt = this.value" class="w-full rounded-xl border border-indigo-200 px-3 py-2 text-xs font-bold bg-white" placeholder="Prompt..." />
-              </div>
-              <div>
-                <label class="block text-[10px] font-extrabold uppercase text-indigo-800 mb-1">Author Exemplar Feedback</label>
-                <textarea onchange="db.find(x=>x.id==='${mod.id}').masterQuiz[${mIdx}].exemplar = this.value" rows="2" class="w-full rounded-xl border border-indigo-200 px-3 py-2 text-xs bg-white" placeholder="Exemplar Answer...">${m.exemplar}</textarea>
-              </div>
-            </div>
-          `;
-        }
+        const isSubj = m.type === 'subjective';
+        const qTitle = isSubj ? (m.prompt || 'Untitled Subjective Question') : (m.question || 'Untitled MCQ Question');
 
         return `
-          <div class="p-5 bg-indigo-50/60 rounded-2xl border border-indigo-100 space-y-4">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-extrabold uppercase text-indigo-700">Master MCQ #${mIdx + 1}</span>
-              <button onclick="deleteAuthorMasterQuestion(${mIdx})" class="text-xs text-rose-500 font-bold">Delete Question</button>
-            </div>
-            <div>
-              <label class="block text-[10px] font-extrabold uppercase text-indigo-800 mb-1">Question Prompt</label>
-              <input type="text" value="${m.question}" onchange="db.find(x=>x.id==='${mod.id}').masterQuiz[${mIdx}].question = this.value" class="w-full rounded-xl border border-indigo-200 px-3 py-2 text-xs font-bold bg-white" placeholder="Question Prompt..." />
-            </div>
-            
-            <div class="grid md:grid-cols-2 gap-3">
-              ${m.choices.map((choice, cIdx) => `
-                <div class="p-3 bg-white rounded-xl border border-indigo-100 space-y-2">
-                  <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-extrabold uppercase text-slate-400">Choice ${cIdx + 1}</span>
-                    <label class="text-[11px] font-bold text-indigo-700 flex items-center gap-1 cursor-pointer">
-                      <input type="radio" name="auth_master_correct_${mIdx}" ${m.correctIndex === cIdx ? 'checked' : ''} onchange="db.find(x=>x.id==='${mod.id}').masterQuiz[${mIdx}].correctIndex = ${cIdx}" /> Correct Answer
-                    </label>
-                  </div>
-                  <input type="text" value="${choice}" onchange="db.find(x=>x.id==='${mod.id}').masterQuiz[${mIdx}].choices[${cIdx}] = this.value" class="w-full rounded-lg border border-indigo-200 px-3 py-1.5 text-xs text-slate-900 bg-slate-50" placeholder="Option Text" />
-                  <input type="text" value="${m.feedbacks?.[cIdx] || ''}" onchange="db.find(x=>x.id==='${mod.id}').masterQuiz[${mIdx}].feedbacks[${cIdx}] = this.value" class="w-full rounded-lg border border-indigo-200 px-3 py-1 text-[11px] text-slate-600 bg-slate-50" placeholder="Author Feedback for Choice ${cIdx + 1}..." />
+          <details class="group bg-indigo-50/50 border border-indigo-200 rounded-2xl overflow-hidden transition-all" ${mIdx === 0 ? 'open' : ''}>
+            <summary class="flex items-center justify-between p-4 bg-white cursor-pointer select-none font-bold text-slate-800 hover:bg-indigo-50/40 border-b border-indigo-100">
+              <div class="flex items-center gap-3">
+                <span class="text-xs font-black uppercase text-indigo-800 bg-indigo-100 px-2.5 py-1 rounded-lg border border-indigo-300">
+                  ${isSubj ? '✍️ Subjective' : '❓ MCQ'} #${mIdx + 1}
+                </span>
+                <span class="text-xs font-extrabold text-slate-900">${qTitle}</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <button type="button" onclick="deleteAuthorMasterQuestion(${mIdx})" class="text-xs font-bold text-rose-500 hover:underline mr-2">Delete</button>
+                <span class="text-xs font-bold text-indigo-700 transition-transform group-open:rotate-180">▼</span>
+              </div>
+            </summary>
+
+            <div class="p-5 space-y-4">
+              ${isSubj ? `
+                <div>
+                  <label class="block text-[10px] font-extrabold uppercase text-indigo-800 mb-1">Subjective Prompt</label>
+                  <input type="text" value="${m.prompt}" onchange="db.find(x=>x.id==='${mod.id}').masterQuiz[${mIdx}].prompt = this.value; renderAuthorMasterQuiz(db.find(x=>x.id==='${mod.id}'))" class="w-full rounded-xl border border-indigo-200 px-3 py-2 text-xs font-bold bg-white" placeholder="Prompt..." />
                 </div>
-              `).join('')}
+                <div>
+                  <label class="block text-[10px] font-extrabold uppercase text-indigo-800 mb-1">Author Exemplar Feedback</label>
+                  <textarea onchange="db.find(x=>x.id==='${mod.id}').masterQuiz[${mIdx}].exemplar = this.value" rows="2" class="w-full rounded-xl border border-indigo-200 px-3 py-2 text-xs bg-white" placeholder="Exemplar Answer...">${m.exemplar}</textarea>
+                </div>
+              ` : `
+                <div>
+                  <label class="block text-[10px] font-extrabold uppercase text-indigo-800 mb-1">Question Prompt</label>
+                  <input type="text" value="${m.question}" onchange="db.find(x=>x.id==='${mod.id}').masterQuiz[${mIdx}].question = this.value; renderAuthorMasterQuiz(db.find(x=>x.id==='${mod.id}'))" class="w-full rounded-xl border border-indigo-200 px-3 py-2 text-xs font-bold bg-white" placeholder="Question Prompt..." />
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-3">
+                  ${m.choices.map((choice, cIdx) => `
+                    <div class="p-3 bg-white rounded-xl border border-indigo-100 space-y-2">
+                      <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-extrabold uppercase text-slate-400">Choice ${cIdx + 1}</span>
+                        <label class="text-[11px] font-bold text-indigo-700 flex items-center gap-1 cursor-pointer">
+                          <input type="radio" name="auth_master_correct_${mIdx}" ${m.correctIndex === cIdx ? 'checked' : ''} onchange="db.find(x=>x.id==='${mod.id}').masterQuiz[${mIdx}].correctIndex = ${cIdx}" /> Correct Answer
+                        </label>
+                      </div>
+                      <input type="text" value="${choice}" onchange="db.find(x=>x.id==='${mod.id}').masterQuiz[${mIdx}].choices[${cIdx}] = this.value" class="w-full rounded-lg border border-indigo-200 px-3 py-1.5 text-xs text-slate-900 bg-slate-50" placeholder="Option Text" />
+                      <input type="text" value="${m.feedbacks?.[cIdx] || ''}" onchange="db.find(x=>x.id==='${mod.id}').masterQuiz[${mIdx}].feedbacks[${cIdx}] = this.value" class="w-full rounded-lg border border-indigo-200 px-3 py-1 text-[11px] text-slate-600 bg-slate-50" placeholder="Author Feedback for Choice ${cIdx + 1}..." />
+                    </div>
+                  `).join('')}
+                </div>
+              `}
             </div>
-          </div>
+          </details>
         `;
       }).join('');
     }
