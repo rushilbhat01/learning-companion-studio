@@ -301,11 +301,12 @@
               <div id="student-video-steps-nav" class="flex items-center gap-2 overflow-x-auto pb-2"></div>
 
               <!-- Universal Video Player -->
-              <div class="space-y-4 relative">
-                <div id="video-player-container" class="overflow-hidden rounded-2xl bg-slate-900 aspect-video shadow-md relative group"></div>
-
-                <!-- IN-VIDEO CHECKPOINT MODAL OVERLAY (NON-SKIPPABLE) -->
-                <div id="in-video-checkpoint-modal" class="hidden absolute inset-0 z-50 bg-slate-950/95 backdrop-blur-md rounded-2xl p-6 flex flex-col justify-between text-white border border-amber-500/40 shadow-2xl overflow-y-auto"></div>
+              <div class="space-y-4">
+                <div class="relative overflow-hidden rounded-2xl bg-slate-900 aspect-video shadow-md group">
+                  <div id="video-player-container" class="w-full h-full"></div>
+                  <!-- IN-VIDEO CHECKPOINT MODAL OVERLAY (NON-SKIPPABLE) -->
+                  <div id="in-video-checkpoint-modal" class="hidden absolute inset-0 z-50 bg-slate-950/95 backdrop-blur-md p-6 flex flex-col justify-between text-white border border-amber-500/40 shadow-2xl overflow-y-auto"></div>
+                </div>
 
                 <!-- Video Completion Banner -->
                 <div id="video-completion-banner" class="p-4 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-between transition-all">
@@ -396,11 +397,12 @@
           <div id="lxt-video-steps-nav" class="flex items-center gap-2 overflow-x-auto pb-2"></div>
 
           <!-- Extension Video Player -->
-          <div class="space-y-4 relative">
-            <div id="lxt-video-player-container" class="overflow-hidden rounded-2xl bg-slate-900 aspect-video shadow-md relative group"></div>
-
-            <!-- LXT IN-VIDEO CHECKPOINT MODAL OVERLAY (NON-SKIPPABLE) -->
-            <div id="lxt-in-video-checkpoint-modal" class="hidden absolute inset-0 z-50 bg-slate-950/95 backdrop-blur-md rounded-2xl p-6 flex flex-col justify-between text-white border border-amber-500/40 shadow-2xl overflow-y-auto"></div>
+          <div class="space-y-4">
+            <div class="relative overflow-hidden rounded-2xl bg-slate-900 aspect-video shadow-md group">
+              <div id="lxt-video-player-container" class="w-full h-full"></div>
+              <!-- LXT IN-VIDEO CHECKPOINT MODAL OVERLAY (NON-SKIPPABLE) -->
+              <div id="lxt-in-video-checkpoint-modal" class="hidden absolute inset-0 z-50 bg-slate-950/95 backdrop-blur-md p-6 flex flex-col justify-between text-white border border-amber-500/40 shadow-2xl overflow-y-auto"></div>
+            </div>
 
             <div id="lxt-video-completion-banner" class="p-4 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-between">
               <span id="lxt-video-lock-text" class="text-xs font-bold text-slate-700">🔒 Watch extension video to unlock questions.</span>
@@ -904,6 +906,14 @@
     }
 
     function pauseVideoPlayback(isLxT = false) {
+      // Force pause all HTML5 video elements across the entire document
+      document.querySelectorAll('video').forEach(vEl => {
+        try {
+          vEl.pause();
+        } catch(e) {}
+      });
+
+      // YouTube API
       try {
         if (activeYtPlayer && typeof activeYtPlayer.pauseVideo === 'function') {
           activeYtPlayer.pauseVideo();
@@ -921,16 +931,6 @@
           }), '*');
         } catch (e) {}
       });
-
-      // HTML5 video pause
-      const containerId = isLxT ? 'lxt-video-player-container' : 'video-player-container';
-      const container = document.getElementById(containerId);
-      if (container) {
-        const vEl = container.querySelector('video');
-        if (vEl && typeof vEl.pause === 'function') {
-          vEl.pause();
-        }
-      }
     }
 
     function resumeVideoPlayback(isLxT = false) {
@@ -1020,12 +1020,19 @@
     function submitInVideoMcq(key, selectedIdx, correctIdx, isLxT) {
       const fbContainer = document.getElementById(`ivc-feedback-${key}`);
       const isCorrect = selectedIdx === correctIdx;
+      const ivc = currentActiveInVideoCheckpoint?.ivc;
+      const feedbackMsg = (ivc && ivc.feedbacks && ivc.feedbacks[selectedIdx]) 
+        ? ivc.feedbacks[selectedIdx] 
+        : (isCorrect ? 'Correct! Excellent strength-based reflection.' : 'Reflect on this option before continuing.');
       
       fbContainer.innerHTML = `
-        <div class="flex items-center justify-between font-bold text-xs ${isCorrect ? 'text-emerald-400' : 'text-amber-400'}">
-          <span>${isCorrect ? '✓ Correct Answer!' : 'Note on Choice:'}</span>
+        <div class="space-y-1.5">
+          <div class="font-bold text-xs ${isCorrect ? 'text-emerald-400' : 'text-amber-300'}">
+            ${isCorrect ? '✓ Correct Choice!' : '💡 Feedback on Selected Choice:'}
+          </div>
+          <p class="text-slate-200 text-xs leading-relaxed">${feedbackMsg}</p>
         </div>
-        <button onclick="completeInVideoCheckpoint('${key}', ${isLxT})" class="w-full bg-teal-600 hover:bg-teal-500 text-white py-2.5 rounded-xl text-xs font-black mt-2 cursor-pointer">
+        <button onclick="completeInVideoCheckpoint('${key}', ${isLxT})" class="w-full bg-teal-600 hover:bg-teal-500 text-white py-2.5 rounded-xl text-xs font-black mt-2 cursor-pointer shadow-md">
           Continue Playing Video ▶
         </button>
       `;
