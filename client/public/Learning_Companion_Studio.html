@@ -903,26 +903,64 @@
       });
     }
 
-    function pauseVideoPlayback(isLxT) {
+    function pauseVideoPlayback(isLxT = false) {
       try {
         if (activeYtPlayer && typeof activeYtPlayer.pauseVideo === 'function') {
           activeYtPlayer.pauseVideo();
         }
       } catch(e) {}
+
+      // Fallback postMessage to all YouTube iframe elements
+      const iframes = document.querySelectorAll('iframe');
+      iframes.forEach(iframe => {
+        try {
+          iframe.contentWindow.postMessage(JSON.stringify({
+            event: 'command',
+            func: 'pauseVideo',
+            args: []
+          }), '*');
+        } catch (e) {}
+      });
+
+      // HTML5 video pause
       const containerId = isLxT ? 'lxt-video-player-container' : 'video-player-container';
-      const vEl = document.querySelector(`#${containerId} video`);
-      if (vEl) vEl.pause();
+      const container = document.getElementById(containerId);
+      if (container) {
+        const vEl = container.querySelector('video');
+        if (vEl && typeof vEl.pause === 'function') {
+          vEl.pause();
+        }
+      }
     }
 
-    function resumeVideoPlayback(isLxT) {
+    function resumeVideoPlayback(isLxT = false) {
       try {
         if (activeYtPlayer && typeof activeYtPlayer.playVideo === 'function') {
           activeYtPlayer.playVideo();
         }
       } catch(e) {}
+
+      // Fallback postMessage to all YouTube iframe elements
+      const iframes = document.querySelectorAll('iframe');
+      iframes.forEach(iframe => {
+        try {
+          iframe.contentWindow.postMessage(JSON.stringify({
+            event: 'command',
+            func: 'playVideo',
+            args: []
+          }), '*');
+        } catch (e) {}
+      });
+
+      // HTML5 video play
       const containerId = isLxT ? 'lxt-video-player-container' : 'video-player-container';
-      const vEl = document.querySelector(`#${containerId} video`);
-      if (vEl) vEl.play();
+      const container = document.getElementById(containerId);
+      if (container) {
+        const vEl = container.querySelector('video');
+        if (vEl && typeof vEl.play === 'function') {
+          vEl.play();
+        }
+      }
     }
 
     function renderInVideoCheckpointModal(ivc, key, isLxT) {
