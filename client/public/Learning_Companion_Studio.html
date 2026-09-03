@@ -301,8 +301,11 @@
               <div id="student-video-steps-nav" class="flex items-center gap-2 overflow-x-auto pb-2"></div>
 
               <!-- Universal Video Player -->
-              <div class="space-y-4">
+              <div class="space-y-4 relative">
                 <div id="video-player-container" class="overflow-hidden rounded-2xl bg-slate-900 aspect-video shadow-md relative group"></div>
+
+                <!-- IN-VIDEO CHECKPOINT MODAL OVERLAY (NON-SKIPPABLE) -->
+                <div id="in-video-checkpoint-modal" class="hidden absolute inset-0 z-50 bg-slate-950/95 backdrop-blur-md rounded-2xl p-6 flex flex-col justify-between text-white border border-amber-500/40 shadow-2xl overflow-y-auto"></div>
 
                 <!-- Video Completion Banner -->
                 <div id="video-completion-banner" class="p-4 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-between transition-all">
@@ -393,8 +396,11 @@
           <div id="lxt-video-steps-nav" class="flex items-center gap-2 overflow-x-auto pb-2"></div>
 
           <!-- Extension Video Player -->
-          <div class="space-y-4">
+          <div class="space-y-4 relative">
             <div id="lxt-video-player-container" class="overflow-hidden rounded-2xl bg-slate-900 aspect-video shadow-md relative group"></div>
+
+            <!-- LXT IN-VIDEO CHECKPOINT MODAL OVERLAY (NON-SKIPPABLE) -->
+            <div id="lxt-in-video-checkpoint-modal" class="hidden absolute inset-0 z-50 bg-slate-950/95 backdrop-blur-md rounded-2xl p-6 flex flex-col justify-between text-white border border-amber-500/40 shadow-2xl overflow-y-auto"></div>
 
             <div id="lxt-video-completion-banner" class="p-4 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-between">
               <span id="lxt-video-lock-text" class="text-xs font-bold text-slate-700">🔒 Watch extension video to unlock questions.</span>
@@ -520,6 +526,29 @@
                 title: "Video Link 1: Core Principles of Strength-Based Mentoring",
                 videoUrl: "https://vjs.zencdn.net/v/oceans.mp4",
                 transcript: "Neurodiversity recognizes that brain differences are natural human variations. Companions move away from a deficit model (fixing behavior) to a strength-based model.",
+                inVideoCheckpoints: [
+                  {
+                    id: "ivc-1-1-1",
+                    timeMin: 0,
+                    timeSec: 15,
+                    type: "mcq",
+                    question: "Mid-Video Reflection Checkpoint (00:15): What is the core focus when mentoring neurodivergent children?",
+                    choices: [
+                      "Building on unique strengths & providing sensory accommodations",
+                      "Enforcing strict behavioral compliance at all times",
+                      "Disallowing communication tools",
+                      "Overloading with loud verbal instructions"
+                    ],
+                    correctIndex: 0,
+                    feedbacks: [
+                      "Correct! Strength-based focus builds safety and trust.",
+                      "Incorrect. Compliance-only approaches increase anxiety.",
+                      "Incorrect. Communication tools (AAC/PECS) are vital.",
+                      "Incorrect. Lower sensory input is key."
+                    ],
+                    exemplar: "Author Exemplar Feedback: Focus on building rapport and respecting sensory needs."
+                  }
+                ],
                 mcqs: [
                   {
                     question: "Video Link 1 Reflection: What is the primary goal of strength-based mentoring?",
@@ -813,6 +842,7 @@
                 const cur = activeYtPlayer.getCurrentTime();
                 const dur = activeYtPlayer.getDuration();
                 if (dur > 0) {
+                  checkInVideoPlayback(cur, isLxT);
                   const pct = (cur / dur) * 100;
                   const bar = document.getElementById(isLxT ? 'lxt-video-progress-bar' : 'video-progress-bar');
                   if (bar) bar.style.width = `${Math.min(pct, 100)}%`;
@@ -821,7 +851,7 @@
                   }
                 }
               }
-            }, 1000);
+            }, 500);
           } catch (e) {
             console.warn("YouTube tracker initialized.");
           }
@@ -847,12 +877,162 @@
       }
     }
 
+    let currentActiveInVideoCheckpoint = null;
+    let answeredInVideoCheckpointsMap = {};
+
+    function checkInVideoPlayback(currentTime, isLxT = false) {
+      if (currentActiveInVideoCheckpoint) return; // Already paused at an active checkpoint
+
+      const sub = selectedSubmodule;
+      if (!sub) return;
+
+      const vSteps = isLxT ? (sub.lxtExtension?.videoSteps || []) : (sub.videoSteps || []);
+      const stepIdx = isLxT ? activeLxTVideoStepIndex : activeVideoStepIndex;
+      const vStep = vSteps[stepIdx];
+      if (!vStep || !vStep.inVideoCheckpoints || !vStep.inVideoCheckpoints.length) return;
+
+      vStep.inVideoCheckpoints.forEach((ivc, idx) => {
+        const targetSeconds = (Number(ivc.timeMin || 0) * 60) + Number(ivc.timeSec || 0);
+        const key = `${isLxT ? 'lxt_' : ''}${sub.id}_step${stepIdx}_ivc${idx}`;
+
+        if (currentTime >= targetSeconds && !answeredInVideoCheckpointsMap[key]) {
+          currentActiveInVideoCheckpoint = { key, ivc, idx, isLxT };
+          pauseVideoPlayback(isLxT);
+          renderInVideoCheckpointModal(ivc, key, isLxT);
+        }
+      });
+    }
+
+    function pauseVideoPlayback(isLxT) {
+      try {
+        if (activeYtPlayer && typeof activeYtPlayer.pauseVideo === 'function') {
+          activeYtPlayer.pauseVideo();
+        }
+      } catch(e) {}
+      const containerId = isLxT ? 'lxt-video-player-container' : 'video-player-container';
+      const vEl = document.querySelector(`#${containerId} video`);
+      if (vEl) vEl.pause();
+    }
+
+    function resumeVideoPlayback(isLxT) {
+      try {
+        if (activeYtPlayer && typeof activeYtPlayer.playVideo === 'function') {
+          activeYtPlayer.playVideo();
+        }
+      } catch(e) {}
+      const containerId = isLxT ? 'lxt-video-player-container' : 'video-player-container';
+      const vEl = document.querySelector(`#${containerId} video`);
+      if (vEl) vEl.play();
+    }
+
+    function renderInVideoCheckpointModal(ivc, key, isLxT) {
+      const modalId = isLxT ? 'lxt-in-video-checkpoint-modal' : 'in-video-checkpoint-modal';
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+
+      const minStr = String(ivc.timeMin || 0).padStart(2, '0');
+      const secStr = String(ivc.timeSec || 0).padStart(2, '0');
+
+      let contentHtml = '';
+      if (ivc.type === 'mcq' || !ivc.type) {
+        contentHtml = `
+          <div class="space-y-2 my-auto">
+            <span class="text-xs font-bold uppercase text-slate-300">Select Choice to Continue Video:</span>
+            <div class="grid gap-2">
+              ${(ivc.choices || ['Option 1', 'Option 2', 'Option 3', 'Option 4']).map((c, cIdx) => `
+                <button onclick="submitInVideoMcq('${key}', ${cIdx}, ${ivc.correctIndex || 0}, ${isLxT})" class="w-full text-left p-3.5 rounded-xl border border-slate-700 bg-slate-900 hover:bg-teal-900/50 text-xs font-bold text-white transition-all cursor-pointer">
+                  ${c}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      } else {
+        contentHtml = `
+          <div class="space-y-3 my-auto">
+            <span class="text-xs font-bold uppercase text-slate-300">Your Reflection Response:</span>
+            <textarea id="ivc-subj-input-${key}" rows="3" class="w-full rounded-xl border border-slate-700 bg-slate-900 p-3.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-teal-500" placeholder="Type your response to resume video playback..."></textarea>
+            <button onclick="submitInVideoSubjective('${key}', ${isLxT})" class="w-full bg-teal-600 hover:bg-teal-500 text-white p-3 rounded-xl text-xs font-black transition-all cursor-pointer">
+              Submit & Resume Video Playback ▶
+            </button>
+          </div>
+        `;
+      }
+
+      modal.innerHTML = `
+        <div class="space-y-2 border-b border-slate-800 pb-3">
+          <div class="flex items-center justify-between">
+            <span class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-extrabold border border-amber-500/30 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> ⏸️ In-Video Reflection Checkpoint (${minStr}:${secStr})
+            </span>
+            <span class="text-[11px] font-bold text-rose-400">🔒 Non-Skippable</span>
+          </div>
+          <h3 class="text-base font-extrabold text-white leading-snug">${ivc.question}</h3>
+        </div>
+
+        ${contentHtml}
+
+        <div id="ivc-feedback-${key}" class="hidden p-3.5 rounded-xl bg-teal-950/90 border border-teal-500/40 text-xs text-teal-200 mt-2 space-y-2">
+        </div>
+      `;
+
+      modal.classList.remove('hidden');
+    }
+
+    function submitInVideoMcq(key, selectedIdx, correctIdx, isLxT) {
+      const fbContainer = document.getElementById(`ivc-feedback-${key}`);
+      const isCorrect = selectedIdx === correctIdx;
+      
+      fbContainer.innerHTML = `
+        <div class="flex items-center justify-between font-bold text-xs ${isCorrect ? 'text-emerald-400' : 'text-amber-400'}">
+          <span>${isCorrect ? '✓ Correct Answer!' : 'Note on Choice:'}</span>
+        </div>
+        <button onclick="completeInVideoCheckpoint('${key}', ${isLxT})" class="w-full bg-teal-600 hover:bg-teal-500 text-white py-2.5 rounded-xl text-xs font-black mt-2 cursor-pointer">
+          Continue Playing Video ▶
+        </button>
+      `;
+      fbContainer.classList.remove('hidden');
+    }
+
+    function submitInVideoSubjective(key, isLxT) {
+      const inputVal = document.getElementById(`ivc-subj-input-${key}`)?.value;
+      if (!inputVal || !inputVal.trim()) return;
+
+      const fbContainer = document.getElementById(`ivc-feedback-${key}`);
+      const exemplar = currentActiveInVideoCheckpoint?.ivc?.exemplar || "Author Exemplar Feedback: Thank you for reflecting.";
+      
+      fbContainer.innerHTML = `
+        <div class="text-xs text-teal-200 space-y-1">
+          <strong>Author Exemplar Feedback:</strong>
+          <p class="text-slate-300">${exemplar}</p>
+        </div>
+        <button onclick="completeInVideoCheckpoint('${key}', ${isLxT})" class="w-full bg-teal-600 hover:bg-teal-500 text-white py-2.5 rounded-xl text-xs font-black mt-2 cursor-pointer">
+          Continue Playing Video ▶
+        </button>
+      `;
+      fbContainer.classList.remove('hidden');
+    }
+
+    function completeInVideoCheckpoint(key, isLxT) {
+      answeredInVideoCheckpointsMap[key] = true;
+      currentActiveInVideoCheckpoint = null;
+
+      const modalId = isLxT ? 'lxt-in-video-checkpoint-modal' : 'in-video-checkpoint-modal';
+      const modal = document.getElementById(modalId);
+      if (modal) modal.classList.add('hidden');
+
+      resumeVideoPlayback(isLxT);
+    }
+
     function onVideoLoadError(vEl) {
       console.warn("Media source blocked by browser. Auto-unlocking reflections.");
       onVideoEnded();
     }
 
     function onVideoProgress(vPlayer) {
+      if (vPlayer.currentTime) {
+        checkInVideoPlayback(vPlayer.currentTime, false);
+      }
       const stepKey = `${selectedSubmodule.id}_${activeVideoStepIndex}`;
       if (videoCompletedMap[stepKey]) return;
       const pct = vPlayer.duration ? (vPlayer.currentTime / vPlayer.duration) * 100 : 0;
@@ -1686,6 +1866,67 @@
             <textarea onchange="selectedSubmodule.videoSteps[${vIdx}].transcript = this.value" rows="2" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs bg-white" placeholder="Notes...">${vStep.transcript}</textarea>
           </div>
 
+          <!-- Mid-Video In-Video Checkpoints (Pause Video at Timestamp) -->
+          <div class="pt-4 border-t border-slate-200 space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-black uppercase text-amber-700">⏱️ Mid-Video Checkpoints (Pause Video at Min:Sec)</span>
+              <button type="button" onclick="addInVideoCheckpoint(${vIdx}, false)" class="text-xs font-bold bg-amber-50 text-amber-800 px-3 py-1.5 rounded-lg border border-amber-200 hover:bg-amber-100 cursor-pointer">+ Add Mid-Video Checkpoint</button>
+            </div>
+
+            ${(vStep.inVideoCheckpoints || []).map((ivc, ivIdx) => `
+              <div class="p-4 bg-amber-50/70 rounded-2xl border border-amber-200 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] font-black uppercase text-amber-800">Mid-Video Checkpoint #${ivIdx + 1}</span>
+                  <button type="button" onclick="deleteInVideoCheckpoint(${vIdx}, ${ivIdx}, false)" class="text-[10px] font-bold text-rose-500 hover:underline cursor-pointer">Delete Checkpoint</button>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-3">
+                  <div>
+                    <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Pause Minute (Min)</label>
+                    <input type="number" min="0" value="${ivc.timeMin || 0}" onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].timeMin = Number(this.value)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-white font-bold" />
+                  </div>
+                  <div>
+                    <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Pause Second (Sec)</label>
+                    <input type="number" min="0" max="59" value="${ivc.timeSec || 0}" onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].timeSec = Number(this.value)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-white font-bold" />
+                  </div>
+                  <div>
+                    <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Question Type</label>
+                    <select onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].type = this.value; renderAuthorVideoSteps(selectedSubmodule)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-white font-bold cursor-pointer">
+                      <option value="mcq" ${ivc.type === 'mcq' || !ivc.type ? 'selected' : ''}>Multiple Choice Question (MCQ)</option>
+                      <option value="subjective" ${ivc.type === 'subjective' ? 'selected' : ''}>Subjective Question</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Question Prompt</label>
+                  <input type="text" value="${ivc.question}" onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].question = this.value" class="w-full rounded-lg border border-amber-200 px-3 py-1.5 text-xs bg-white font-bold" placeholder="Question prompt..." />
+                </div>
+
+                ${ivc.type === 'subjective' ? `
+                  <div>
+                    <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Author Exemplar Feedback</label>
+                    <textarea onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].exemplar = this.value" rows="2" class="w-full rounded-lg border border-amber-200 px-3 py-1.5 text-xs bg-white" placeholder="Author Exemplar Feedback...">${ivc.exemplar || ''}</textarea>
+                  </div>
+                ` : `
+                  <div class="grid md:grid-cols-2 gap-2">
+                    ${(ivc.choices || ['Option A', 'Option B', 'Option C', 'Option D']).map((choice, cIdx) => `
+                      <div class="p-2 bg-white rounded-lg border border-amber-200 space-y-1">
+                        <div class="flex items-center justify-between">
+                          <span class="text-[9px] font-bold text-slate-400">Choice ${cIdx + 1}</span>
+                          <label class="text-[9px] font-bold text-teal-700 flex items-center gap-1 cursor-pointer">
+                            <input type="radio" name="auth_ivc_${vIdx}_${ivIdx}" ${ivc.correctIndex === cIdx ? 'checked' : ''} onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].correctIndex = ${cIdx}" /> Correct
+                          </label>
+                        </div>
+                        <input type="text" value="${choice}" onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].choices[${cIdx}] = this.value" class="w-full rounded-lg border border-amber-200 px-2 py-1 text-xs bg-slate-50" placeholder="Choice..." />
+                      </div>
+                    `).join('')}
+                  </div>
+                `}
+              </div>
+            `).join('')}
+          </div>
+
           <!-- Reflections for Video Link -->
           <div class="pt-4 border-t border-slate-200 space-y-4">
             <div class="flex items-center justify-between">
@@ -1770,6 +2011,67 @@
           <div>
             <label class="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">LxT Lecture Notes</label>
             <textarea onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].transcript = this.value" rows="2" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs bg-slate-50" placeholder="Notes...">${vStep.transcript}</textarea>
+          </div>
+
+          <!-- Mid-Video In-Video Checkpoints for LxT -->
+          <div class="pt-4 border-t border-teal-100 space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-black uppercase text-amber-700">⏱️ Mid-Video Checkpoints (Pause Video at Min:Sec)</span>
+              <button type="button" onclick="addInVideoCheckpoint(${vIdx}, true)" class="text-xs font-bold bg-amber-50 text-amber-800 px-3 py-1.5 rounded-lg border border-amber-200 hover:bg-amber-100 cursor-pointer">+ Add Mid-Video Checkpoint</button>
+            </div>
+
+            ${(vStep.inVideoCheckpoints || []).map((ivc, ivIdx) => `
+              <div class="p-4 bg-amber-50/70 rounded-2xl border border-amber-200 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] font-black uppercase text-amber-800">LxT Checkpoint #${ivIdx + 1}</span>
+                  <button type="button" onclick="deleteInVideoCheckpoint(${vIdx}, ${ivIdx}, true)" class="text-[10px] font-bold text-rose-500 hover:underline cursor-pointer">Delete Checkpoint</button>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-3">
+                  <div>
+                    <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Pause Minute (Min)</label>
+                    <input type="number" min="0" value="${ivc.timeMin || 0}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].timeMin = Number(this.value)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-white font-bold" />
+                  </div>
+                  <div>
+                    <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Pause Second (Sec)</label>
+                    <input type="number" min="0" max="59" value="${ivc.timeSec || 0}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].timeSec = Number(this.value)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-white font-bold" />
+                  </div>
+                  <div>
+                    <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Question Type</label>
+                    <select onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].type = this.value; renderAuthorLxTExtension(selectedSubmodule)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-white font-bold cursor-pointer">
+                      <option value="mcq" ${ivc.type === 'mcq' || !ivc.type ? 'selected' : ''}>Multiple Choice Question (MCQ)</option>
+                      <option value="subjective" ${ivc.type === 'subjective' ? 'selected' : ''}>Subjective Question</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Question Prompt</label>
+                  <input type="text" value="${ivc.question}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].question = this.value" class="w-full rounded-lg border border-amber-200 px-3 py-1.5 text-xs bg-white font-bold" placeholder="Question prompt..." />
+                </div>
+
+                ${ivc.type === 'subjective' ? `
+                  <div>
+                    <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Author Exemplar Feedback</label>
+                    <textarea onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].exemplar = this.value" rows="2" class="w-full rounded-lg border border-amber-200 px-3 py-1.5 text-xs bg-white" placeholder="Author Exemplar Feedback...">${ivc.exemplar || ''}</textarea>
+                  </div>
+                ` : `
+                  <div class="grid md:grid-cols-2 gap-2">
+                    ${(ivc.choices || ['Option A', 'Option B', 'Option C', 'Option D']).map((choice, cIdx) => `
+                      <div class="p-2 bg-white rounded-lg border border-amber-200 space-y-1">
+                        <div class="flex items-center justify-between">
+                          <span class="text-[9px] font-bold text-slate-400">Choice ${cIdx + 1}</span>
+                          <label class="text-[9px] font-bold text-teal-700 flex items-center gap-1 cursor-pointer">
+                            <input type="radio" name="auth_lxt_ivc_${vIdx}_${ivIdx}" ${ivc.correctIndex === cIdx ? 'checked' : ''} onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].correctIndex = ${cIdx}" /> Correct
+                          </label>
+                        </div>
+                        <input type="text" value="${choice}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].choices[${cIdx}] = this.value" class="w-full rounded-lg border border-amber-200 px-2 py-1 text-xs bg-slate-50" placeholder="Choice..." />
+                      </div>
+                    `).join('')}
+                  </div>
+                `}
+              </div>
+            `).join('')}
           </div>
 
           <!-- Reflections for LxT Video Link -->
