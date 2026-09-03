@@ -1,0 +1,2538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Learning Companion Studio — Neurodivergent Mentorship Training Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: '#0f766e',
+            'brand-hover': '#0d9488',
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="goHome()">
+        <div class="h-10 w-10 rounded-xl bg-teal-700 flex items-center justify-center text-white font-black text-lg shadow-md shadow-teal-700/20">
+          LC
+        </div>
+        <div>
+          <h1 class="font-extrabold text-slate-900 leading-none text-base">Learning Companion Studio</h1>
+          <p class="text-[11px] font-semibold text-teal-700 mt-0.5">Neurodivergent Mentorship Training</p>
+        </div>
+      </div>
+
+      <!-- View Switcher -->
+      <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+        <button id="tab-author" onclick="switchView('author')" class="px-4 py-2 rounded-lg text-xs font-extrabold uppercase tracking-wider transition-all text-slate-600 hover:text-slate-900">
+          ✏️ Authoring Desk
+        </button>
+        <button id="tab-student" onclick="switchView('student')" class="px-4 py-2 rounded-lg text-xs font-extrabold uppercase tracking-wider transition-all bg-teal-700 text-white shadow-sm">
+          🎓 LC Companion View
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-6 py-8 flex-grow w-full">
+
+    <!-- ==================== VIEW 1: AUTHORING DESK ==================== -->
+    <section id="view-author" class="hidden space-y-6">
+      <div id="publish-toast" class="hidden mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-semibold flex items-center justify-between">
+        <span>🎉 <strong>Published!</strong> All changes published to LC View.</span>
+        <button onclick="switchView('student')" class="text-xs bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold hover:bg-emerald-600">Switch to Companion View →</button>
+      </div>
+      <div class="rounded-3xl bg-slate-900 text-white p-8 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-teal-400">Creator Desk</span>
+          <h2 class="text-3xl font-extrabold tracking-tight mt-1">Authoring Studio</h2>
+          <p class="text-slate-400 text-sm mt-1">Configure modules, multi-video links, reflections, multi-video LxT extension trajectories, master quizzes & track companion LxI submissions.</p>
+        </div>
+        <button onclick="publishContent()" class="bg-teal-600 hover:bg-teal-500 text-white px-6 py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-teal-600/30">
+          🚀 Publish Changes
+        </button>
+      </div>
+
+      <!-- Module & Submodule Selector Bar -->
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label class="text-xs font-bold uppercase tracking-wider text-slate-500">1. Module</label>
+              <button type="button" onclick="addNewModule()" class="text-xs font-extrabold bg-teal-700 text-white px-3 py-1 rounded-lg hover:bg-teal-600">+ Add Module</button>
+            </div>
+            <select id="author-module-select" onchange="onAuthorModuleChange()" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-bold text-slate-900"></select>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label class="text-xs font-bold uppercase tracking-wider text-slate-500">2. Submodule</label>
+              <button type="button" onclick="addNewSubmodule()" class="text-xs font-extrabold bg-teal-50 text-teal-700 border border-teal-200 px-3 py-1 rounded-lg hover:bg-teal-100">+ Add Submodule</button>
+            </div>
+            <select id="author-submodule-select" onchange="onAuthorSubmoduleChange()" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-bold text-slate-900"></select>
+          </div>
+        </div>
+
+        <!-- Module & Submodule Metadata Inputs -->
+        <div class="pt-4 border-t border-slate-100 grid md:grid-cols-4 gap-3">
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Module Title</label>
+            <input id="author-mod-title" type="text" onchange="updateModuleMeta()" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold bg-slate-50" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Submodule Title</label>
+            <input id="author-sub-title" type="text" onchange="updateSubmoduleTitle()" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold bg-slate-50" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Level Tag</label>
+            <input id="author-mod-level" type="text" onchange="updateModuleMeta()" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold bg-slate-50" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Description</label>
+            <input id="author-mod-desc" type="text" onchange="updateModuleMeta()" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold bg-slate-50" />
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPACT CONFIGURATION TABS (NO HEAVY SCROLLING) -->
+      <div class="flex items-center gap-2 border-b border-slate-200 pb-3 overflow-x-auto">
+        <button id="auth-tab-btn-led" onclick="setAuthorTab('led')" class="px-5 py-2.5 rounded-2xl text-xs font-black transition-all bg-teal-700 text-white shadow-md">
+          🎬 LeD: Main Video Links & Reflections
+        </button>
+        <button id="auth-tab-btn-lxt" onclick="setAuthorTab('lxt')" class="px-5 py-2.5 rounded-2xl text-xs font-black transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200">
+          🚀 LxT: Multi-Video Extension Trajectory
+        </button>
+        <button id="auth-tab-btn-master" onclick="setAuthorTab('master')" class="px-5 py-2.5 rounded-2xl text-xs font-black transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200">
+          🎓 Master Quiz: End-of-Module Assessment
+        </button>
+        <button id="auth-tab-btn-lxi" onclick="setAuthorTab('lxi')" class="px-5 py-2.5 rounded-2xl text-xs font-black transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200">
+          💬 LxI: Daily Discussion & Submissions
+        </button>
+      </div>
+
+      <!-- PANEL 1: LED MAIN VIDEO LINKS & REFLECTIONS -->
+      <div id="auth-panel-led" class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div>
+            <span class="text-xs font-extrabold uppercase tracking-wider text-teal-700">🎬 Submodule Main Lessons</span>
+            <h3 class="text-lg font-extrabold text-slate-900 mt-0.5">LeD Video Links & Reflections Configurator</h3>
+          </div>
+          <button type="button" onclick="addVideoStepToSubmodule()" class="text-xs font-extrabold bg-teal-700 text-white px-4 py-2 rounded-xl hover:bg-teal-600">
+            + Add Video Link
+          </button>
+        </div>
+
+        <div id="author-video-steps-container" class="space-y-6"></div>
+      </div>
+
+      <!-- PANEL 2: LXT MULTI-VIDEO EXTENSION TRAJECTORY -->
+      <div id="auth-panel-lxt" class="hidden bg-white p-8 rounded-3xl border border-teal-200 shadow-sm space-y-6">
+        <div class="flex items-center justify-between border-b border-teal-200/60 pb-4">
+          <div>
+            <span class="text-xs font-extrabold uppercase tracking-wider text-teal-800">🚀 LxT Extension Trajectory</span>
+            <h3 class="text-lg font-extrabold text-slate-900 mt-0.5">Multi-Video Extension Lessons & Reflection Configurator</h3>
+            <p class="text-xs text-slate-500">Unlocked for companions ONLY after completing the main submodule lesson.</p>
+          </div>
+          <button type="button" onclick="addLxTVideoLink()" class="text-xs font-extrabold bg-teal-700 text-white px-4 py-2 rounded-xl hover:bg-teal-600">
+            + Add LxT Video Link
+          </button>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-extrabold uppercase text-teal-800 mb-1">LxT Extension Title</label>
+          <input id="author-lxt-title" type="text" onchange="updateLxTMeta()" class="w-full rounded-xl border border-teal-200 px-3 py-2 text-xs font-bold bg-slate-50" placeholder="LxT Extension Lesson Title..." />
+        </div>
+
+        <div id="author-lxt-steps-container" class="space-y-6"></div>
+      </div>
+
+      <!-- PANEL 3: END-OF-MODULE MASTER QUIZ -->
+      <div id="auth-panel-master" class="hidden bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div>
+            <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">🎓 End-of-Module Assessment</span>
+            <h3 class="text-lg font-extrabold text-slate-900 mt-0.5">Master Quiz Configurator</h3>
+            <p class="text-xs text-slate-500">Configure final comprehensive MCQs and Subjective questions for this module.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="addAuthorMasterMCQ()" class="text-xs font-bold bg-indigo-700 text-white px-3.5 py-2 rounded-xl hover:bg-indigo-600">+ Add Master MCQ</button>
+            <button type="button" onclick="addAuthorMasterSubjective()" class="text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-3.5 py-2 rounded-xl hover:bg-indigo-100">+ Add Master Subjective</button>
+          </div>
+        </div>
+        <div id="author-master-quiz-list" class="space-y-4"></div>
+      </div>
+
+      <!-- PANEL 4: LXI DAILY DISCUSSION QUESTION CONFIGURATOR -->
+      <div id="auth-panel-lxi" class="hidden space-y-6">
+        <div class="bg-indigo-900 text-white p-8 rounded-3xl space-y-4 shadow-md">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-indigo-300">💬 Daily LxI Peer Discussion Question</span>
+            <h3 class="text-lg font-extrabold text-white mt-0.5">Configure Peer Discussion Question</h3>
+            <p class="text-xs text-indigo-200 mt-1">This prompt appears on the Companion View. Companions answer to unlock peer responses.</p>
+          </div>
+          <textarea id="author-global-lxi" rows="3" class="w-full rounded-2xl border border-indigo-700 bg-indigo-950 p-4 text-xs text-white placeholder-indigo-300 focus:outline-none focus:border-indigo-400" placeholder="Set today's peer discussion question..."></textarea>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== VIEW 2: LC STUDENT VIEW ==================== -->
+    <section id="view-student" class="space-y-8">
+      
+      <!-- Breadcrumbs -->
+      <div id="student-breadcrumb" class="flex items-center gap-2 text-xs font-bold text-slate-500">
+        <span class="cursor-pointer hover:text-teal-700" onclick="goHome()">All Modules</span>
+        <span id="crumb-module-nav" class="hidden">› <span id="crumb-module-title" class="text-slate-900"></span></span>
+        <span id="crumb-sub-nav" class="hidden">› <span id="crumb-sub-title" class="text-teal-700"></span></span>
+      </div>
+
+      <!-- LEVEL 1: CATALOG & DAILY LXI QUESTION -->
+      <div id="student-level-modules" class="space-y-8">
+        
+        <!-- Daily LxI Question Card -->
+        <div class="bg-gradient-to-r from-indigo-900 to-slate-900 text-white p-8 rounded-3xl shadow-xl space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-extrabold uppercase tracking-wider border border-indigo-500/30">
+              💬 Daily LxI Companion Discussion
+            </span>
+            <span id="lxi-lock-status" class="text-xs font-bold text-amber-300">
+              🔒 Peer Answers Hidden (Submit yours first to unlock)
+            </span>
+          </div>
+          <h3 id="global-lxi-question-text" class="text-xl font-bold text-white leading-snug">
+            Share a strategy you have used to build rapport with a mentee who communicates non-verbally.
+          </h3>
+          <div class="space-y-3 pt-2">
+            <textarea id="global-lxi-response" rows="2" class="w-full rounded-2xl border border-indigo-700/60 bg-indigo-950/70 p-4 text-xs text-white placeholder-indigo-300/60 focus:outline-none focus:border-indigo-400" placeholder="Type your response to unlock peer answers..."></textarea>
+            <div class="flex items-center justify-between">
+              <span id="lxi-status" class="text-xs text-indigo-300 font-semibold"></span>
+              <button id="btn-submit-lxi" onclick="submitLxIResponse()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md">
+                Post Answer & Unlock Peer Responses →
+              </button>
+            </div>
+          </div>
+
+          <!-- Peer Community Answers -->
+          <div id="lxi-peer-responses" class="pt-4 border-t border-indigo-800/60 space-y-2 hidden">
+            <span class="text-[11px] font-bold uppercase text-emerald-300">🔓 Peer Responses Unlocked:</span>
+            <div id="student-lxi-feed" class="space-y-2"></div>
+          </div>
+        </div>
+
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-teal-700">Training Catalog</span>
+          <h2 class="text-3xl font-extrabold text-slate-900 mt-1">Mentorship Training Modules</h2>
+        </div>
+
+        <div id="modules-grid" class="grid md:grid-cols-2 gap-6"></div>
+      </div>
+
+      <!-- LEVEL 2: SUBMODULES LIST & END-OF-MODULE MASTER QUIZ LINK -->
+      <div id="student-level-submodules" class="hidden space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <button onclick="goHome()" class="text-xs font-bold text-teal-700 mb-2 inline-block">← Back to All Modules</button>
+            <h2 id="selected-module-header" class="text-3xl font-extrabold text-slate-900">Module Title</h2>
+            <p id="selected-module-desc" class="text-slate-500 text-sm mt-1"></p>
+          </div>
+        </div>
+
+        <div id="submodules-list" class="grid md:grid-cols-2 gap-4"></div>
+
+        <!-- End of Module Master Quiz Card -->
+        <div id="master-quiz-card-container" class="p-6 rounded-3xl bg-indigo-50 border border-indigo-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-700">🎓 Final Module Assessment</span>
+            <h4 class="text-lg font-extrabold text-indigo-950 mt-0.5">End-of-Module Master Quiz</h4>
+            <p id="master-quiz-lock-desc" class="text-xs text-amber-700 font-bold">🔒 Complete all submodules to unlock the Master Quiz.</p>
+          </div>
+          <button id="btn-take-master-quiz" disabled onclick="openMasterQuiz()" class="bg-slate-300 text-slate-500 cursor-not-allowed px-5 py-3 rounded-xl text-xs font-extrabold shadow-none whitespace-nowrap">
+            🔒 Take Master Quiz (Locked)
+          </button>
+        </div>
+      </div>
+
+      <!-- LEVEL 3: SUBMODULE CONTENT & LXT EXTENSION TRAJECTORY -->
+      <div id="student-level-content" class="hidden space-y-8">
+        <button onclick="goSubmodules()" class="text-xs font-bold text-teal-700">← Back to Submodules</button>
+
+        <div class="grid lg:grid-cols-4 gap-8">
+          <!-- Sidebar -->
+          <aside class="lg:col-span-1 space-y-6">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+              <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Submodules Outline</h4>
+              <div id="sidebar-submodules-list" class="space-y-1.5"></div>
+            </div>
+          </aside>
+
+          <!-- Main Column -->
+          <div class="lg:col-span-3 space-y-8">
+            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+              
+              <header class="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div>
+                  <span id="student-module-badge" class="text-xs font-bold uppercase tracking-wider text-teal-700"></span>
+                  <h2 id="student-sub-title" class="text-3xl font-extrabold text-slate-900 mt-1">Submodule Title</h2>
+                </div>
+                <span id="student-video-step-badge" class="px-3.5 py-1.5 rounded-full bg-teal-50 text-teal-800 text-xs font-black border border-teal-200">
+                  Video Link 1 of 2
+                </span>
+              </header>
+
+              <!-- Video Link Selector Bar -->
+              <div id="student-video-steps-nav" class="flex items-center gap-2 overflow-x-auto pb-2"></div>
+
+              <!-- Universal Video Player -->
+              <div class="space-y-4">
+                <div class="relative overflow-hidden rounded-2xl bg-slate-900 aspect-video shadow-md group">
+                  <div id="video-player-container" class="w-full h-full"></div>
+                  <!-- IN-VIDEO CHECKPOINT MODAL OVERLAY (NON-SKIPPABLE) -->
+                  <div id="in-video-checkpoint-modal" class="hidden absolute inset-0 z-50 bg-slate-950/95 backdrop-blur-md p-6 flex flex-col justify-between text-white border border-amber-500/40 shadow-2xl overflow-y-auto"></div>
+                </div>
+
+                <!-- Video Completion Banner -->
+                <div id="video-completion-banner" class="p-4 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-between transition-all">
+                  <div class="space-y-0.5">
+                    <span id="video-lock-text" class="text-xs font-bold text-slate-700">
+                      🔒 Watch video to the end to unlock reflection questions.
+                    </span>
+                    <div id="video-progress-bar-container" class="w-48 bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                      <div id="video-progress-bar" class="bg-teal-600 h-full w-0 transition-all"></div>
+                    </div>
+                  </div>
+                  <button id="btn-unlock-reflections" disabled onclick="unlockReflections()" class="bg-slate-300 text-slate-500 cursor-not-allowed px-5 py-2.5 rounded-xl text-xs font-extrabold transition-all">
+                    🔒 Watch Video to Unlock Reflections
+                  </button>
+                </div>
+              </div>
+
+              <!-- Transcript -->
+              <div class="pt-4 border-t border-slate-100">
+                <h4 class="text-xs font-extrabold uppercase text-slate-400 mb-1">Lecture Notes</h4>
+                <p id="student-transcript-text" class="text-slate-700 text-sm leading-relaxed whitespace-pre-line"></p>
+              </div>
+
+              <!-- POST-VIDEO REFLECTIONS -->
+              <div id="student-reflections-section" class="hidden pt-8 border-t border-slate-200 space-y-8">
+                <div class="flex items-center gap-2">
+                  <span class="text-xl">✍️</span>
+                  <div>
+                    <h3 class="text-xl font-extrabold text-slate-900">Post-Video Reflections</h3>
+                    <p class="text-xs text-slate-500">Complete these reflections to proceed.</p>
+                  </div>
+                </div>
+
+                <div id="student-mcqs-list" class="space-y-6"></div>
+                <div id="student-subjectives-list" class="space-y-6"></div>
+
+                <div class="pt-4 border-t border-slate-200 flex justify-end">
+                  <button id="btn-next-step" onclick="finishCurrentVideoStep()" class="bg-teal-700 hover:bg-teal-600 text-white px-6 py-3 rounded-xl text-xs font-extrabold shadow-md transition-all">
+                    ✓ Complete Reflections & Proceed →
+                  </button>
+                </div>
+              </div>
+
+              <!-- LXT EXTENSION TRAJECTORY CARD -->
+              <div id="student-lxt-card-container" class="pt-8 border-t border-slate-200">
+                <div class="p-6 rounded-3xl bg-gradient-to-r from-teal-900 to-slate-900 text-white space-y-4 shadow-lg">
+                  <div class="flex items-center justify-between">
+                    <span class="px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-xs font-extrabold uppercase tracking-wider border border-teal-500/30">
+                      🚀 LxT Extension Trajectory
+                    </span>
+                    <span id="lxt-lock-status" class="text-xs font-bold text-amber-300">
+                      🔒 Locked (Complete main submodule lesson first)
+                    </span>
+                  </div>
+                  <h3 id="lxt-card-title" class="text-lg font-extrabold text-white">
+                    LxT Extension Trajectory: Advanced Strategy Case Study
+                  </h3>
+                  <p class="text-xs text-teal-100">
+                    An advanced extension lesson featuring multi-video analysis and reflection questions for companions seeking deeper mastery.
+                  </p>
+                  <button id="btn-launch-lxt" disabled onclick="openLxTExtensionLesson()" class="bg-slate-700 text-slate-400 cursor-not-allowed px-5 py-2.5 rounded-xl text-xs font-extrabold shadow-none transition-all">
+                    🔒 Launch LxT Extension (Locked)
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- LEVEL 4: LXT EXTENSION LESSON VIEW -->
+      <div id="student-level-lxt-view" class="hidden space-y-8">
+        <button onclick="goSubmodules()" class="text-xs font-bold text-teal-700">← Back to Submodules</button>
+        <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+          <header class="border-b border-slate-100 pb-4 flex items-center justify-between">
+            <div>
+              <span class="text-xs font-extrabold uppercase tracking-wider text-teal-700">🚀 LxT Extension Trajectory Lesson</span>
+              <h2 id="lxt-view-title" class="text-3xl font-extrabold text-slate-900 mt-1">LxT Extension Lesson</h2>
+            </div>
+            <span id="lxt-video-step-badge" class="px-3.5 py-1.5 rounded-full bg-teal-50 text-teal-800 text-xs font-black border border-teal-200">
+              LxT Video Link 1 of 2
+            </span>
+          </header>
+
+          <!-- LxT Video Link Selector Bar -->
+          <div id="lxt-video-steps-nav" class="flex items-center gap-2 overflow-x-auto pb-2"></div>
+
+          <!-- Extension Video Player -->
+          <div class="space-y-4">
+            <div class="relative overflow-hidden rounded-2xl bg-slate-900 aspect-video shadow-md group">
+              <div id="lxt-video-player-container" class="w-full h-full"></div>
+              <!-- LXT IN-VIDEO CHECKPOINT MODAL OVERLAY (NON-SKIPPABLE) -->
+              <div id="lxt-in-video-checkpoint-modal" class="hidden absolute inset-0 z-50 bg-slate-950/95 backdrop-blur-md p-6 flex flex-col justify-between text-white border border-amber-500/40 shadow-2xl overflow-y-auto"></div>
+            </div>
+
+            <div id="lxt-video-completion-banner" class="p-4 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-between">
+              <span id="lxt-video-lock-text" class="text-xs font-bold text-slate-700">🔒 Watch extension video to unlock questions.</span>
+              <button id="btn-unlock-lxt-reflections" disabled onclick="unlockLxTReflections()" class="bg-slate-300 text-slate-500 cursor-not-allowed px-5 py-2.5 rounded-xl text-xs font-extrabold">
+                🔒 Watch Video to Unlock LxT Reflections
+              </button>
+            </div>
+          </div>
+
+          <!-- Transcript -->
+          <div class="pt-4 border-t border-slate-100">
+            <h4 class="text-xs font-extrabold uppercase text-slate-400 mb-1">Extension Lecture Notes</h4>
+            <p id="lxt-transcript-text" class="text-slate-700 text-sm leading-relaxed whitespace-pre-line"></p>
+          </div>
+
+          <!-- Extension Reflection Questions -->
+          <div id="lxt-reflections-section" class="hidden pt-8 border-t border-slate-200 space-y-8">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">✍️</span>
+              <h3 class="text-xl font-extrabold text-slate-900">LxT Extension Reflections</h3>
+            </div>
+            <div id="lxt-mcqs-list" class="space-y-6"></div>
+            <div id="lxt-subjectives-list" class="space-y-6"></div>
+
+            <div class="pt-4 border-t border-slate-200 flex justify-end">
+              <button id="btn-next-lxt-step" onclick="finishCurrentLxTVideoStep()" class="bg-teal-700 hover:bg-teal-600 text-white px-6 py-3 rounded-xl text-xs font-extrabold shadow-md transition-all">
+                ✓ Complete Reflections & Proceed →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEVEL 5: END-OF-MODULE MASTER QUIZ VIEW -->
+      <div id="student-level-masterquiz" class="hidden space-y-8">
+        <button onclick="goSubmodules()" class="text-xs font-bold text-indigo-700">← Back to Submodules</button>
+        <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+          <header class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">Final Assessment</span>
+            <h2 id="master-quiz-title" class="text-3xl font-extrabold text-slate-900 mt-1">End-of-Module Master Quiz</h2>
+            <p class="text-xs text-slate-500 mt-1">Answer all MCQs and Subjective questions below to complete this module.</p>
+          </header>
+
+          <!-- Master Quiz Completion Certificate Banner -->
+          <div id="master-quiz-celebration-banner" class="hidden p-6 rounded-3xl bg-emerald-500 text-white space-y-3 shadow-xl">
+            <div class="flex items-center gap-3">
+              <span class="text-3xl">🎉</span>
+              <div>
+                <h3 class="text-xl font-black">Module Master Certification Completed!</h3>
+                <p id="master-quiz-score-text" class="text-xs font-bold text-emerald-100">You scored 100% on the End-of-Module Assessment.</p>
+              </div>
+            </div>
+            <div class="pt-2 border-t border-emerald-400/40 flex items-center justify-between">
+              <span class="text-xs text-emerald-100 font-semibold">Author Exemplars and Feedbacks revealed below.</span>
+              <button onclick="goHome()" class="bg-white text-emerald-900 px-4 py-2 rounded-xl text-xs font-black hover:bg-emerald-50">
+                Return to Training Catalog →
+              </button>
+            </div>
+          </div>
+
+          <div id="master-quiz-questions-list" class="space-y-6"></div>
+
+          <!-- PROMINENT SUBMIT MASTER QUIZ BUTTON -->
+          <div id="master-quiz-submit-container" class="pt-6 border-t border-slate-200 flex justify-end">
+            <button id="btn-submit-master-quiz" onclick="submitMasterQuiz()" class="bg-indigo-700 hover:bg-indigo-600 text-white px-8 py-4 rounded-2xl text-sm font-black shadow-xl shadow-indigo-700/20 transition-all cursor-pointer">
+              🎓 Submit Master Quiz & Finish Module →
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script>
+    let globalLxIQuestion = "Share a strategy you have used to build rapport with a mentee who communicates non-verbally.";
+    let hasUserSubmittedLxI = false;
+    let authorActiveTab = 'led';
+    
+    let lxiSubmissions = [
+      { companionName: "Companion Ananya", timestamp: "Today, 10:14 AM", answer: "I use visual emotion cards and give 10-second processing pauses before expecting a gesture response." },
+      { companionName: "Companion Rahul", timestamp: "Today, 11:30 AM", answer: "I match their body language and focus on side-by-side drawing activities to reduce direct eye-contact pressure." }
+    ];
+
+    let db = [
+      {
+        id: "mod-1",
+        title: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        description: "Learn core strategies for mentoring children on the Autism Spectrum, ADHD, and sensory differences.",
+        level: "Foundational",
+        masterQuiz: [
+          {
+            type: "mcq",
+            question: "Master Assessment Q1: What is the core difference between a sensory meltdown and a behavioral tantrum?",
+            choices: [
+              "Meltdowns are goal-driven; tantrums are involuntary",
+              "Sensory meltdowns are involuntary responses to neurological overload; tantrums are goal-driven",
+              "They are identical and require immediate punishment",
+              "Meltdowns only occur in adults"
+            ],
+            correctIndex: 1,
+            feedbacks: [
+              "Incorrect. Tantrums are goal-driven; meltdowns are involuntary overload.",
+              "Correct! Sensory meltdowns result from central nervous system overload.",
+              "Incorrect. Meltdowns require calm co-regulation, not punishment.",
+              "Incorrect. Meltdowns occur across all age groups."
+            ]
+          },
+          {
+            type: "subjective",
+            prompt: "Master Assessment Subjective: Outline a 3-step action plan if your mentee experiences sensory overload during a group activity.",
+            exemplar: "Author Exemplar Feedback: 1. Reduce sensory stimuli (dim lights, lower voice). 2. Transition to a quiet space without demands. 3. Allow calm recovery time before rejoining with a low-pressure preferred activity."
+          }
+        ],
+        submodules: [
+          {
+            id: "sub-1-1",
+            title: "Submodule 1.1: Understanding Neurodiversity & Strength-Based Mentoring",
+            videoSteps: [
+              {
+                id: "vstep-1-1-1",
+                title: "Video Link 1: Core Principles of Strength-Based Mentoring",
+                videoUrl: "https://vjs.zencdn.net/v/oceans.mp4",
+                transcript: "Neurodiversity recognizes that brain differences are natural human variations. Companions move away from a deficit model (fixing behavior) to a strength-based model.",
+                inVideoCheckpoints: [
+                  {
+                    id: "ivc-1-1-1",
+                    timeMin: 0,
+                    timeSec: 15,
+                    type: "mcq",
+                    question: "Mid-Video Reflection Checkpoint (00:15): What is the core focus when mentoring neurodivergent children?",
+                    choices: [
+                      "Building on unique strengths & providing sensory accommodations",
+                      "Enforcing strict behavioral compliance at all times",
+                      "Disallowing communication tools",
+                      "Overloading with loud verbal instructions"
+                    ],
+                    correctIndex: 0,
+                    feedbacks: [
+                      "Correct! Strength-based focus builds safety and trust.",
+                      "Incorrect. Compliance-only approaches increase anxiety.",
+                      "Incorrect. Communication tools (AAC/PECS) are vital.",
+                      "Incorrect. Lower sensory input is key."
+                    ],
+                    exemplar: "Author Exemplar Feedback: Focus on building rapport and respecting sensory needs."
+                  }
+                ],
+                mcqs: [
+                  {
+                    question: "Video Link 1 Reflection: What is the primary goal of strength-based mentoring?",
+                    choices: [
+                      "Forcing the child to mimic neurotypical social behaviors at all times",
+                      "Building upon the child’s unique interests while providing sensory accommodations",
+                      "Keeping a rigid strict timeline without flexibility",
+                      "Preventing the child from using non-verbal communication aids"
+                    ],
+                    correctIndex: 1,
+                    feedbacks: [
+                      "Incorrect. Forcing masking causes high anxiety.",
+                      "Correct! Strength-based mentoring fosters trust and respects individual sensory profiles.",
+                      "Incorrect. Rigid timelines increase overwhelm.",
+                      "Incorrect. Non-verbal communication tools should always be encouraged."
+                    ]
+                  }
+                ],
+                subjectives: [
+                  {
+                    prompt: "Video Link 1 Reflection Subjective: How would you modify your tone if a mentee shows signs of sensory overload?",
+                    exemplar: "Author Exemplar Feedback: Lower voice tone, reduce noise/bright lighting, pause task, offer a quiet break."
+                  }
+                ]
+              },
+              {
+                id: "vstep-1-1-2",
+                title: "Video Link 2: Processing Pauses & Communication",
+                videoUrl: "https://media.w3.org/2010/05/sintel/trailer.mp4",
+                transcript: "Learn how to adapt communication using 10-second processing pauses.",
+                mcqs: [
+                  {
+                    question: "Video Link 2 Reflection: Why are 10-second processing pauses essential?",
+                    choices: [
+                      "They allow the child's brain adequate time to process auditory input without pressure",
+                      "They shorten the mentoring session length",
+                      "They force immediate answers",
+                      "They are unnecessary"
+                    ],
+                    correctIndex: 0,
+                    feedbacks: [
+                      "Correct! Processing pauses reduce anxiety and improve comprehension.",
+                      "Incorrect. Processing pauses improve quality of interaction.",
+                      "Incorrect. Never pressure an immediate response.",
+                      "Incorrect. Processing pauses are vital."
+                    ]
+                  }
+                ],
+                subjectives: []
+              }
+            ],
+            lxtExtension: {
+              title: "LxT Extension Trajectory: Advanced Assistive Tech & Case Analysis",
+              videoSteps: [
+                {
+                  id: "lxt-vstep-1-1-1",
+                  title: "LxT Video Link 1: Modeling AAC & Communication Devices",
+                  videoUrl: "https://vjs.zencdn.net/v/oceans.mp4",
+                  transcript: "Advanced analysis of modeling non-verbal communication devices alongside mentees.",
+                  mcqs: [
+                    {
+                      question: "LxT Video 1 MCQ: How does modeling AAC use on a secondary device build mentee confidence?",
+                      choices: [
+                        "It normalizes non-verbal communication and lowers anxiety",
+                        "It forces the child to stop speaking",
+                        "It complicates interaction",
+                        "It is ineffective"
+                      ],
+                      correctIndex: 0,
+                      feedbacks: ["Correct! Modeling normalizes AAC.", "Incorrect.", "Incorrect.", "Incorrect."]
+                    }
+                  ],
+                  subjectives: [
+                    {
+                      prompt: "LxT Video 1 Subjective: Design a custom communication board for a mentee interested in art.",
+                      exemplar: "Author Exemplar Feedback: Include high-contrast icons for primary colors, 'more paint', 'break', 'all done', and emotion cards."
+                    }
+                  ]
+                },
+                {
+                  id: "lxt-vstep-1-1-2",
+                  title: "LxT Video Link 2: Advanced Case Studies in Co-Regulation",
+                  videoUrl: "https://media.w3.org/2010/05/sintel/trailer.mp4",
+                  transcript: "Real-world video case study demonstrating co-regulation techniques during high-sensory group settings.",
+                  mcqs: [],
+                  subjectives: []
+                }
+              ]
+            }
+          },
+          {
+            id: "sub-1-2",
+            title: "Submodule 1.2: Visual Schedules & Predictability",
+            videoSteps: [
+              {
+                id: "vstep-1-2-1",
+                title: "Video Link 1: Designing Visual Schedules",
+                videoUrl: "https://media.w3.org/2010/05/sintel/trailer.mp4",
+                transcript: "Predictability creates psychological safety. Visual schedules help children anticipate changes.",
+                mcqs: [
+                  {
+                    question: "Video Link 1 Reflection: Why are visual schedules effective for children with ADHD or Autism?",
+                    choices: [
+                      "They reduce cognitive load and provide clear, predictable expectations",
+                      "They replace mentor interaction",
+                      "They make sessions complicated",
+                      "They are only for non-readers"
+                    ],
+                    correctIndex: 0,
+                    feedbacks: [
+                      "Correct! Visual schedules lower anxiety by clearly setting expectations.",
+                      "Incorrect. Visual schedules enhance collaboration.",
+                      "Incorrect. Visual schedules simplify transitions.",
+                      "Incorrect. Visual schedules benefit all learners."
+                    ]
+                  }
+                ],
+                subjectives: []
+              }
+            ],
+            lxtExtension: {
+              title: "LxT Extension Trajectory: Dynamic Visual Change Cards",
+              videoSteps: [
+                {
+                  id: "lxt-vstep-1-2-1",
+                  title: "LxT Video Link 1: Handling Schedule Disruptions",
+                  videoUrl: "https://vjs.zencdn.net/v/oceans.mp4",
+                  transcript: "How to handle unexpected schedule changes using visual Change Cards.",
+                  mcqs: [],
+                  subjectives: []
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        id: "mod-2",
+        title: "Module 2: Behavioral Support & De-escalation Techniques",
+        description: "Master calm co-regulation, sensory regulation, and positive reinforcement for companions.",
+        level: "Intermediate",
+        masterQuiz: [
+          {
+            type: "mcq",
+            question: "Master Assessment Q1: What is the companion’s primary responsibility during a sensory meltdown?",
+            choices: [
+              "Ensuring physical safety, reducing sensory input, and maintaining a calm presence",
+              "Demanding immediate verbal explanations",
+              "Imposing strict academic penalties",
+              "Crowding around the child"
+            ],
+            correctIndex: 0,
+            feedbacks: [
+              "Correct! Safety, calm presence, and reducing stimulation are essential for de-escalation.",
+              "Incorrect. Demands overload an already overwhelmed system.",
+              "Incorrect. Penalties break trust.",
+              "Incorrect. Crowding increases sensory overwhelm."
+            ]
+          }
+        ],
+        submodules: [
+          {
+            id: "sub-2-1",
+            title: "Submodule 2.1: Meltdowns vs. Tantrums & Co-regulation",
+            videoSteps: [
+              {
+                id: "vstep-2-1-1",
+                title: "Video Link 1: Meltdowns & Co-regulation",
+                videoUrl: "https://vjs.zencdn.net/v/oceans.mp4",
+                transcript: "A sensory meltdown is an involuntary response to overload. Companions must prioritize physical safety and zero demands.",
+                mcqs: [
+                  {
+                    question: "Video Link 1 Reflection: What should a companion focus on during a meltdown?",
+                    choices: [
+                      "Physical safety and low stimulation",
+                      "Correcting behavior immediately",
+                      "Asking multiple questions",
+                      "Increasing noise levels"
+                    ],
+                    correctIndex: 0,
+                    feedbacks: ["Correct!", "Incorrect.", "Incorrect.", "Incorrect."]
+                  }
+                ],
+                subjectives: []
+              }
+            ],
+            lxtExtension: {
+              title: "LxT Extension Trajectory: De-escalation Case Analysis",
+              videoSteps: [
+                {
+                  id: "lxt-vstep-2-1-1",
+                  title: "LxT Video Link 1: Advanced De-escalation",
+                  videoUrl: "https://vjs.zencdn.net/v/oceans.mp4",
+                  transcript: "Advanced video case study on de-escalating intense sensory meltdowns.",
+                  mcqs: [],
+                  subjectives: []
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ];
+
+    let selectedModuleId = "mod-1";
+    let selectedSubmodule = db[0].submodules[0];
+    let activeVideoStepIndex = 0;
+    let activeLxTVideoStepIndex = 0;
+
+    let selectedChoicesMap = {};
+    let revealedExemplarsMap = {};
+    let videoCompletedMap = {};
+    let videoStepFinishedMap = {};
+    let lxtVideoCompletedMap = {};
+    let lxtVideoStepFinishedMap = {};
+    let submoduleFinishedMap = {};
+    let masterQuizSubmittedMap = {};
+
+    function setAuthorTab(tab) {
+      authorActiveTab = tab;
+      const tabs = ['led', 'lxt', 'master', 'lxi'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`auth-tab-btn-${t}`);
+        const panel = document.getElementById(`auth-panel-${t}`);
+        if (t === tab) {
+          if (btn) btn.className = "px-5 py-2.5 rounded-2xl text-xs font-black transition-all bg-teal-700 text-white shadow-md cursor-pointer";
+          if (panel) panel.classList.remove('hidden');
+        } else {
+          if (btn) btn.className = "px-5 py-2.5 rounded-2xl text-xs font-black transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 cursor-pointer";
+          if (panel) panel.classList.add('hidden');
+        }
+      });
+    }
+
+    let ytProgressInterval = null;
+    let activeYtPlayer = null;
+
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    }
+
+    function parseVideoUrl(rawUrl) {
+      if (!rawUrl) return { type: 'mp4', url: 'https://vjs.zencdn.net/v/oceans.mp4' };
+      const url = rawUrl.trim();
+      const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
+      if (ytMatch && ytMatch[1]) {
+        return { type: 'youtube', videoId: ytMatch[1], embedUrl: `https://www.youtube.com/embed/${ytMatch[1]}?enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`, rawUrl: url };
+      }
+      return { type: 'mp4', url: url };
+    }
+
+    function renderUniversalVideoPlayer(videoUrl, titleOverlay, targetId = 'video-player-container', isLxT = false) {
+      const container = document.getElementById(targetId);
+      const parsed = parseVideoUrl(videoUrl);
+
+      if (ytProgressInterval) clearInterval(ytProgressInterval);
+
+      // Reset modal and active checkpoint state on video player render
+      currentActiveInVideoCheckpoint = null;
+      const mainModal = document.getElementById('in-video-checkpoint-modal');
+      if (mainModal) mainModal.classList.add('hidden');
+      const lxtModal = document.getElementById('lxt-in-video-checkpoint-modal');
+      if (lxtModal) lxtModal.classList.add('hidden');
+
+      if (parsed.type === 'youtube') {
+        const iframeId = targetId + '_yt_iframe_' + Date.now();
+        container.innerHTML = `
+          <iframe id="${iframeId}" class="w-full h-full border-0" src="${parsed.embedUrl}" title="${titleOverlay}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          <div class="absolute top-3 left-3 bg-slate-950/80 px-3 py-1.5 rounded-lg text-xs text-teal-300 font-bold flex items-center gap-2 backdrop-blur-sm pointer-events-none">
+            <span class="w-2.5 h-2.5 rounded-full bg-teal-400 animate-ping"></span>
+            <span>${titleOverlay}</span>
+          </div>
+        `;
+
+        function initYtTracker() {
+          if (!window.YT || !window.YT.Player) {
+            setTimeout(initYtTracker, 300);
+            return;
+          }
+
+          try {
+            activeYtPlayer = new YT.Player(iframeId, {
+              events: {
+                'onStateChange': function(event) {
+                  // YT.PlayerState.ENDED === 0
+                  if (event.data === 0) {
+                    isLxT ? onLxTVideoEnded() : onVideoEnded();
+                  }
+                }
+              }
+            });
+
+            ytProgressInterval = setInterval(() => {
+              if (currentActiveInVideoCheckpoint) {
+                pauseVideoPlayback(isLxT);
+                return;
+              }
+              if (activeYtPlayer && typeof activeYtPlayer.getCurrentTime === 'function' && typeof activeYtPlayer.getDuration === 'function') {
+                const cur = activeYtPlayer.getCurrentTime();
+                const dur = activeYtPlayer.getDuration();
+                if (dur > 0) {
+                  checkInVideoPlayback(cur, isLxT);
+                  const pct = (cur / dur) * 100;
+                  const bar = document.getElementById(isLxT ? 'lxt-video-progress-bar' : 'video-progress-bar');
+                  if (bar) bar.style.width = `${Math.min(pct, 100)}%`;
+                  if (cur >= dur - 2) {
+                    isLxT ? onLxTVideoEnded() : onVideoEnded();
+                  }
+                }
+              }
+            }, 250);
+          } catch (e) {
+            console.warn("YouTube tracker initialized.");
+          }
+        }
+
+        initYtTracker();
+      } else {
+        const errHandler = isLxT ? 'onLxTVideoEnded()' : 'onVideoLoadError(this)';
+        const progHandler = isLxT ? 'onLxTVideoProgress(this)' : 'onVideoProgress(this)';
+        const endHandler = isLxT ? 'onLxTVideoEnded()' : 'onVideoEnded()';
+        container.innerHTML = `
+          <video class="w-full h-full object-cover focus:outline-none" controls playsinline preload="auto" poster="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=1000&auto=format&fit=crop" ontimeupdate="${progHandler}" onended="${endHandler}" onerror="${errHandler}">
+            <source src="${parsed.url}" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+          <div class="absolute top-3 left-3 bg-slate-950/80 px-3 py-1.5 rounded-lg text-xs text-teal-300 font-bold flex items-center gap-2 backdrop-blur-sm pointer-events-none">
+            <span class="w-2.5 h-2.5 rounded-full bg-teal-400 animate-ping"></span>
+            <span>${titleOverlay}</span>
+          </div>
+        `;
+        const vEl = container.querySelector('video');
+        if (vEl) {
+          vEl.currentTime = 0;
+          vEl.load();
+        }
+      }
+    }
+
+    let currentActiveInVideoCheckpoint = null;
+    let answeredInVideoCheckpointsMap = {};
+
+    function checkInVideoPlayback(currentTime, isLxT = false) {
+      if (currentActiveInVideoCheckpoint) return; // Already active
+
+      const sub = selectedSubmodule;
+      if (!sub) return;
+
+      // Ignore initial zero/load artifact timestamps
+      if (currentTime <= 0.5) return;
+
+      const vSteps = isLxT ? (sub.lxtExtension?.videoSteps || []) : (sub.videoSteps || []);
+      const stepIdx = isLxT ? activeLxTVideoStepIndex : activeVideoStepIndex;
+      const vStep = vSteps[stepIdx];
+      if (!vStep || !vStep.inVideoCheckpoints || !vStep.inVideoCheckpoints.length) return;
+
+      vStep.inVideoCheckpoints.forEach((ivc, idx) => {
+        const targetSeconds = (Number(ivc.timeMin || 0) * 60) + Number(ivc.timeSec || 0);
+        const key = `${isLxT ? 'lxt_' : ''}${sub.id}_step${stepIdx}_ivc${idx}`;
+
+        if (currentTime >= targetSeconds && !answeredInVideoCheckpointsMap[key]) {
+          currentActiveInVideoCheckpoint = { key, ivc, idx, isLxT };
+          pauseVideoPlayback(isLxT);
+          renderInVideoCheckpointModal(ivc, key, isLxT);
+        }
+      });
+    }
+
+    function pauseVideoPlayback(isLxT = false) {
+      // Force pause all HTML5 video elements across the entire document
+      document.querySelectorAll('video').forEach(vEl => {
+        try {
+          vEl.pause();
+        } catch(e) {}
+      });
+
+      // YouTube API
+      try {
+        if (activeYtPlayer && typeof activeYtPlayer.pauseVideo === 'function') {
+          activeYtPlayer.pauseVideo();
+        }
+      } catch(e) {}
+
+      // Fallback postMessage to all YouTube iframe elements
+      const iframes = document.querySelectorAll('iframe');
+      iframes.forEach(iframe => {
+        try {
+          iframe.contentWindow.postMessage(JSON.stringify({
+            event: 'command',
+            func: 'pauseVideo',
+            args: []
+          }), '*');
+        } catch (e) {}
+      });
+    }
+
+    function resumeVideoPlayback(isLxT = false) {
+      try {
+        if (activeYtPlayer && typeof activeYtPlayer.playVideo === 'function') {
+          activeYtPlayer.playVideo();
+        }
+      } catch(e) {}
+
+      // Fallback postMessage to all YouTube iframe elements
+      const iframes = document.querySelectorAll('iframe');
+      iframes.forEach(iframe => {
+        try {
+          iframe.contentWindow.postMessage(JSON.stringify({
+            event: 'command',
+            func: 'playVideo',
+            args: []
+          }), '*');
+        } catch (e) {}
+      });
+
+      // HTML5 video play
+      const containerId = isLxT ? 'lxt-video-player-container' : 'video-player-container';
+      const container = document.getElementById(containerId);
+      if (container) {
+        const vEl = container.querySelector('video');
+        if (vEl && typeof vEl.play === 'function') {
+          vEl.play();
+        }
+      }
+    }
+
+    function renderInVideoCheckpointModal(ivc, key, isLxT) {
+      const modalId = isLxT ? 'lxt-in-video-checkpoint-modal' : 'in-video-checkpoint-modal';
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+
+      const minStr = String(ivc.timeMin || 0).padStart(2, '0');
+      const secStr = String(ivc.timeSec || 0).padStart(2, '0');
+
+      let contentHtml = '';
+      if (ivc.type === 'mcq' || !ivc.type) {
+        contentHtml = `
+          <div class="space-y-2 my-auto">
+            <span class="text-xs font-bold uppercase text-slate-300">Select Choice to Continue Video:</span>
+            <div class="grid gap-2">
+              ${(ivc.choices || ['Option 1', 'Option 2', 'Option 3', 'Option 4']).map((c, cIdx) => `
+                <button onclick="submitInVideoMcq('${key}', ${cIdx}, ${ivc.correctIndex || 0}, ${isLxT})" class="w-full text-left p-3.5 rounded-xl border border-slate-700 bg-slate-900 hover:bg-teal-900/50 text-xs font-bold text-white transition-all cursor-pointer">
+                  ${c}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      } else {
+        contentHtml = `
+          <div class="space-y-3 my-auto">
+            <span class="text-xs font-bold uppercase text-slate-300">Your Reflection Response:</span>
+            <textarea id="ivc-subj-input-${key}" rows="3" class="w-full rounded-xl border border-slate-700 bg-slate-900 p-3.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-teal-500" placeholder="Type your response to resume video playback..."></textarea>
+            <button onclick="submitInVideoSubjective('${key}', ${isLxT})" class="w-full bg-teal-600 hover:bg-teal-500 text-white p-3 rounded-xl text-xs font-black transition-all cursor-pointer">
+              Submit & Resume Video Playback ▶
+            </button>
+          </div>
+        `;
+      }
+
+      modal.innerHTML = `
+        <div class="space-y-2 border-b border-slate-800 pb-3">
+          <div class="flex items-center justify-between">
+            <span class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-extrabold border border-amber-500/30 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> ⏸️ In-Video Reflection Checkpoint (${minStr}:${secStr})
+            </span>
+            <span class="text-[11px] font-bold text-rose-400">🔒 Non-Skippable</span>
+          </div>
+          <h3 class="text-base font-extrabold text-white leading-snug">${ivc.question}</h3>
+        </div>
+
+        ${contentHtml}
+
+        <div id="ivc-feedback-${key}" class="hidden p-3.5 rounded-xl bg-teal-950/90 border border-teal-500/40 text-xs text-teal-200 mt-2 space-y-2">
+        </div>
+      `;
+
+      modal.classList.remove('hidden');
+    }
+
+    function submitInVideoMcq(key, selectedIdx, correctIdx, isLxT) {
+      const fbContainer = document.getElementById(`ivc-feedback-${key}`);
+      const isCorrect = selectedIdx === correctIdx;
+      const ivc = currentActiveInVideoCheckpoint?.ivc;
+      const feedbackMsg = (ivc && ivc.feedbacks && ivc.feedbacks[selectedIdx]) 
+        ? ivc.feedbacks[selectedIdx] 
+        : (isCorrect ? 'Correct! Excellent strength-based reflection.' : 'Reflect on this option before continuing.');
+      
+      fbContainer.innerHTML = `
+        <div class="space-y-1.5">
+          <div class="font-bold text-xs ${isCorrect ? 'text-emerald-400' : 'text-amber-300'}">
+            ${isCorrect ? '✓ Correct Choice!' : '💡 Feedback on Selected Choice:'}
+          </div>
+          <p class="text-slate-200 text-xs leading-relaxed">${feedbackMsg}</p>
+        </div>
+        <button onclick="completeInVideoCheckpoint('${key}', ${isLxT})" class="w-full bg-teal-600 hover:bg-teal-500 text-white py-2.5 rounded-xl text-xs font-black mt-2 cursor-pointer shadow-md">
+          Continue Playing Video ▶
+        </button>
+      `;
+      fbContainer.classList.remove('hidden');
+    }
+
+    function submitInVideoSubjective(key, isLxT) {
+      const inputVal = document.getElementById(`ivc-subj-input-${key}`)?.value;
+      if (!inputVal || !inputVal.trim()) return;
+
+      const fbContainer = document.getElementById(`ivc-feedback-${key}`);
+      const exemplar = currentActiveInVideoCheckpoint?.ivc?.exemplar || "Author Exemplar Feedback: Thank you for reflecting.";
+      
+      fbContainer.innerHTML = `
+        <div class="text-xs text-teal-200 space-y-1">
+          <strong>Author Exemplar Feedback:</strong>
+          <p class="text-slate-300">${exemplar}</p>
+        </div>
+        <button onclick="completeInVideoCheckpoint('${key}', ${isLxT})" class="w-full bg-teal-600 hover:bg-teal-500 text-white py-2.5 rounded-xl text-xs font-black mt-2 cursor-pointer">
+          Continue Playing Video ▶
+        </button>
+      `;
+      fbContainer.classList.remove('hidden');
+    }
+
+    function completeInVideoCheckpoint(key, isLxT) {
+      answeredInVideoCheckpointsMap[key] = true;
+      currentActiveInVideoCheckpoint = null;
+
+      const modalId = isLxT ? 'lxt-in-video-checkpoint-modal' : 'in-video-checkpoint-modal';
+      const modal = document.getElementById(modalId);
+      if (modal) modal.classList.add('hidden');
+
+      resumeVideoPlayback(isLxT);
+    }
+
+    function onVideoLoadError(vEl) {
+      console.warn("Media source blocked by browser. Auto-unlocking reflections.");
+      onVideoEnded();
+    }
+
+    function onVideoProgress(vPlayer) {
+      if (currentActiveInVideoCheckpoint) {
+        try { vPlayer.pause(); } catch(e) {}
+        return;
+      }
+      if (vPlayer.currentTime) {
+        checkInVideoPlayback(vPlayer.currentTime, false);
+      }
+      const stepKey = `${selectedSubmodule.id}_${activeVideoStepIndex}`;
+      if (videoCompletedMap[stepKey]) return;
+      const pct = vPlayer.duration ? (vPlayer.currentTime / vPlayer.duration) * 100 : 0;
+      const bar = document.getElementById('video-progress-bar');
+      if (bar) bar.style.width = `${Math.min(pct, 100)}%`;
+      if (vPlayer.ended || (vPlayer.duration && vPlayer.currentTime >= vPlayer.duration - 1)) {
+        onVideoEnded();
+      }
+    }
+
+    function onVideoEnded() {
+      const stepKey = `${selectedSubmodule.id}_${activeVideoStepIndex}`;
+      if (videoCompletedMap[stepKey]) return;
+      
+      const btn = document.getElementById('btn-unlock-reflections');
+      if (btn) {
+        btn.removeAttribute('disabled');
+        btn.className = "bg-teal-700 hover:bg-teal-600 text-white px-5 py-2.5 rounded-xl text-xs font-extrabold shadow-md transition-all animate-pulse cursor-pointer";
+        btn.innerText = `✓ Video Link ${activeVideoStepIndex + 1} Complete! Unlock Reflections →`;
+      }
+      
+      const lockText = document.getElementById('video-lock-text');
+      if (lockText) lockText.innerHTML = `🎉 <strong>Video Link ${activeVideoStepIndex + 1} Finished!</strong> Click button to unlock reflections.`;
+      
+      const bar = document.getElementById('video-progress-bar');
+      if (bar) bar.style.width = "100%";
+      
+      const banner = document.getElementById('video-completion-banner');
+      if (banner) banner.className = "p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-between";
+    }
+
+    function unlockReflections() {
+      const stepKey = `${selectedSubmodule.id}_${activeVideoStepIndex}`;
+      videoCompletedMap[stepKey] = true;
+      
+      const reflSec = document.getElementById('student-reflections-section');
+      if (reflSec) reflSec.classList.remove('hidden');
+      
+      const banner = document.getElementById('video-completion-banner');
+      if (banner) {
+        banner.className = "p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-between";
+        banner.innerHTML = `<span>🎉 <strong>Video Link ${activeVideoStepIndex + 1} Completed!</strong> Reflection Questions unlocked below.</span>`;
+      }
+      
+      if (reflSec) {
+        window.scrollTo({ top: reflSec.offsetTop - 80, behavior: 'smooth' });
+      }
+    }
+
+    function finishCurrentVideoStep() {
+      const stepKey = `${selectedSubmodule.id}_${activeVideoStepIndex}`;
+      videoStepFinishedMap[stepKey] = true;
+
+      const stepsCount = selectedSubmodule.videoSteps.length;
+      if (activeVideoStepIndex + 1 < stepsCount) {
+        activeVideoStepIndex++;
+        renderSubmoduleContent(selectedSubmodule, db.find(m => m.id === selectedModuleId));
+        window.scrollTo({ top: document.getElementById('student-level-content').offsetTop, behavior: 'smooth' });
+      } else {
+        submoduleFinishedMap[selectedSubmodule.id] = true;
+        renderSubmoduleContent(selectedSubmodule, db.find(m => m.id === selectedModuleId));
+        window.scrollTo({ top: document.getElementById('student-lxt-card-container').offsetTop - 60, behavior: 'smooth' });
+      }
+    }
+
+    // MASTER QUIZ SUBMISSION ENGINE
+    function submitMasterQuiz() {
+      const mod = db.find(m => m.id === selectedModuleId);
+      const questions = mod.masterQuiz || [];
+      
+      let totalMcqs = 0;
+      let correctMcqs = 0;
+
+      questions.forEach((q, idx) => {
+        if (q.type === 'subjective') {
+          revealedExemplarsMap[`master_${mod.id}_${idx}`] = true;
+        } else {
+          totalMcqs++;
+          const selected = selectedChoicesMap[`master_${mod.id}_${idx}`];
+          if (selected === q.correctIndex) {
+            correctMcqs++;
+          }
+        }
+      });
+
+      const scorePct = totalMcqs > 0 ? Math.round((correctMcqs / totalMcqs) * 100) : 100;
+      masterQuizSubmittedMap[mod.id] = true;
+
+      const celebrationBanner = document.getElementById('master-quiz-celebration-banner');
+      celebrationBanner.classList.remove('hidden');
+      document.getElementById('master-quiz-score-text').innerText = `You scored ${scorePct}% on the End-of-Module Multiple Choice Assessment and unlocked all Author Exemplar Feedbacks below.`;
+
+      document.getElementById('master-quiz-submit-container').innerHTML = `
+        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold flex items-center justify-between w-full">
+          <span>✓ Master Quiz Submitted & Certified!</span>
+          <button onclick="goHome()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold">Return to Training Catalog →</button>
+        </div>
+      `;
+
+      renderMasterQuiz(mod);
+      window.scrollTo({ top: celebrationBanner.offsetTop - 80, behavior: 'smooth' });
+    }
+
+    // MULTI-VIDEO LXT EXTENSION LOGIC
+    function openLxTExtensionLesson() {
+      activeLxTVideoStepIndex = 0;
+      document.getElementById('student-level-content').classList.add('hidden');
+      document.getElementById('student-level-lxt-view').classList.remove('hidden');
+      renderLxTExtensionContent();
+    }
+
+    function renderLxTExtensionContent() {
+      const sub = selectedSubmodule;
+      const ext = sub.lxtExtension || { title: "LxT Extension Trajectory", videoSteps: [] };
+      const vSteps = ext.videoSteps || [];
+      const currentStep = vSteps[activeLxTVideoStepIndex] || {
+        title: "LxT Video Link 1",
+        videoUrl: "https://vjs.zencdn.net/v/oceans.mp4",
+        transcript: "No transcript.",
+        mcqs: [],
+        subjectives: []
+      };
+
+      document.getElementById('lxt-view-title').innerText = ext.title || "LxT Extension Trajectory";
+      document.getElementById('lxt-video-step-badge').innerText = `LxT Video Link ${activeLxTVideoStepIndex + 1} of ${vSteps.length}`;
+
+      const navContainer = document.getElementById('lxt-video-steps-nav');
+      navContainer.innerHTML = vSteps.map((v, idx) => {
+        const isDone = lxtVideoStepFinishedMap[`lxt_${sub.id}_${idx}`];
+        const isActive = idx === activeLxTVideoStepIndex;
+        return `
+          <button onclick="selectLxTVideoStep(${idx})" class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${isActive ? 'bg-teal-700 text-white shadow-md' : (isDone ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-100 text-slate-600 hover:bg-slate-200')}">
+            ${isDone ? '✓ ' : ''}LxT Link ${idx + 1}: ${v.title}
+          </button>
+        `;
+      }).join('');
+
+      renderUniversalVideoPlayer(currentStep.videoUrl, currentStep.title, 'lxt-video-player-container', true);
+
+      document.getElementById('lxt-transcript-text').innerText = currentStep.transcript;
+
+      const stepKey = `lxt_${sub.id}_${activeLxTVideoStepIndex}`;
+      const isCompleted = lxtVideoCompletedMap[stepKey];
+      const reflSec = document.getElementById('lxt-reflections-section');
+      const banner = document.getElementById('lxt-video-completion-banner');
+
+      if (isCompleted) {
+        reflSec.classList.remove('hidden');
+        banner.className = "p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-between";
+        banner.innerHTML = `<span>🎉 <strong>LxT Video Link ${activeLxTVideoStepIndex + 1} Completed!</strong> Reflections unlocked below.</span>`;
+      } else {
+        reflSec.classList.add('hidden');
+        banner.className = "p-4 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-between";
+        banner.innerHTML = `
+          <span id="lxt-video-lock-text" class="text-xs font-bold text-slate-700">🔒 LxT Link ${activeLxTVideoStepIndex + 1}: Watch video to unlock reflections.</span>
+          <button id="btn-unlock-lxt-reflections" disabled onclick="unlockLxTReflections()" class="bg-slate-300 text-slate-500 cursor-not-allowed px-5 py-2.5 rounded-xl text-xs font-extrabold">
+            🔒 Watch Video to Unlock LxT Reflections
+          </button>
+        `;
+      }
+
+      const nextBtn = document.getElementById('btn-next-lxt-step');
+      if (activeLxTVideoStepIndex + 1 < vSteps.length) {
+        nextBtn.innerText = `✓ Complete Reflections & Proceed to LxT Link ${activeLxTVideoStepIndex + 2} →`;
+      } else {
+        nextBtn.innerText = "✓ Complete All LxT Reflections & Return →";
+      }
+
+      // Render MCQs for this LxT Video Step
+      const mcqList = document.getElementById('lxt-mcqs-list');
+      mcqList.innerHTML = (currentStep.mcqs || []).map((m, mIdx) => `
+        <div class="p-6 rounded-2xl bg-teal-50/50 border border-teal-200 space-y-4">
+          <span class="text-xs font-extrabold uppercase text-teal-800">LxT MCQ #${mIdx + 1}</span>
+          <h4 class="text-sm font-bold text-slate-900">${m.question}</h4>
+          <div class="grid gap-2.5">
+            ${m.choices.map((choice, cIdx) => `
+              <div class="space-y-1">
+                <button onclick="selectMcqChoice('lxt_${sub.id}_${activeLxTVideoStepIndex}', ${mIdx}, ${cIdx})" class="w-full text-left p-3.5 rounded-xl border text-xs font-semibold transition-all ${selectedChoicesMap[`lxt_${sub.id}_${activeLxTVideoStepIndex}_${mIdx}`] === cIdx ? (m.correctIndex === cIdx ? 'bg-emerald-50 border-emerald-500 text-emerald-900' : 'bg-rose-50 border-rose-500 text-rose-900') : 'bg-white border-slate-200 hover:border-teal-600'}">
+                  ${choice}
+                </button>
+                ${selectedChoicesMap[`lxt_${sub.id}_${activeLxTVideoStepIndex}_${mIdx}`] === cIdx ? `
+                  <div class="p-3 rounded-lg text-xs font-medium ${m.correctIndex === cIdx ? 'bg-emerald-100 text-emerald-900' : 'bg-rose-100 text-rose-900'}">
+                    <strong>Feedback:</strong> ${m.feedbacks?.[cIdx] || (m.correctIndex === cIdx ? 'Correct!' : 'Incorrect.')}
+                  </div>
+                ` : ''}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      // Render Subjectives for this LxT Video Step
+      const subjList = document.getElementById('lxt-subjectives-list');
+      subjList.innerHTML = (currentStep.subjectives || []).map((s, sIdx) => `
+        <div class="p-6 rounded-2xl bg-teal-50/50 border border-teal-200 space-y-3">
+          <span class="text-xs font-extrabold uppercase text-teal-800">LxT Subjective #${sIdx + 1}</span>
+          <h4 class="text-sm font-bold text-slate-900">${s.prompt}</h4>
+          <textarea rows="2" class="w-full rounded-xl border border-teal-200 p-3 text-xs bg-white" placeholder="Type your response..."></textarea>
+          <button onclick="toggleSubjExemplar('lxt_${sub.id}_${activeLxTVideoStepIndex}', ${sIdx})" class="text-xs font-bold text-teal-700 hover:underline">
+            ${revealedExemplarsMap[`lxt_${sub.id}_${activeLxTVideoStepIndex}_${sIdx}`] ? 'Hide Author Exemplar Feedback' : 'View Author Exemplar Feedback'}
+          </button>
+          ${revealedExemplarsMap[`lxt_${sub.id}_${activeLxTVideoStepIndex}_${sIdx}`] ? `
+            <div class="p-3 rounded-xl bg-teal-100/70 border border-teal-300 text-xs text-teal-950 font-medium">
+              <strong>Author Exemplar Feedback:</strong> ${s.exemplar}
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+
+    function selectLxTVideoStep(stepIdx) {
+      const sub = selectedSubmodule;
+      if (stepIdx > 0 && !lxtVideoStepFinishedMap[`lxt_${sub.id}_${stepIdx - 1}`]) {
+        alert("🔒 Complete previous LxT video link reflections first!");
+        return;
+      }
+      activeLxTVideoStepIndex = stepIdx;
+      renderLxTExtensionContent();
+    }
+
+    function onLxTVideoProgress(vPlayer) {
+      if (currentActiveInVideoCheckpoint) {
+        try { vPlayer.pause(); } catch(e) {}
+        return;
+      }
+      if (vPlayer.currentTime) {
+        checkInVideoPlayback(vPlayer.currentTime, true);
+      }
+      const stepKey = `lxt_${selectedSubmodule.id}_${activeLxTVideoStepIndex}`;
+      if (lxtVideoCompletedMap[stepKey]) return;
+      if (vPlayer.ended || (vPlayer.duration && vPlayer.currentTime >= vPlayer.duration - 1)) {
+        onLxTVideoEnded();
+      }
+    }
+
+    function onLxTVideoEnded() {
+      const stepKey = `lxt_${selectedSubmodule.id}_${activeLxTVideoStepIndex}`;
+      if (lxtVideoCompletedMap[stepKey]) return;
+
+      const btn = document.getElementById('btn-unlock-lxt-reflections');
+      if (btn) {
+        btn.removeAttribute('disabled');
+        btn.className = "bg-teal-700 hover:bg-teal-600 text-white px-5 py-2.5 rounded-xl text-xs font-extrabold shadow-md transition-all animate-pulse cursor-pointer";
+        btn.innerText = `✓ LxT Link ${activeLxTVideoStepIndex + 1} Complete! Unlock Reflections →`;
+      }
+
+      const lockText = document.getElementById('lxt-video-lock-text');
+      if (lockText) lockText.innerHTML = `🎉 <strong>LxT Video Link ${activeLxTVideoStepIndex + 1} Finished!</strong> Click button to unlock reflections.`;
+
+      const banner = document.getElementById('lxt-video-completion-banner');
+      if (banner) banner.className = "p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-between";
+    }
+
+    function unlockLxTReflections() {
+      const stepKey = `lxt_${selectedSubmodule.id}_${activeLxTVideoStepIndex}`;
+      lxtVideoCompletedMap[stepKey] = true;
+      
+      const reflSec = document.getElementById('lxt-reflections-section');
+      if (reflSec) reflSec.classList.remove('hidden');
+      
+      const banner = document.getElementById('lxt-video-completion-banner');
+      if (banner) {
+        banner.className = "p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-between";
+        banner.innerHTML = `<span>🎉 <strong>LxT Video Link ${activeLxTVideoStepIndex + 1} Completed!</strong> Reflection questions unlocked below.</span>`;
+      }
+
+      if (reflSec) {
+        window.scrollTo({ top: reflSec.offsetTop - 80, behavior: 'smooth' });
+      }
+    }
+
+    function finishCurrentLxTVideoStep() {
+      const sub = selectedSubmodule;
+      const stepKey = `lxt_${sub.id}_${activeLxTVideoStepIndex}`;
+      lxtVideoStepFinishedMap[stepKey] = true;
+
+      const stepsCount = (sub.lxtExtension?.videoSteps || []).length;
+      if (activeLxTVideoStepIndex + 1 < stepsCount) {
+        activeLxTVideoStepIndex++;
+        renderLxTExtensionContent();
+        window.scrollTo({ top: document.getElementById('student-level-lxt-view').offsetTop, behavior: 'smooth' });
+      } else {
+        goSubmodules();
+      }
+    }
+
+    function selectVideoStep(stepIdx) {
+      if (stepIdx > 0 && !videoStepFinishedMap[`${selectedSubmodule.id}_${stepIdx - 1}`]) {
+        alert("🔒 Complete previous video link reflections first!");
+        return;
+      }
+      activeVideoStepIndex = stepIdx;
+      renderSubmoduleContent(selectedSubmodule, db.find(m => m.id === selectedModuleId));
+    }
+
+    function submitLxIResponse() {
+      const val = document.getElementById('global-lxi-response').value;
+      if (!val.trim()) return;
+      
+      lxiSubmissions.unshift({
+        companionName: "Volunteer Companion (You)",
+        timestamp: "Just Now",
+        answer: val
+      });
+
+      hasUserSubmittedLxI = true;
+      document.getElementById('lxi-status').innerText = "✓ Submitted! Peer answers unlocked below.";
+      document.getElementById('lxi-lock-status').innerHTML = "🔓 Peer Answers Unlocked";
+      document.getElementById('lxi-lock-status').className = "text-xs font-extrabold text-emerald-400";
+      document.getElementById('lxi-peer-responses').classList.remove('hidden');
+      renderStudentLxIFeed();
+    }
+
+    function renderStudentLxIFeed() {
+      const feed = document.getElementById('student-lxi-feed');
+      if (!hasUserSubmittedLxI) {
+        document.getElementById('lxi-peer-responses').classList.add('hidden');
+        return;
+      }
+      feed.innerHTML = lxiSubmissions.map(sub => `
+        <div class="p-3 bg-indigo-950/80 rounded-xl text-xs text-indigo-100 border border-indigo-800/40 space-y-1">
+          <div class="flex items-center justify-between text-[10px] text-indigo-300">
+            <strong>${sub.companionName}</strong>
+            <span>${sub.timestamp}</span>
+          </div>
+          <p class="leading-relaxed text-xs text-indigo-100">"${sub.answer}"</p>
+        </div>
+      `).join('');
+    }
+
+    function switchView(view) {
+      if (view === 'author') {
+        document.getElementById('view-author').classList.remove('hidden');
+        document.getElementById('view-student').classList.add('hidden');
+        document.getElementById('tab-author').className = "px-4 py-2 rounded-lg text-xs font-extrabold uppercase tracking-wider transition-all bg-teal-700 text-white shadow-sm";
+        document.getElementById('tab-student').className = "px-4 py-2 rounded-lg text-xs font-extrabold uppercase tracking-wider transition-all text-slate-600 hover:text-slate-900";
+        initAuthorDesk();
+      } else {
+        document.getElementById('view-author').classList.add('hidden');
+        document.getElementById('view-student').classList.remove('hidden');
+        document.getElementById('tab-student').className = "px-4 py-2 rounded-lg text-xs font-extrabold uppercase tracking-wider transition-all bg-teal-700 text-white shadow-sm";
+        document.getElementById('tab-author').className = "px-4 py-2 rounded-lg text-xs font-extrabold uppercase tracking-wider transition-all text-slate-600 hover:text-slate-900";
+        goHome();
+      }
+    }
+
+    function goHome() {
+      document.getElementById('student-level-modules').classList.remove('hidden');
+      document.getElementById('student-level-submodules').classList.add('hidden');
+      document.getElementById('student-level-content').classList.add('hidden');
+      document.getElementById('student-level-lxt-view').classList.add('hidden');
+      document.getElementById('student-level-masterquiz').classList.add('hidden');
+      document.getElementById('crumb-module-nav').classList.add('hidden');
+      document.getElementById('crumb-sub-nav').classList.add('hidden');
+
+      document.getElementById('global-lxi-question-text').innerText = globalLxIQuestion;
+      renderStudentLxIFeed();
+      renderModulesGrid();
+    }
+
+    function openModule(modId) {
+      selectedModuleId = modId;
+      const mod = db.find(m => m.id === modId);
+      document.getElementById('student-level-modules').classList.add('hidden');
+      document.getElementById('student-level-submodules').classList.remove('hidden');
+      document.getElementById('student-level-content').classList.add('hidden');
+      document.getElementById('student-level-lxt-view').classList.add('hidden');
+      document.getElementById('student-level-masterquiz').classList.add('hidden');
+      
+      document.getElementById('crumb-module-nav').classList.remove('hidden');
+      document.getElementById('crumb-module-title').innerText = mod.title;
+      document.getElementById('crumb-sub-nav').classList.add('hidden');
+
+      document.getElementById('selected-module-header').innerText = mod.title;
+      document.getElementById('selected-module-desc').innerText = mod.description;
+      renderSubmodulesList(mod);
+    }
+
+    function openSubmodule(subId) {
+      const mod = db.find(m => m.id === selectedModuleId);
+      const sub = mod.submodules.find(s => s.id === subId);
+      selectedSubmodule = sub;
+      activeVideoStepIndex = 0;
+
+      document.getElementById('student-level-modules').classList.add('hidden');
+      document.getElementById('student-level-submodules').classList.add('hidden');
+      document.getElementById('student-level-content').classList.remove('hidden');
+      document.getElementById('student-level-lxt-view').classList.add('hidden');
+      document.getElementById('student-level-masterquiz').classList.add('hidden');
+
+      document.getElementById('crumb-sub-nav').classList.remove('hidden');
+      document.getElementById('crumb-sub-title').innerText = sub.title;
+
+      renderSubmoduleContent(sub, mod);
+    }
+
+    function openMasterQuiz() {
+      const mod = db.find(m => m.id === selectedModuleId);
+      document.getElementById('student-level-modules').classList.add('hidden');
+      document.getElementById('student-level-submodules').classList.add('hidden');
+      document.getElementById('student-level-content').classList.add('hidden');
+      document.getElementById('student-level-lxt-view').classList.add('hidden');
+      document.getElementById('student-level-masterquiz').classList.remove('hidden');
+
+      document.getElementById('master-quiz-title').innerText = `End-of-Module Master Quiz: ${mod.title}`;
+      renderMasterQuiz(mod);
+    }
+
+    function goSubmodules() {
+      openModule(selectedModuleId);
+    }
+
+    function renderModulesGrid() {
+      const grid = document.getElementById('modules-grid');
+      grid.innerHTML = db.map(mod => `
+        <div onclick="openModule('${mod.id}')" class="group bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:shadow-lg hover:border-teal-600 transition-all cursor-pointer flex flex-col justify-between">
+          <div>
+            <span class="inline-block px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-800 text-[10px] font-bold uppercase tracking-wider mb-3">${mod.level}</span>
+            <h3 class="text-lg font-extrabold text-slate-900 group-hover:text-teal-700 transition-colors">${mod.title}</h3>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">${mod.description}</p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-teal-700">
+            <span>${mod.submodules.length} Submodules inside →</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderSubmodulesList(mod) {
+      const list = document.getElementById('submodules-list');
+      list.innerHTML = mod.submodules.map((sub, idx) => {
+        const isFinished = submoduleFinishedMap[sub.id];
+        const vStepsCount = (sub.videoSteps || []).length;
+        return `
+          <div onclick="openSubmodule('${sub.id}')" class="bg-white p-5 rounded-2xl border ${isFinished ? 'border-emerald-300 bg-emerald-50/20' : 'border-slate-200'} shadow-sm hover:border-teal-600 transition-all cursor-pointer flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="h-8 w-8 rounded-xl ${isFinished ? 'bg-emerald-600 text-white' : 'bg-teal-700 text-white'} font-black text-xs flex items-center justify-center">
+                ${isFinished ? '✓' : idx + 1}
+              </span>
+              <div>
+                <h4 class="font-bold text-sm text-slate-900">${sub.title}</h4>
+                <p class="text-[11px] ${isFinished ? 'text-emerald-700 font-bold' : 'text-slate-400'}">
+                  ${isFinished ? '✓ Completed (LxT Extension Unlocked)' : `🎬 ${vStepsCount} Video Link${vStepsCount > 1 ? 's' : ''}`}
+                </p>
+              </div>
+            </div>
+            <span class="text-xs font-bold ${isFinished ? 'text-emerald-700' : 'text-teal-700'}">
+              ${isFinished ? 'Review →' : 'Launch →'}
+            </span>
+          </div>
+        `;
+      }).join('');
+
+      const totalSubs = mod.submodules.length;
+      const finishedSubs = mod.submodules.filter(s => submoduleFinishedMap[s.id]).length;
+      const masterQuizBtn = document.getElementById('btn-take-master-quiz');
+      const lockDesc = document.getElementById('master-quiz-lock-desc');
+
+      if (finishedSubs === totalSubs && totalSubs > 0) {
+        masterQuizBtn.removeAttribute('disabled');
+        masterQuizBtn.className = "bg-indigo-700 hover:bg-indigo-600 text-white px-5 py-3 rounded-xl text-xs font-extrabold shadow-md transition-all cursor-pointer animate-bounce whitespace-nowrap";
+        masterQuizBtn.innerText = "🎓 Take Master Quiz →";
+        lockDesc.className = "text-xs text-emerald-700 font-bold flex items-center gap-1";
+        lockDesc.innerText = `🔓 All ${totalSubs}/${totalSubs} submodules completed! Master Quiz unlocked.`;
+      } else {
+        masterQuizBtn.setAttribute('disabled', 'true');
+        masterQuizBtn.className = "bg-slate-200 text-slate-400 cursor-not-allowed px-5 py-3 rounded-xl text-xs font-extrabold shadow-none whitespace-nowrap";
+        masterQuizBtn.innerText = "🔒 Take Master Quiz (Locked)";
+        lockDesc.className = "text-xs text-amber-700 font-bold";
+        lockDesc.innerText = `🔒 Complete all submodules (${finishedSubs}/${totalSubs} completed) to unlock Master Quiz.`;
+      }
+    }
+
+    function renderSubmoduleContent(sub, mod) {
+      document.getElementById('student-module-badge').innerText = mod.title;
+      document.getElementById('student-sub-title').innerText = sub.title;
+
+      const videoSteps = sub.videoSteps || [];
+      const currentStep = videoSteps[activeVideoStepIndex] || {
+        title: "Video Link 1",
+        videoUrl: "https://vjs.zencdn.net/v/oceans.mp4",
+        transcript: "No transcript.",
+        mcqs: [],
+        subjectives: []
+      };
+
+      document.getElementById('student-video-step-badge').innerText = `Video Link ${activeVideoStepIndex + 1} of ${videoSteps.length}`;
+
+      const navContainer = document.getElementById('student-video-steps-nav');
+      navContainer.innerHTML = videoSteps.map((v, idx) => {
+        const isDone = videoStepFinishedMap[`${sub.id}_${idx}`];
+        const isActive = idx === activeVideoStepIndex;
+        return `
+          <button onclick="selectVideoStep(${idx})" class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${isActive ? 'bg-teal-700 text-white shadow-md' : (isDone ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-100 text-slate-600 hover:bg-slate-200')}">
+            ${isDone ? '✓ ' : ''}Link ${idx + 1}: ${v.title}
+          </button>
+        `;
+      }).join('');
+
+      renderUniversalVideoPlayer(currentStep.videoUrl, currentStep.title);
+
+      document.getElementById('student-transcript-text').innerText = currentStep.transcript;
+
+      const stepKey = `${sub.id}_${activeVideoStepIndex}`;
+      const isCompleted = videoCompletedMap[stepKey];
+      const reflSec = document.getElementById('student-reflections-section');
+      const banner = document.getElementById('video-completion-banner');
+
+      if (isCompleted) {
+        reflSec.classList.remove('hidden');
+        banner.className = "p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-between";
+        banner.innerHTML = `<span>🎉 <strong>Video Link ${activeVideoStepIndex + 1} Completed!</strong> Reflection Questions unlocked below.</span>`;
+      } else {
+        reflSec.classList.add('hidden');
+        banner.className = "p-4 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-between";
+        banner.innerHTML = `
+          <div class="space-y-0.5">
+            <span id="video-lock-text" class="text-xs font-bold text-slate-700">
+              🔒 Link ${activeVideoStepIndex + 1}: Watch video to the end to unlock reflection questions.
+            </span>
+            <div id="video-progress-bar-container" class="w-48 bg-slate-200 h-1.5 rounded-full overflow-hidden">
+              <div id="video-progress-bar" class="bg-teal-600 h-full w-0 transition-all"></div>
+            </div>
+          </div>
+          <button id="btn-unlock-reflections" disabled onclick="unlockReflections()" class="bg-slate-300 text-slate-500 cursor-not-allowed px-5 py-2.5 rounded-xl text-xs font-extrabold transition-all">
+            🔒 Watch Video to Unlock Reflections
+          </button>
+        `;
+      }
+
+      const nextBtn = document.getElementById('btn-next-step');
+      if (activeVideoStepIndex + 1 < videoSteps.length) {
+        nextBtn.innerText = `✓ Complete Reflections & Proceed to Video Link ${activeVideoStepIndex + 2} →`;
+      } else {
+        nextBtn.innerText = "✓ Complete Final Reflections & Finish Submodule →";
+      }
+
+      const sbList = document.getElementById('sidebar-submodules-list');
+      sbList.innerHTML = mod.submodules.map((s, idx) => `
+        <div onclick="openSubmodule('${s.id}')" class="p-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all ${s.id === sub.id ? 'bg-teal-50 text-teal-800 border border-teal-200' : 'text-slate-600 hover:bg-slate-50'}">
+          ${idx + 1}. ${s.title}
+        </div>
+      `).join('');
+
+      const mcqList = document.getElementById('student-mcqs-list');
+      mcqList.innerHTML = (currentStep.mcqs || []).map((m, mIdx) => `
+        <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
+          <span class="text-xs font-extrabold uppercase text-slate-400">Multiple Choice Question #${mIdx + 1}</span>
+          <h4 class="text-sm font-bold text-slate-900">${m.question}</h4>
+          <div class="grid gap-2.5">
+            ${m.choices.map((choice, cIdx) => `
+              <div class="space-y-1">
+                <button onclick="selectMcqChoice('${sub.id}_${activeVideoStepIndex}', ${mIdx}, ${cIdx})" class="w-full text-left p-3.5 rounded-xl border text-xs font-semibold transition-all ${selectedChoicesMap[`${sub.id}_${activeVideoStepIndex}_${mIdx}`] === cIdx ? (m.correctIndex === cIdx ? 'bg-emerald-50 border-emerald-500 text-emerald-900' : 'bg-rose-50 border-rose-500 text-rose-900') : 'bg-white border-slate-200 hover:border-teal-600'}">
+                  ${choice}
+                </button>
+                ${selectedChoicesMap[`${sub.id}_${activeVideoStepIndex}_${mIdx}`] === cIdx ? `
+                  <div class="p-3 rounded-lg text-xs font-medium ${m.correctIndex === cIdx ? 'bg-emerald-100 text-emerald-900' : 'bg-rose-100 text-rose-900'}">
+                    <strong>Author Feedback for Choice ${cIdx + 1}:</strong> ${m.feedbacks?.[cIdx] || (m.correctIndex === cIdx ? 'Correct!' : 'Incorrect.')}
+                  </div>
+                ` : ''}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      const subjList = document.getElementById('student-subjectives-list');
+      subjList.innerHTML = (currentStep.subjectives || []).map((s, sIdx) => `
+        <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+          <span class="text-xs font-extrabold uppercase text-slate-400">Subjective Reflection #${sIdx + 1}</span>
+          <h4 class="text-sm font-bold text-slate-900">${s.prompt}</h4>
+          <textarea rows="2" class="w-full rounded-xl border border-slate-200 p-3 text-xs bg-white" placeholder="Type your response here..."></textarea>
+          <button onclick="toggleSubjExemplar('${sub.id}_${activeVideoStepIndex}', ${sIdx})" class="text-xs font-bold text-teal-700 hover:underline">
+            ${revealedExemplarsMap[`${sub.id}_${activeVideoStepIndex}_${sIdx}`] ? 'Hide Author Feedback / Exemplar Answer' : 'View Author Feedback / Exemplar Answer'}
+          </button>
+          ${revealedExemplarsMap[`${sub.id}_${activeVideoStepIndex}_${sIdx}`] ? `
+            <div class="p-3 rounded-xl bg-indigo-50 border border-indigo-200 text-xs text-indigo-950 font-medium">
+              ${s.exemplar}
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+
+      // LXT CARD PROGRESS GATING STATUS
+      const ext = sub.lxtExtension || { title: "LxT Extension Trajectory" };
+      const isSubFinished = submoduleFinishedMap[sub.id];
+      const lxtBtn = document.getElementById('btn-launch-lxt');
+      const lxtLockStatus = document.getElementById('lxt-lock-status');
+      
+      document.getElementById('lxt-card-title').innerText = ext.title || "LxT Extension Trajectory";
+
+      if (isSubFinished) {
+        lxtBtn.removeAttribute('disabled');
+        lxtBtn.className = "bg-teal-500 hover:bg-teal-400 text-slate-950 px-5 py-2.5 rounded-xl text-xs font-extrabold shadow-md transition-all animate-bounce cursor-pointer";
+        lxtBtn.innerText = "🚀 Launch LxT Extension Trajectory →";
+        lxtLockStatus.className = "text-xs font-extrabold text-emerald-400";
+        lxtLockStatus.innerText = "🔓 Unlocked! Main Submodule Complete";
+      } else {
+        lxtBtn.setAttribute('disabled', 'true');
+        lxtBtn.className = "bg-slate-800 text-slate-500 cursor-not-allowed px-5 py-2.5 rounded-xl text-xs font-extrabold shadow-none";
+        lxtBtn.innerText = "🔒 Launch LxT Extension (Locked)";
+        lxtLockStatus.className = "text-xs font-bold text-amber-300";
+        lxtLockStatus.innerText = "🔒 Locked (Complete main submodule lesson first)";
+      }
+    }
+
+    function renderMasterQuiz(mod) {
+      const container = document.getElementById('master-quiz-questions-list');
+      const questions = mod.masterQuiz || [];
+      if (!questions.length) {
+        container.innerHTML = `<p class="text-xs text-slate-400 font-semibold">No Master Quiz questions configured yet.</p>`;
+        return;
+      }
+      container.innerHTML = questions.map((m, mIdx) => {
+        if (m.type === 'subjective') {
+          return `
+            <div class="p-6 rounded-2xl bg-indigo-50/50 border border-indigo-100 space-y-3">
+              <span class="text-xs font-extrabold uppercase text-indigo-700">Master Subjective Question #${mIdx + 1}</span>
+              <h4 class="text-sm font-bold text-slate-900">${m.prompt}</h4>
+              <textarea rows="3" class="w-full rounded-xl border border-indigo-200 p-3 text-xs bg-white" placeholder="Type your comprehensive answer..."></textarea>
+              <button onclick="toggleSubjExemplar('master_${mod.id}', ${mIdx})" class="text-xs font-bold text-indigo-700 hover:underline">
+                ${revealedExemplarsMap[`master_${mod.id}_${mIdx}`] ? 'Hide Author Feedback / Exemplar Answer' : 'View Author Feedback / Exemplar Answer'}
+              </button>
+              ${revealedExemplarsMap[`master_${mod.id}_${mIdx}`] ? `
+                <div class="p-3 rounded-xl bg-indigo-100/70 border border-indigo-300 text-xs text-indigo-950 font-medium">
+                  <strong>Author Exemplar Feedback:</strong> ${m.exemplar}
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }
+        
+        return `
+          <div class="p-6 rounded-2xl bg-indigo-50/50 border border-indigo-100 space-y-4">
+            <span class="text-xs font-extrabold uppercase text-indigo-700">Master MCQ #${mIdx + 1}</span>
+            <h4 class="text-sm font-bold text-slate-900">${m.question}</h4>
+            <div class="grid gap-2.5">
+              ${m.choices.map((choice, cIdx) => `
+                <div class="space-y-1">
+                  <button onclick="selectMcqChoice('master_${mod.id}', ${mIdx}, ${cIdx})" class="w-full text-left p-3.5 rounded-xl border text-xs font-semibold transition-all ${selectedChoicesMap[`master_${mod.id}_${mIdx}`] === cIdx ? (m.correctIndex === cIdx ? 'bg-emerald-50 border-emerald-500 text-emerald-900' : 'bg-rose-50 border-rose-500 text-rose-900') : 'bg-white border-slate-200 hover:border-indigo-600'}">
+                    ${choice}
+                  </button>
+                  ${selectedChoicesMap[`master_${mod.id}_${mIdx}`] === cIdx ? `
+                    <div class="p-3 rounded-lg text-xs font-medium ${m.correctIndex === cIdx ? 'bg-emerald-100 text-emerald-900' : 'bg-rose-100 text-rose-900'}">
+                      <strong>Feedback:</strong> ${m.feedbacks?.[cIdx] || (m.correctIndex === cIdx ? 'Correct!' : 'Incorrect.')}
+                    </div>
+                  ` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectMcqChoice(subIdKey, mIdx, cIdx) {
+      selectedChoicesMap[`${subIdKey}_${mIdx}`] = cIdx;
+      if (subIdKey.startsWith('master_')) {
+        const mod = db.find(m => m.id === selectedModuleId);
+        renderMasterQuiz(mod);
+      } else if (subIdKey.startsWith('lxt_')) {
+        renderLxTExtensionContent();
+      } else {
+        renderSubmoduleContent(selectedSubmodule, db.find(m => m.id === selectedModuleId));
+      }
+    }
+
+    function toggleSubjExemplar(subIdKey, sIdx) {
+      revealedExemplarsMap[`${subIdKey}_${sIdx}`] = !revealedExemplarsMap[`${subIdKey}_${sIdx}`];
+      if (subIdKey.startsWith('master_')) {
+        const mod = db.find(m => m.id === selectedModuleId);
+        renderMasterQuiz(mod);
+      } else if (subIdKey.startsWith('lxt_')) {
+        renderLxTExtensionContent();
+      } else {
+        renderSubmoduleContent(selectedSubmodule, db.find(m => m.id === selectedModuleId));
+      }
+    }
+
+    // AUTHOR DESK JS FOR MULTI-VIDEO LXT
+    function initAuthorDesk() {
+      document.getElementById('author-global-lxi').value = globalLxIQuestion;
+      const modSelect = document.getElementById('author-module-select');
+      modSelect.innerHTML = db.map(m => `<option value="${m.id}">${m.title}</option>`).join('');
+      setAuthorTab(authorActiveTab);
+      onAuthorModuleChange();
+    }
+
+    function addNewModule() {
+      const newModNum = db.length + 1;
+      const newMod = {
+        id: `mod-${Date.now()}`,
+        title: `Module ${newModNum}: New Mentorship Module`,
+        description: "Overview of new mentorship module.",
+        level: "Intermediate",
+        masterQuiz: [],
+        submodules: [
+          {
+            id: `sub-new-${Date.now()}`,
+            title: `Submodule ${newModNum}.1: Lesson Focus`,
+            videoSteps: [
+              {
+                id: `vstep-${Date.now()}`,
+                title: "Video Link 1: Overview",
+                videoUrl: "https://vjs.zencdn.net/v/oceans.mp4",
+                transcript: "Notes for video lesson.",
+                mcqs: [],
+                subjectives: []
+              }
+            ],
+            lxtExtension: {
+              title: "LxT Extension Trajectory",
+              videoSteps: [
+                {
+                  id: `lxt-vstep-${Date.now()}`,
+                  title: "LxT Video Link 1: Extension Focus",
+                  videoUrl: "https://vjs.zencdn.net/v/oceans.mp4",
+                  transcript: "Extension notes...",
+                  mcqs: [],
+                  subjectives: []
+                }
+              ]
+            }
+          }
+        ]
+      };
+      db.push(newMod);
+      initAuthorDesk();
+      document.getElementById('author-module-select').value = newMod.id;
+      onAuthorModuleChange();
+    }
+
+    function updateModuleMeta() {
+      const modId = document.getElementById('author-module-select').value;
+      const mod = db.find(m => m.id === modId);
+      if (mod) {
+        mod.title = document.getElementById('author-mod-title').value;
+        mod.level = document.getElementById('author-mod-level').value;
+        mod.description = document.getElementById('author-mod-desc').value;
+        const modSelect = document.getElementById('author-module-select');
+        const opt = modSelect.querySelector(`option[value="${modId}"]`);
+        if (opt) opt.innerText = mod.title;
+      }
+    }
+
+    function updateSubmoduleTitle() {
+      const modId = document.getElementById('author-module-select').value;
+      const subId = document.getElementById('author-submodule-select').value;
+      const mod = db.find(m => m.id === modId);
+      const sub = mod.submodules.find(s => s.id === subId);
+      if (sub) {
+        sub.title = document.getElementById('author-sub-title').value;
+        const subSelect = document.getElementById('author-submodule-select');
+        const opt = subSelect.querySelector(`option[value="${subId}"]`);
+        if (opt) opt.innerText = sub.title;
+      }
+    }
+
+    function onAuthorModuleChange() {
+      const modId = document.getElementById('author-module-select').value;
+      const mod = db.find(m => m.id === modId);
+      
+      document.getElementById('author-mod-title').value = mod.title;
+      document.getElementById('author-mod-level').value = mod.level;
+      document.getElementById('author-mod-desc').value = mod.description;
+
+      const subSelect = document.getElementById('author-submodule-select');
+      subSelect.innerHTML = mod.submodules.map(s => `<option value="${s.id}">${s.title}</option>`).join('');
+      onAuthorSubmoduleChange();
+      renderAuthorMasterQuiz(mod);
+    }
+
+    function onAuthorSubmoduleChange() {
+      const modId = document.getElementById('author-module-select').value;
+      const subId = document.getElementById('author-submodule-select').value;
+      const mod = db.find(m => m.id === modId);
+      const sub = mod.submodules.find(s => s.id === subId);
+      if (!sub) return;
+
+      selectedSubmodule = sub;
+      document.getElementById('author-sub-title').value = sub.title;
+
+      if (!sub.videoSteps || !sub.videoSteps.length) {
+        sub.videoSteps = [{
+          id: `vstep-${Date.now()}`,
+          title: "Video Link 1: Lesson Overview",
+          videoUrl: "https://vjs.zencdn.net/v/oceans.mp4",
+          transcript: "Transcript...",
+          mcqs: [],
+          subjectives: []
+        }];
+      }
+
+      if (!sub.lxtExtension || !sub.lxtExtension.videoSteps) {
+        sub.lxtExtension = {
+          title: "LxT Extension Trajectory",
+          videoSteps: [
+            {
+              id: `lxt-vstep-${Date.now()}`,
+              title: "LxT Video Link 1: Advanced Strategy",
+              videoUrl: "https://vjs.zencdn.net/v/oceans.mp4",
+              transcript: "Extension transcript...",
+              mcqs: [],
+              subjectives: []
+            }
+          ]
+        };
+      }
+
+      renderAuthorVideoSteps(sub);
+      renderAuthorLxTExtension(sub);
+    }
+
+    function addInVideoCheckpoint(vIdx, isLxT = false) {
+      if (!selectedSubmodule) {
+        const modId = document.getElementById('author-module-select').value;
+        const subId = document.getElementById('author-submodule-select').value;
+        const mod = db.find(m => m.id === modId);
+        if (mod && mod.submodules) {
+          selectedSubmodule = mod.submodules.find(s => s.id === subId);
+        }
+      }
+      if (!selectedSubmodule) return;
+
+      const vStep = isLxT ? selectedSubmodule.lxtExtension.videoSteps[vIdx] : selectedSubmodule.videoSteps[vIdx];
+      if (!vStep) return;
+      if (!vStep.inVideoCheckpoints) vStep.inVideoCheckpoints = [];
+      const newNum = vStep.inVideoCheckpoints.length + 1;
+      vStep.inVideoCheckpoints.push({
+        id: `ivc-${Date.now()}`,
+        timeMin: 0,
+        timeSec: 30,
+        type: "mcq",
+        question: `Mid-Video Checkpoint #${newNum}: Pause & Reflect`,
+        choices: ["Option A", "Option B", "Option C", "Option D"],
+        correctIndex: 0,
+        feedbacks: ["Feedback A", "Feedback B", "Feedback C", "Feedback D"],
+        exemplar: "Author Exemplar Feedback / Reference Answer"
+      });
+      if (isLxT) {
+        renderAuthorLxTExtension(selectedSubmodule);
+      } else {
+        renderAuthorVideoSteps(selectedSubmodule);
+      }
+    }
+
+    function deleteInVideoCheckpoint(vIdx, ivIdx, isLxT = false) {
+      if (!selectedSubmodule) {
+        const modId = document.getElementById('author-module-select').value;
+        const subId = document.getElementById('author-submodule-select').value;
+        const mod = db.find(m => m.id === modId);
+        if (mod && mod.submodules) {
+          selectedSubmodule = mod.submodules.find(s => s.id === subId);
+        }
+      }
+      if (!selectedSubmodule) return;
+
+      const vStep = isLxT ? selectedSubmodule.lxtExtension.videoSteps[vIdx] : selectedSubmodule.videoSteps[vIdx];
+      if (vStep && vStep.inVideoCheckpoints) {
+        vStep.inVideoCheckpoints.splice(ivIdx, 1);
+      }
+      if (isLxT) {
+        renderAuthorLxTExtension(selectedSubmodule);
+      } else {
+        renderAuthorVideoSteps(selectedSubmodule);
+      }
+    }
+
+    function renderAuthorVideoSteps(sub) {
+      const container = document.getElementById('author-video-steps-container');
+      const steps = sub.videoSteps || [];
+
+      container.innerHTML = steps.map((vStep, vIdx) => {
+        const ivcCount = vStep.inVideoCheckpoints?.length || 0;
+        const mcqCount = vStep.mcqs?.length || 0;
+        const subjCount = vStep.subjectives?.length || 0;
+
+        return `
+        <details class="group bg-slate-50 border border-slate-200 rounded-3xl overflow-hidden shadow-sm transition-all" ${vIdx === 0 ? 'open' : ''}>
+          <summary class="flex items-center justify-between p-5 bg-white border-b border-slate-200 cursor-pointer select-none font-bold text-slate-800 hover:bg-slate-50/80 transition-all">
+            <div class="flex items-center gap-3">
+              <span class="text-xs font-black uppercase text-teal-800 bg-teal-50 px-2.5 py-1 rounded-lg border border-teal-200">Main Video Link #${vIdx + 1}</span>
+              <span class="text-sm font-extrabold text-slate-900">${vStep.title || 'Untitled Video Link'}</span>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <div class="hidden sm:flex items-center gap-2 text-[11px] font-bold text-slate-500">
+                <span class="px-2 py-0.5 rounded-md bg-amber-100/70 text-amber-800 border border-amber-200">⏱️ ${ivcCount} Checkpoint(s)</span>
+                <span class="px-2 py-0.5 rounded-md bg-teal-100/70 text-teal-800 border border-teal-200">❓ ${mcqCount} MCQ(s)</span>
+                <span class="px-2 py-0.5 rounded-md bg-indigo-100/70 text-indigo-800 border border-indigo-200">✍️ ${subjCount} Subjective(s)</span>
+              </div>
+              ${steps.length > 1 ? `<button type="button" onclick="deleteVideoStep(${vIdx})" class="text-xs font-bold text-rose-500 hover:underline mr-2">Delete</button>` : ''}
+              <span class="text-xs font-extrabold text-teal-700 transition-transform duration-200 group-open:rotate-180">▼</span>
+            </div>
+          </summary>
+
+          <div class="p-6 space-y-6">
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Video Title</label>
+                <input type="text" value="${vStep.title}" onchange="selectedSubmodule.videoSteps[${vIdx}].title = this.value; renderAuthorVideoSteps(selectedSubmodule)" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold bg-white" placeholder="Video title..." />
+              </div>
+              <div>
+                <label class="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Video URL (MP4 Stream or YouTube)</label>
+                <input type="text" value="${vStep.videoUrl}" onchange="selectedSubmodule.videoSteps[${vIdx}].videoUrl = this.value" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-900 bg-white" placeholder="Paste any MP4 or YouTube video URL..." />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Lecture Notes</label>
+              <textarea onchange="selectedSubmodule.videoSteps[${vIdx}].transcript = this.value" rows="2" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs bg-white" placeholder="Notes...">${vStep.transcript}</textarea>
+            </div>
+
+            <!-- Mid-Video In-Video Checkpoints Accordion -->
+            <details class="group/ivc bg-amber-50/60 border border-amber-200 rounded-2xl overflow-hidden" open>
+              <summary class="flex items-center justify-between p-4 cursor-pointer select-none font-bold text-xs text-amber-800 hover:bg-amber-100/50">
+                <div class="flex items-center gap-2">
+                  <span>⏱️ Mid-Video Checkpoints (Pause Video at Min:Sec)</span>
+                  <span class="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[10px]">${ivcCount} Active</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="addInVideoCheckpoint(${vIdx}, false)" class="text-xs font-bold bg-amber-700 text-white px-3 py-1 rounded-lg hover:bg-amber-800 shadow-sm">+ Add Checkpoint</button>
+                  <span class="text-xs font-bold text-amber-700 transition-transform group-open/ivc:rotate-180">▼</span>
+                </div>
+              </summary>
+
+              <div class="p-4 space-y-3 border-t border-amber-200/60">
+                ${(vStep.inVideoCheckpoints || []).map((ivc, ivIdx) => `
+                  <div class="p-4 bg-white rounded-2xl border border-amber-200 space-y-3">
+                    <div class="flex items-center justify-between">
+                      <span class="text-[10px] font-black uppercase text-amber-800">Mid-Video Checkpoint #${ivIdx + 1}</span>
+                      <button type="button" onclick="deleteInVideoCheckpoint(${vIdx}, ${ivIdx}, false)" class="text-[10px] font-bold text-rose-500 hover:underline">Delete</button>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-3">
+                      <div>
+                        <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Pause Min</label>
+                        <input type="number" min="0" value="${ivc.timeMin || 0}" onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].timeMin = Number(this.value)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-slate-50 font-bold" />
+                      </div>
+                      <div>
+                        <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Pause Sec</label>
+                        <input type="number" min="0" max="59" value="${ivc.timeSec || 0}" onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].timeSec = Number(this.value)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-slate-50 font-bold" />
+                      </div>
+                      <div>
+                        <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Question Type</label>
+                        <select onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].type = this.value; renderAuthorVideoSteps(selectedSubmodule)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-slate-50 font-bold cursor-pointer">
+                          <option value="mcq" ${ivc.type === 'mcq' || !ivc.type ? 'selected' : ''}>Multiple Choice Question (MCQ)</option>
+                          <option value="subjective" ${ivc.type === 'subjective' ? 'selected' : ''}>Subjective Question</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Question Prompt</label>
+                      <input type="text" value="${ivc.question}" onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].question = this.value" class="w-full rounded-lg border border-amber-200 px-3 py-1.5 text-xs bg-slate-50 font-bold" placeholder="Question prompt..." />
+                    </div>
+
+                    ${ivc.type === 'subjective' ? `
+                      <div>
+                        <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Author Exemplar Feedback</label>
+                        <textarea onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].exemplar = this.value" rows="2" class="w-full rounded-lg border border-amber-200 px-3 py-1.5 text-xs bg-slate-50" placeholder="Exemplar Feedback...">${ivc.exemplar || ''}</textarea>
+                      </div>
+                    ` : `
+                      <div class="grid md:grid-cols-2 gap-2">
+                        ${(ivc.choices || ['Option A', 'Option B', 'Option C', 'Option D']).map((choice, cIdx) => `
+                          <div class="p-2 bg-slate-50 rounded-lg border border-amber-200 space-y-1">
+                            <div class="flex items-center justify-between">
+                              <span class="text-[9px] font-bold text-slate-400">Choice ${cIdx + 1}</span>
+                              <label class="text-[9px] font-bold text-teal-700 flex items-center gap-1 cursor-pointer">
+                                <input type="radio" name="auth_ivc_${vIdx}_${ivIdx}" ${ivc.correctIndex === cIdx ? 'checked' : ''} onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].correctIndex = ${cIdx}" /> Correct
+                              </label>
+                            </div>
+                            <input type="text" value="${choice}" onchange="selectedSubmodule.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].choices[${cIdx}] = this.value" class="w-full rounded-lg border border-amber-200 px-2 py-1 text-xs bg-white" placeholder="Choice..." />
+                          </div>
+                        `).join('')}
+                      </div>
+                    `}
+                  </div>
+                `).join('')}
+              </div>
+            </details>
+
+            <!-- Reflections Accordion -->
+            <details class="group/refl bg-teal-50/50 border border-teal-200 rounded-2xl overflow-hidden" open>
+              <summary class="flex items-center justify-between p-4 cursor-pointer select-none font-bold text-xs text-teal-800 hover:bg-teal-100/50">
+                <div class="flex items-center gap-2">
+                  <span>💬 Post-Video Reflections</span>
+                  <span class="px-2 py-0.5 rounded-full bg-teal-200 text-teal-900 text-[10px]">${mcqCount} MCQs | ${subjCount} Subjectives</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="addVideoStepMCQ(${vIdx})" class="text-xs font-bold bg-teal-700 text-white px-3 py-1 rounded-lg hover:bg-teal-800 shadow-sm">+ Add MCQ</button>
+                  <button type="button" onclick="addVideoStepSubjective(${vIdx})" class="text-xs font-bold bg-indigo-700 text-white px-3 py-1 rounded-lg hover:bg-indigo-800 shadow-sm">+ Add Subjective</button>
+                  <span class="text-xs font-bold text-teal-700 transition-transform group-open/refl:rotate-180">▼</span>
+                </div>
+              </summary>
+
+              <div class="p-4 space-y-4 border-t border-teal-200/60">
+                <!-- MCQs -->
+                <div class="space-y-3">
+                  ${(vStep.mcqs || []).map((m, mIdx) => `
+                    <div class="p-4 bg-white rounded-2xl border border-teal-200 space-y-3">
+                      <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-extrabold uppercase text-teal-700">MCQ #${mIdx + 1}</span>
+                        <button type="button" onclick="deleteVideoStepMCQ(${vIdx}, ${mIdx})" class="text-[10px] font-bold text-rose-500 hover:underline">Delete</button>
+                      </div>
+                      <input type="text" value="${m.question}" onchange="selectedSubmodule.videoSteps[${vIdx}].mcqs[${mIdx}].question = this.value" class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-bold bg-slate-50" placeholder="Question..." />
+                      
+                      <div class="grid md:grid-cols-2 gap-2">
+                        ${m.choices.map((choice, cIdx) => `
+                          <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                            <div class="flex items-center justify-between">
+                              <span class="text-[9px] font-bold text-slate-400">Choice ${cIdx + 1}</span>
+                              <label class="text-[10px] font-bold text-teal-700 flex items-center gap-1 cursor-pointer">
+                                <input type="radio" name="auth_step_${vIdx}_mcq_${mIdx}" ${m.correctIndex === cIdx ? 'checked' : ''} onchange="selectedSubmodule.videoSteps[${vIdx}].mcqs[${mIdx}].correctIndex = ${cIdx}" /> Correct
+                              </label>
+                            </div>
+                            <input type="text" value="${choice}" onchange="selectedSubmodule.videoSteps[${vIdx}].mcqs[${mIdx}].choices[${cIdx}] = this.value" class="w-full rounded-lg border border-slate-200 px-2.5 py-1 text-xs bg-white" placeholder="Choice..." />
+                            <input type="text" value="${m.feedbacks?.[cIdx] || ''}" onchange="selectedSubmodule.videoSteps[${vIdx}].mcqs[${mIdx}].feedbacks[${cIdx}] = this.value" class="w-full rounded-lg border border-slate-200 px-2.5 py-1 text-[10px] text-slate-600 bg-white" placeholder="Feedback..." />
+                          </div>
+                        `).join('')}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+
+                <!-- Subjectives -->
+                <div class="space-y-3">
+                  ${(vStep.subjectives || []).map((s, sIdx) => `
+                    <div class="p-4 bg-white rounded-2xl border border-indigo-200 space-y-2">
+                      <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-extrabold uppercase text-indigo-700">Subjective #${sIdx + 1}</span>
+                        <button type="button" onclick="deleteVideoStepSubjective(${vIdx}, ${sIdx})" class="text-[10px] font-bold text-rose-500 hover:underline">Delete</button>
+                      </div>
+                      <input type="text" value="${s.prompt}" onchange="selectedSubmodule.videoSteps[${vIdx}].subjectives[${sIdx}].prompt = this.value" class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold bg-slate-50" placeholder="Subjective Prompt..." />
+                      <textarea onchange="selectedSubmodule.videoSteps[${vIdx}].subjectives[${sIdx}].exemplar = this.value" rows="2" class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs bg-slate-50" placeholder="Author Exemplar Feedback...">${s.exemplar}</textarea>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </details>
+          </div>
+        </details>
+      `;
+      }).join('');
+    }
+
+    function renderAuthorLxTExtension(sub) {
+      const ext = sub.lxtExtension || {};
+      document.getElementById('author-lxt-title').value = ext.title || '';
+
+      const container = document.getElementById('author-lxt-steps-container');
+      const steps = ext.videoSteps || [];
+
+      container.innerHTML = steps.map((vStep, vIdx) => {
+        const ivcCount = vStep.inVideoCheckpoints?.length || 0;
+        const mcqCount = vStep.mcqs?.length || 0;
+        const subjCount = vStep.subjectives?.length || 0;
+
+        return `
+        <details class="group bg-teal-50/30 border border-teal-200 rounded-3xl overflow-hidden shadow-sm transition-all" ${vIdx === 0 ? 'open' : ''}>
+          <summary class="flex items-center justify-between p-5 bg-white border-b border-teal-200/80 cursor-pointer select-none font-bold text-slate-800 hover:bg-teal-50/50 transition-all">
+            <div class="flex items-center gap-3">
+              <span class="text-xs font-black uppercase text-teal-800 bg-teal-100 px-2.5 py-1 rounded-lg border border-teal-300">LxT Video Link #${vIdx + 1}</span>
+              <span class="text-sm font-extrabold text-slate-900">${vStep.title || 'Untitled LxT Link'}</span>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <div class="hidden sm:flex items-center gap-2 text-[11px] font-bold text-slate-500">
+                <span class="px-2 py-0.5 rounded-md bg-amber-100/70 text-amber-800 border border-amber-200">⏱️ ${ivcCount} Checkpoint(s)</span>
+                <span class="px-2 py-0.5 rounded-md bg-teal-100/70 text-teal-800 border border-teal-200">❓ ${mcqCount} MCQ(s)</span>
+                <span class="px-2 py-0.5 rounded-md bg-indigo-100/70 text-indigo-800 border border-indigo-200">✍️ ${subjCount} Subjective(s)</span>
+              </div>
+              ${steps.length > 1 ? `<button type="button" onclick="deleteLxTVideoLink(${vIdx})" class="text-xs font-bold text-rose-500 hover:underline mr-2">Delete</button>` : ''}
+              <span class="text-xs font-extrabold text-teal-700 transition-transform duration-200 group-open:rotate-180">▼</span>
+            </div>
+          </summary>
+
+          <div class="p-6 space-y-6">
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">LxT Video Title</label>
+                <input type="text" value="${vStep.title}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].title = this.value; renderAuthorLxTExtension(selectedSubmodule)" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold bg-white" placeholder="Title..." />
+              </div>
+              <div>
+                <label class="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">LxT Video URL</label>
+                <input type="text" value="${vStep.videoUrl}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].videoUrl = this.value" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs bg-white" placeholder="MP4 Stream or YouTube URL..." />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">LxT Lecture Notes</label>
+              <textarea onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].transcript = this.value" rows="2" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs bg-white" placeholder="Notes...">${vStep.transcript}</textarea>
+            </div>
+
+            <!-- Mid-Video In-Video Checkpoints for LxT -->
+            <details class="group/lxtivc bg-amber-50/60 border border-amber-200 rounded-2xl overflow-hidden" open>
+              <summary class="flex items-center justify-between p-4 cursor-pointer select-none font-bold text-xs text-amber-800 hover:bg-amber-100/50">
+                <div class="flex items-center gap-2">
+                  <span>⏱️ Mid-Video Checkpoints (Pause Video at Min:Sec)</span>
+                  <span class="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[10px]">${ivcCount} Active</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="addInVideoCheckpoint(${vIdx}, true)" class="text-xs font-bold bg-amber-700 text-white px-3 py-1 rounded-lg hover:bg-amber-800 shadow-sm">+ Add Checkpoint</button>
+                  <span class="text-xs font-bold text-amber-700 transition-transform group-open/lxtivc:rotate-180">▼</span>
+                </div>
+              </summary>
+
+              <div class="p-4 space-y-3 border-t border-amber-200/60">
+                ${(vStep.inVideoCheckpoints || []).map((ivc, ivIdx) => `
+                  <div class="p-4 bg-white rounded-2xl border border-amber-200 space-y-3">
+                    <div class="flex items-center justify-between">
+                      <span class="text-[10px] font-black uppercase text-amber-800">LxT Checkpoint #${ivIdx + 1}</span>
+                      <button type="button" onclick="deleteInVideoCheckpoint(${vIdx}, ${ivIdx}, true)" class="text-[10px] font-bold text-rose-500 hover:underline">Delete</button>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-3">
+                      <div>
+                        <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Pause Min</label>
+                        <input type="number" min="0" value="${ivc.timeMin || 0}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].timeMin = Number(this.value)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-slate-50 font-bold" />
+                      </div>
+                      <div>
+                        <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Pause Sec</label>
+                        <input type="number" min="0" max="59" value="${ivc.timeSec || 0}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].timeSec = Number(this.value)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-slate-50 font-bold" />
+                      </div>
+                      <div>
+                        <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Question Type</label>
+                        <select onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].type = this.value; renderAuthorLxTExtension(selectedSubmodule)" class="w-full rounded-lg border border-amber-200 px-2.5 py-1 text-xs bg-slate-50 font-bold cursor-pointer">
+                          <option value="mcq" ${ivc.type === 'mcq' || !ivc.type ? 'selected' : ''}>Multiple Choice Question (MCQ)</option>
+                          <option value="subjective" ${ivc.type === 'subjective' ? 'selected' : ''}>Subjective Question</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Question Prompt</label>
+                      <input type="text" value="${ivc.question}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].question = this.value" class="w-full rounded-lg border border-amber-200 px-3 py-1.5 text-xs bg-slate-50 font-bold" placeholder="Question prompt..." />
+                    </div>
+
+                    ${ivc.type === 'subjective' ? `
+                      <div>
+                        <label class="block text-[9px] font-extrabold uppercase text-amber-800 mb-1">Author Exemplar Feedback</label>
+                        <textarea onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].exemplar = this.value" rows="2" class="w-full rounded-lg border border-amber-200 px-3 py-1.5 text-xs bg-slate-50" placeholder="Exemplar Feedback...">${ivc.exemplar || ''}</textarea>
+                      </div>
+                    ` : `
+                      <div class="grid md:grid-cols-2 gap-2">
+                        ${(ivc.choices || ['Option A', 'Option B', 'Option C', 'Option D']).map((choice, cIdx) => `
+                          <div class="p-2 bg-slate-50 rounded-lg border border-amber-200 space-y-1">
+                            <div class="flex items-center justify-between">
+                              <span class="text-[9px] font-bold text-slate-400">Choice ${cIdx + 1}</span>
+                              <label class="text-[9px] font-bold text-teal-700 flex items-center gap-1 cursor-pointer">
+                                <input type="radio" name="auth_lxt_ivc_${vIdx}_${ivIdx}" ${ivc.correctIndex === cIdx ? 'checked' : ''} onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].correctIndex = ${cIdx}" /> Correct
+                              </label>
+                            </div>
+                            <input type="text" value="${choice}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].inVideoCheckpoints[${ivIdx}].choices[${cIdx}] = this.value" class="w-full rounded-lg border border-amber-200 px-2 py-1 text-xs bg-white" placeholder="Choice..." />
+                          </div>
+                        `).join('')}
+                      </div>
+                    `}
+                  </div>
+                `).join('')}
+              </div>
+            </details>
+
+            <!-- Reflections for LxT Video Link -->
+            <details class="group/lxtrefl bg-teal-50/50 border border-teal-200 rounded-2xl overflow-hidden" open>
+              <summary class="flex items-center justify-between p-4 cursor-pointer select-none font-bold text-xs text-teal-800 hover:bg-teal-100/50">
+                <div class="flex items-center gap-2">
+                  <span>💬 LxT Post-Video Reflections</span>
+                  <span class="px-2 py-0.5 rounded-full bg-teal-200 text-teal-900 text-[10px]">${mcqCount} MCQs | ${subjCount} Subjectives</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="addLxTStepMCQ(${vIdx})" class="text-xs font-bold bg-teal-700 text-white px-3 py-1 rounded-lg hover:bg-teal-800 shadow-sm">+ Add MCQ</button>
+                  <button type="button" onclick="addLxTStepSubjective(${vIdx})" class="text-xs font-bold bg-indigo-700 text-white px-3 py-1 rounded-lg hover:bg-indigo-800 shadow-sm">+ Add Subjective</button>
+                  <span class="text-xs font-bold text-teal-700 transition-transform group-open/lxtrefl:rotate-180">▼</span>
+                </div>
+              </summary>
+
+              <div class="p-4 space-y-4 border-t border-teal-200/60">
+                <!-- MCQs -->
+                <div class="space-y-3">
+                  ${(vStep.mcqs || []).map((m, mIdx) => `
+                    <div class="p-4 bg-white rounded-2xl border border-teal-200 space-y-3">
+                      <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-extrabold uppercase text-teal-700">LxT MCQ #${mIdx + 1}</span>
+                        <button type="button" onclick="deleteLxTStepMCQ(${vIdx}, ${mIdx})" class="text-[10px] font-bold text-rose-500 hover:underline">Delete</button>
+                      </div>
+                      <input type="text" value="${m.question}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].mcqs[${mIdx}].question = this.value" class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-bold bg-slate-50" placeholder="Question..." />
+                      
+                      <div class="grid md:grid-cols-2 gap-2">
+                        ${m.choices.map((choice, cIdx) => `
+                          <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                            <div class="flex items-center justify-between">
+                              <span class="text-[9px] font-bold text-slate-400">Choice ${cIdx + 1}</span>
+                              <label class="text-[10px] font-bold text-teal-700 flex items-center gap-1 cursor-pointer">
+                                <input type="radio" name="auth_lxt_step_${vIdx}_mcq_${mIdx}" ${m.correctIndex === cIdx ? 'checked' : ''} onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].mcqs[${mIdx}].correctIndex = ${cIdx}" /> Correct
+                              </label>
+                            </div>
+                            <input type="text" value="${choice}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].mcqs[${mIdx}].choices[${cIdx}] = this.value" class="w-full rounded-lg border border-slate-200 px-2.5 py-1 text-xs bg-white" placeholder="Choice..." />
+                            <input type="text" value="${m.feedbacks?.[cIdx] || ''}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].mcqs[${mIdx}].feedbacks[${cIdx}] = this.value" class="w-full rounded-lg border border-slate-200 px-2.5 py-1 text-[10px] text-slate-600 bg-white" placeholder="Feedback..." />
+                          </div>
+                        `).join('')}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+
+                <!-- Subjectives -->
+                <div class="space-y-3">
+                  ${(vStep.subjectives || []).map((s, sIdx) => `
+                    <div class="p-4 bg-white rounded-2xl border border-indigo-200 space-y-2">
+                      <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-extrabold uppercase text-indigo-700">LxT Subjective #${sIdx + 1}</span>
+                        <button type="button" onclick="deleteLxTStepSubjective(${vIdx}, ${sIdx})" class="text-[10px] font-bold text-rose-500 hover:underline">Delete</button>
+                      </div>
+                      <input type="text" value="${s.prompt}" onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].subjectives[${sIdx}].prompt = this.value" class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold bg-slate-50" placeholder="Prompt..." />
+                      <textarea onchange="selectedSubmodule.lxtExtension.videoSteps[${vIdx}].subjectives[${sIdx}].exemplar = this.value" rows="2" class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs bg-slate-50" placeholder="Author Exemplar Feedback...">${s.exemplar}</textarea>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </details>
+          </div>
+        </details>
+      `;
+      }).join('');
+    }
+
+    function addLxTVideoLink() {
+      if (!selectedSubmodule.lxtExtension) selectedSubmodule.lxtExtension = { title: "LxT Extension Trajectory", videoSteps: [] };
+      if (!selectedSubmodule.lxtExtension.videoSteps) selectedSubmodule.lxtExtension.videoSteps = [];
+      const newStepNum = selectedSubmodule.lxtExtension.videoSteps.length + 1;
+      selectedSubmodule.lxtExtension.videoSteps.push({
+        id: `lxt-vstep-${Date.now()}`,
+        title: `LxT Video Link ${newStepNum}: Advanced Skill`,
+        videoUrl: "https://vjs.zencdn.net/v/oceans.mp4",
+        transcript: "Lecture notes for this LxT extension video link.",
+        mcqs: [],
+        subjectives: []
+      });
+      renderAuthorLxTExtension(selectedSubmodule);
+    }
+
+    function deleteLxTVideoLink(vIdx) {
+      selectedSubmodule.lxtExtension.videoSteps.splice(vIdx, 1);
+      renderAuthorLxTExtension(selectedSubmodule);
+    }
+
+    function addLxTStepMCQ(vIdx) {
+      const vStep = selectedSubmodule.lxtExtension.videoSteps[vIdx];
+      if (!vStep.mcqs) vStep.mcqs = [];
+      vStep.mcqs.push({
+        question: `LxT Reflection Question for Video Link ${vIdx + 1}`,
+        choices: ["Option A", "Option B", "Option C", "Option D"],
+        correctIndex: 0,
+        feedbacks: ["Feedback A", "Feedback B", "Feedback C", "Feedback D"]
+      });
+      renderAuthorLxTExtension(selectedSubmodule);
+    }
+
+    function deleteLxTStepMCQ(vIdx, mIdx) {
+      selectedSubmodule.lxtExtension.videoSteps[vIdx].mcqs.splice(mIdx, 1);
+      renderAuthorLxTExtension(selectedSubmodule);
+    }
+
+    function addLxTStepSubjective(vIdx) {
+      const vStep = selectedSubmodule.lxtExtension.videoSteps[vIdx];
+      if (!vStep.subjectives) vStep.subjectives = [];
+      vStep.subjectives.push({
+        prompt: `LxT Reflection Subjective for Video Link ${vIdx + 1}`,
+        exemplar: "Author Exemplar Feedback / Reference Answer"
+      });
+      renderAuthorLxTExtension(selectedSubmodule);
+    }
+
+    function deleteLxTStepSubjective(vIdx, sIdx) {
+      selectedSubmodule.lxtExtension.videoSteps[vIdx].subjectives.splice(sIdx, 1);
+      renderAuthorLxTExtension(selectedSubmodule);
+    }
+
+    function updateLxTMeta() {
+      if (!selectedSubmodule.lxtExtension) selectedSubmodule.lxtExtension = {};
+      selectedSubmodule.lxtExtension.title = document.getElementById('author-lxt-title').value;
+    }
+
+    function addVideoStepToSubmodule() {
+      if (!selectedSubmodule.videoSteps) selectedSubmodule.videoSteps = [];
+      const newStepNum = selectedSubmodule.videoSteps.length + 1;
+      selectedSubmodule.videoSteps.push({
+        id: `vstep-${Date.now()}`,
+        title: `Video Link ${newStepNum}: Additional Lesson`,
+        videoUrl: "https://vjs.zencdn.net/v/oceans.mp4",
+        transcript: "Lecture notes for this additional video lesson.",
+        mcqs: [],
+        subjectives: []
+      });
+      renderAuthorVideoSteps(selectedSubmodule);
+    }
+
+    function deleteVideoStep(vIdx) {
+      selectedSubmodule.videoSteps.splice(vIdx, 1);
+      renderAuthorVideoSteps(selectedSubmodule);
+    }
+
+    function addVideoStepMCQ(vIdx) {
+      const vStep = selectedSubmodule.videoSteps[vIdx];
+      if (!vStep.mcqs) vStep.mcqs = [];
+      vStep.mcqs.push({
+        question: `Reflection Question for Video Link ${vIdx + 1}`,
+        choices: ["Option A", "Option B", "Option C", "Option D"],
+        correctIndex: 0,
+        feedbacks: ["Feedback A", "Feedback B", "Feedback C", "Feedback D"]
+      });
+      renderAuthorVideoSteps(selectedSubmodule);
+    }
+
+    function deleteVideoStepMCQ(vIdx, mIdx) {
+      selectedSubmodule.videoSteps[vIdx].mcqs.splice(mIdx, 1);
+      renderAuthorVideoSteps(selectedSubmodule);
+    }
+
+    function addVideoStepSubjective(vIdx) {
+      const vStep = selectedSubmodule.videoSteps[vIdx];
+      if (!vStep.subjectives) vStep.subjectives = [];
+      vStep.subjectives.push({
+        prompt: `Reflection Subjective for Video Link ${vIdx + 1}`,
+        exemplar: "Author Exemplar Feedback / Reference Answer"
+      });
+      renderAuthorVideoSteps(selectedSubmodule);
+    }
+
+    function deleteVideoStepSubjective(vIdx, sIdx) {
+      selectedSubmodule.videoSteps[vIdx].subjectives.splice(sIdx, 1);
+      renderAuthorVideoSteps(selectedSubmodule);
+    }
+
+    // MASTER QUIZ AUTHORING
+    function renderAuthorMasterQuiz(mod) {
+      const container = document.getElementById('author-master-quiz-list');
+      container.innerHTML = (mod.masterQuiz || []).map((m, mIdx) => {
+        const isSubj = m.type === 'subjective';
+        const qTitle = isSubj ? (m.prompt || 'Untitled Subjective Question') : (m.question || 'Untitled MCQ Question');
+
+        return `
+          <details class="group bg-indigo-50/50 border border-indigo-200 rounded-2xl overflow-hidden transition-all" ${mIdx === 0 ? 'open' : ''}>
+            <summary class="flex items-center justify-between p-4 bg-white cursor-pointer select-none font-bold text-slate-800 hover:bg-indigo-50/40 border-b border-indigo-100">
+              <div class="flex items-center gap-3">
+                <span class="text-xs font-black uppercase text-indigo-800 bg-indigo-100 px-2.5 py-1 rounded-lg border border-indigo-300">
+                  ${isSubj ? '✍️ Subjective' : '❓ MCQ'} #${mIdx + 1}
+                </span>
+                <span class="text-xs font-extrabold text-slate-900">${qTitle}</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <button type="button" onclick="deleteAuthorMasterQuestion(${mIdx})" class="text-xs font-bold text-rose-500 hover:underline mr-2">Delete</button>
+                <span class="text-xs font-bold text-indigo-700 transition-transform group-open:rotate-180">▼</span>
+              </div>
+            </summary>
+
+            <div class="p-5 space-y-4">
+              ${isSubj ? `
+                <div>
+                  <label class="block text-[10px] font-extrabold uppercase text-indigo-800 mb-1">Subjective Prompt</label>
+                  <input type="text" value="${m.prompt}" onchange="db.find(x=>x.id==='${mod.id}').masterQuiz[${mIdx}].prompt = this.value; renderAuthorMasterQuiz(db.find(x=>x.id==='${mod.id}'))" class="w-full rounded-xl border border-indigo-200 px-3 py-2 text-xs font-bold bg-white" placeholder="Prompt..." />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-extrabold uppercase text-indigo-800 mb-1">Author Exemplar Feedback</label>
+                  <textarea onchange="db.find(x=>x.id==='${mod.id}').masterQuiz[${mIdx}].exemplar = this.value" rows="2" class="w-full rounded-xl border border-indigo-200 px-3 py-2 text-xs bg-white" placeholder="Exemplar Answer...">${m.exemplar}</textarea>
+                </div>
+              ` : `
+                <div>
+                  <label class="block text-[10px] font-extrabold uppercase text-indigo-800 mb-1">Question Prompt</label>
+                  <input type="text" value="${m.question}" onchange="db.find(x=>x.id==='${mod.id}').masterQuiz[${mIdx}].question = this.value; renderAuthorMasterQuiz(db.find(x=>x.id==='${mod.id}'))" class="w-full rounded-xl border border-indigo-200 px-3 py-2 text-xs font-bold bg-white" placeholder="Question Prompt..." />
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-3">
+                  ${m.choices.map((choice, cIdx) => `
+                    <div class="p-3 bg-white rounded-xl border border-indigo-100 space-y-2">
+                      <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-extrabold uppercase text-slate-400">Choice ${cIdx + 1}</span>
+                        <label class="text-[11px] font-bold text-indigo-700 flex items-center gap-1 cursor-pointer">
+                          <input type="radio" name="auth_master_correct_${mIdx}" ${m.correctIndex === cIdx ? 'checked' : ''} onchange="db.find(x=>x.id==='${mod.id}').masterQuiz[${mIdx}].correctIndex = ${cIdx}" /> Correct Answer
+                        </label>
+                      </div>
+                      <input type="text" value="${choice}" onchange="db.find(x=>x.id==='${mod.id}').masterQuiz[${mIdx}].choices[${cIdx}] = this.value" class="w-full rounded-lg border border-indigo-200 px-3 py-1.5 text-xs text-slate-900 bg-slate-50" placeholder="Option Text" />
+                      <input type="text" value="${m.feedbacks?.[cIdx] || ''}" onchange="db.find(x=>x.id==='${mod.id}').masterQuiz[${mIdx}].feedbacks[${cIdx}] = this.value" class="w-full rounded-lg border border-indigo-200 px-3 py-1 text-[11px] text-slate-600 bg-slate-50" placeholder="Author Feedback for Choice ${cIdx + 1}..." />
+                    </div>
+                  `).join('')}
+                </div>
+              `}
+            </div>
+          </details>
+        `;
+      }).join('');
+    }
+
+    function addAuthorMasterMCQ() {
+      const modId = document.getElementById('author-module-select').value;
+      const mod = db.find(m => m.id === modId);
+      if (!mod.masterQuiz) mod.masterQuiz = [];
+      mod.masterQuiz.push({ type: "mcq", question: "New Master MCQ Question", choices: ["Option A", "Option B", "Option C", "Option D"], correctIndex: 0, feedbacks: ["Feedback A", "Feedback B", "Feedback C", "Feedback D"] });
+      renderAuthorMasterQuiz(mod);
+    }
+
+    function addAuthorMasterSubjective() {
+      const modId = document.getElementById('author-module-select').value;
+      const mod = db.find(m => m.id === modId);
+      if (!mod.masterQuiz) mod.masterQuiz = [];
+      mod.masterQuiz.push({ type: "subjective", prompt: "New Master Subjective Question", exemplar: "Author Exemplar Feedback / Reference Answer" });
+      renderAuthorMasterQuiz(mod);
+    }
+
+    function deleteAuthorMasterQuestion(i) {
+      const modId = document.getElementById('author-module-select').value;
+      const mod = db.find(m => m.id === modId);
+      mod.masterQuiz.splice(i, 1);
+      renderAuthorMasterQuiz(mod);
+    }
+
+    function publishContent() {
+      globalLxIQuestion = document.getElementById('author-global-lxi').value;
+
+      // Reset answered in-video checkpoints so newly authored quizzes start fresh from 0 seconds
+      answeredInVideoCheckpointsMap = {};
+      currentActiveInVideoCheckpoint = null;
+      const mainModal = document.getElementById('in-video-checkpoint-modal');
+      if (mainModal) mainModal.classList.add('hidden');
+      const lxtModal = document.getElementById('lxt-in-video-checkpoint-modal');
+      if (lxtModal) lxtModal.classList.add('hidden');
+
+      document.getElementById('publish-toast').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Init
+    goHome();
+  </script>
+</body>
+</html>
