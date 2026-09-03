@@ -1839,6 +1839,61 @@
       renderAuthorLxTExtension(sub);
     }
 
+    function addInVideoCheckpoint(vIdx, isLxT = false) {
+      if (!selectedSubmodule) {
+        const modId = document.getElementById('author-module-select').value;
+        const subId = document.getElementById('author-submodule-select').value;
+        const mod = db.find(m => m.id === modId);
+        if (mod && mod.submodules) {
+          selectedSubmodule = mod.submodules.find(s => s.id === subId);
+        }
+      }
+      if (!selectedSubmodule) return;
+
+      const vStep = isLxT ? selectedSubmodule.lxtExtension.videoSteps[vIdx] : selectedSubmodule.videoSteps[vIdx];
+      if (!vStep) return;
+      if (!vStep.inVideoCheckpoints) vStep.inVideoCheckpoints = [];
+      const newNum = vStep.inVideoCheckpoints.length + 1;
+      vStep.inVideoCheckpoints.push({
+        id: `ivc-${Date.now()}`,
+        timeMin: 0,
+        timeSec: 30,
+        type: "mcq",
+        question: `Mid-Video Checkpoint #${newNum}: Pause & Reflect`,
+        choices: ["Option A", "Option B", "Option C", "Option D"],
+        correctIndex: 0,
+        feedbacks: ["Feedback A", "Feedback B", "Feedback C", "Feedback D"],
+        exemplar: "Author Exemplar Feedback / Reference Answer"
+      });
+      if (isLxT) {
+        renderAuthorLxTExtension(selectedSubmodule);
+      } else {
+        renderAuthorVideoSteps(selectedSubmodule);
+      }
+    }
+
+    function deleteInVideoCheckpoint(vIdx, ivIdx, isLxT = false) {
+      if (!selectedSubmodule) {
+        const modId = document.getElementById('author-module-select').value;
+        const subId = document.getElementById('author-submodule-select').value;
+        const mod = db.find(m => m.id === modId);
+        if (mod && mod.submodules) {
+          selectedSubmodule = mod.submodules.find(s => s.id === subId);
+        }
+      }
+      if (!selectedSubmodule) return;
+
+      const vStep = isLxT ? selectedSubmodule.lxtExtension.videoSteps[vIdx] : selectedSubmodule.videoSteps[vIdx];
+      if (vStep && vStep.inVideoCheckpoints) {
+        vStep.inVideoCheckpoints.splice(ivIdx, 1);
+      }
+      if (isLxT) {
+        renderAuthorLxTExtension(selectedSubmodule);
+      } else {
+        renderAuthorVideoSteps(selectedSubmodule);
+      }
+    }
+
     function renderAuthorVideoSteps(sub) {
       const container = document.getElementById('author-video-steps-container');
       const steps = sub.videoSteps || [];
