@@ -811,6 +811,13 @@
 
       if (ytProgressInterval) clearInterval(ytProgressInterval);
 
+      // Reset modal and active checkpoint state on video player render
+      currentActiveInVideoCheckpoint = null;
+      const mainModal = document.getElementById('in-video-checkpoint-modal');
+      if (mainModal) mainModal.classList.add('hidden');
+      const lxtModal = document.getElementById('lxt-in-video-checkpoint-modal');
+      if (lxtModal) lxtModal.classList.add('hidden');
+
       if (parsed.type === 'youtube') {
         const iframeId = targetId + '_yt_iframe_' + Date.now();
         container.innerHTML = `
@@ -879,7 +886,10 @@
           </div>
         `;
         const vEl = container.querySelector('video');
-        if (vEl) vEl.load();
+        if (vEl) {
+          vEl.currentTime = 0;
+          vEl.load();
+        }
       }
     }
 
@@ -887,10 +897,13 @@
     let answeredInVideoCheckpointsMap = {};
 
     function checkInVideoPlayback(currentTime, isLxT = false) {
-      if (currentActiveInVideoCheckpoint) return; // Already paused at an active checkpoint
+      if (currentActiveInVideoCheckpoint) return; // Already active
 
       const sub = selectedSubmodule;
       if (!sub) return;
+
+      // Ignore initial zero/load artifact timestamps
+      if (currentTime <= 0.5) return;
 
       const vSteps = isLxT ? (sub.lxtExtension?.videoSteps || []) : (sub.videoSteps || []);
       const stepIdx = isLxT ? activeLxTVideoStepIndex : activeVideoStepIndex;
@@ -2431,6 +2444,15 @@
 
     function publishContent() {
       globalLxIQuestion = document.getElementById('author-global-lxi').value;
+
+      // Reset answered in-video checkpoints so newly authored quizzes start fresh from 0 seconds
+      answeredInVideoCheckpointsMap = {};
+      currentActiveInVideoCheckpoint = null;
+      const mainModal = document.getElementById('in-video-checkpoint-modal');
+      if (mainModal) mainModal.classList.add('hidden');
+      const lxtModal = document.getElementById('lxt-in-video-checkpoint-modal');
+      if (lxtModal) lxtModal.classList.add('hidden');
+
       document.getElementById('publish-toast').classList.remove('hidden');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
