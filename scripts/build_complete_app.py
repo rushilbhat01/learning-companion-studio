@@ -18,7 +18,7 @@ html_content = r'''<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <title>Learning Companion Studio — Neurodivergent Mentorship Training Platform</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -42,41 +42,44 @@ html_content = r'''<!DOCTYPE html>
     /* Mobile-optimized smooth scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; rounded: 9999px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    /* Hide scrollbars on mobile horizontal carousels while preserving touch momentum */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased selection:bg-teal-500 selection:text-white">
 
   <!-- ==================== HEADER ==================== -->
   <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-md transition-all shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-0 min-h-16 flex flex-wrap items-center justify-between gap-3">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       
       <!-- Brand Logo -->
       <div class="flex items-center gap-3 cursor-pointer group" onclick="goHome()">
-        <div class="h-10 w-10 rounded-2xl bg-teal-700 flex items-center justify-center text-white font-black text-lg shadow-md shadow-teal-700/20 group-hover:scale-105 transition-transform">
+        <div class="h-10 w-10 rounded-2xl bg-teal-700 flex items-center justify-center text-white font-black text-lg shadow-md shadow-teal-700/20 group-hover:scale-105 transition-transform flex-shrink-0">
           LC
         </div>
-        <div>
+        <div class="min-w-0">
           <div class="flex items-center gap-2">
-            <h1 class="font-extrabold text-slate-900 leading-none text-base tracking-tight">Learning Companion Studio</h1>
-            <span class="hidden sm:inline-flex px-2 py-0.5 rounded-full bg-teal-50 border border-teal-200 text-teal-800 text-[10px] font-black uppercase">v2.0</span>
+            <h1 class="font-extrabold text-slate-900 leading-none text-base tracking-tight truncate">Learning Companion Studio</h1>
+            <span class="inline-flex px-2 py-0.5 rounded-full bg-teal-50 border border-teal-200 text-teal-800 text-[10px] font-black uppercase flex-shrink-0">v2.0</span>
           </div>
-          <p class="text-[11px] font-semibold text-teal-700 mt-0.5">Neurodivergent Mentorship Training • InclusiveMinds</p>
+          <p class="text-[11px] font-semibold text-teal-700 mt-0.5 truncate max-w-[280px] sm:max-w-none">Neurodivergent Mentorship Training • InclusiveMinds</p>
         </div>
       </div>
 
-      <!-- 3-Way Responsive View Switcher -->
-      <nav class="flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200 text-xs font-black overflow-x-auto max-w-full">
-        <button id="tab-student" onclick="switchView('student')" class="px-3.5 py-2 rounded-xl transition-all bg-teal-700 text-white shadow-sm flex items-center gap-1.5 whitespace-nowrap">
-          <span>🎓</span> <span class="hidden xs:inline">Companion</span><span>View</span>
+      <!-- 3-Way Responsive View Switcher (Full-width 3-tab segmented control on mobile) -->
+      <nav class="w-full sm:w-auto grid grid-cols-3 sm:flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200 text-xs font-black">
+        <button id="tab-student" onclick="switchView('student')" class="w-full justify-center px-2.5 sm:px-3.5 py-2 rounded-xl transition-all bg-teal-700 text-white shadow-sm flex items-center gap-1.5 whitespace-nowrap text-center text-xs font-black">
+          <span>🎓</span> <span>Companion</span><span class="hidden md:inline">View</span>
         </button>
-        <button id="tab-author" onclick="switchView('author')" class="px-3.5 py-2 rounded-xl transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5 whitespace-nowrap">
-          <span>✏️</span> <span>Authoring</span><span class="hidden sm:inline">Desk</span>
+        <button id="tab-author" onclick="switchView('author')" class="w-full justify-center px-2.5 sm:px-3.5 py-2 rounded-xl transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5 whitespace-nowrap text-center text-xs font-black">
+          <span>✏️</span> <span>Authoring</span><span class="hidden md:inline">Desk</span>
           <span id="nav-draft-indicator" class="hidden w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
         </button>
-        <button id="tab-admin" onclick="switchView('admin')" class="px-3.5 py-2 rounded-xl transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5 whitespace-nowrap">
-          <span>📊</span> <span>Admin</span><span class="hidden sm:inline">Dashboard</span>
+        <button id="tab-admin" onclick="switchView('admin')" class="w-full justify-center px-2.5 sm:px-3.5 py-2 rounded-xl transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5 whitespace-nowrap text-center text-xs font-black">
+          <span>📊</span> <span>Admin</span><span class="hidden md:inline">Dashboard</span>
         </button>
       </nav>
 
@@ -116,27 +119,27 @@ html_content = r'''<!DOCTYPE html>
         </div>
 
         <!-- Action Buttons: Save Draft vs Publish vs Discard -->
-        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-          <button type="button" onclick="saveAuthorDraft()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full lg:w-auto">
+          <button type="button" onclick="saveAuthorDraft()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all text-center">
             <span>💾</span> <span>Save as Draft</span>
           </button>
-          <button type="button" onclick="discardAuthorDraft()" id="btn-discard-draft" class="hidden px-3.5 py-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 font-bold text-xs flex items-center gap-1.5 transition-all">
+          <button type="button" onclick="discardAuthorDraft()" id="btn-discard-draft" class="hidden w-full sm:w-auto px-3.5 py-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 font-bold text-xs flex items-center justify-center gap-1.5 transition-all text-center">
             <span>↺</span> <span>Discard Draft</span>
           </button>
-          <button type="button" onclick="publishContent()" class="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-extrabold text-xs shadow-lg shadow-teal-600/30 flex items-center gap-1.5 transition-all">
+          <button type="button" onclick="publishContent()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-extrabold text-xs shadow-lg shadow-teal-600/30 flex items-center justify-center gap-1.5 transition-all text-center">
             <span>🚀</span> <span>Publish Live to LC View</span>
           </button>
         </div>
       </div>
 
       <!-- MODULE & SUBMODULE MANAGEMENT CARD (WITH EDIT & DELETE) -->
-      <div class="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+      <div class="bg-white p-4 sm:p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
           <div class="flex items-center gap-2">
             <span class="text-lg">🗂️</span>
             <h3 class="text-sm font-black uppercase tracking-wider text-slate-800">Module & Submodule Lifecycle Manager</h3>
           </div>
-          <span class="text-[11px] text-slate-400 font-bold">Edit metadata, add or delete modules</span>
+          <span class="hidden sm:inline text-[11px] text-slate-400 font-bold">Edit metadata, add or delete modules</span>
         </div>
 
         <div class="grid md:grid-cols-2 gap-5">
@@ -194,19 +197,19 @@ html_content = r'''<!DOCTYPE html>
         </div>
       </div>
 
-      <!-- COMPACT TABBED AUTHORING DESK -->
-      <div class="flex items-center gap-2 border-b border-slate-200 pb-3 overflow-x-auto text-xs font-black">
-        <button id="auth-tab-btn-led" onclick="setAuthorTab('led')" class="px-4 py-2.5 rounded-2xl transition-all bg-teal-700 text-white shadow-md whitespace-nowrap">
-          🎬 LeD & PDF: Content & Checkpoints
+      <!-- COMPACT TABBED AUTHORING DESK (Smooth momentum scroll on mobile) -->
+      <div class="flex items-center gap-2 border-b border-slate-200 pb-3 overflow-x-auto no-scrollbar text-xs font-black -mx-4 px-4 sm:mx-0 sm:px-0">
+        <button id="auth-tab-btn-led" onclick="setAuthorTab('led')" class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl transition-all bg-teal-700 text-white shadow-md whitespace-nowrap flex items-center gap-1.5 flex-shrink-0">
+          <span>🎬</span> <span>Content & PDF Guide</span>
         </button>
-        <button id="auth-tab-btn-lxt" onclick="setAuthorTab('lxt')" class="px-4 py-2.5 rounded-2xl transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 whitespace-nowrap">
-          🚀 LxT: Multi-Video Extension Trajectory
+        <button id="auth-tab-btn-lxt" onclick="setAuthorTab('lxt')" class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 whitespace-nowrap flex items-center gap-1.5 flex-shrink-0">
+          <span>🚀</span> <span>LxT Trajectory</span>
         </button>
-        <button id="auth-tab-btn-master" onclick="setAuthorTab('master')" class="px-4 py-2.5 rounded-2xl transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 whitespace-nowrap">
-          🎓 Master Quiz: End-of-Module Assessment
+        <button id="auth-tab-btn-master" onclick="setAuthorTab('master')" class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 whitespace-nowrap flex items-center gap-1.5 flex-shrink-0">
+          <span>🎓</span> <span>Master Quiz</span>
         </button>
-        <button id="auth-tab-btn-lxi" onclick="setAuthorTab('lxi')" class="px-4 py-2.5 rounded-2xl transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 whitespace-nowrap">
-          💬 Module-Scoped LxI Discussion
+        <button id="auth-tab-btn-lxi" onclick="setAuthorTab('lxi')" class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 whitespace-nowrap flex items-center gap-1.5 flex-shrink-0">
+          <span>💬</span> <span>LxI Discussion</span>
         </button>
       </div>
 
@@ -484,11 +487,15 @@ html_content = r'''<!DOCTYPE html>
                         <h4 id="pdf-doc-title" class="text-base sm:text-lg font-black text-indigo-950">De-escalation Toolkit & Protocol (PDF)</h4>
                       </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                      <a id="pdf-download-btn" href="#" target="_blank" class="px-3.5 py-2 rounded-xl bg-white border border-indigo-200 text-indigo-800 text-xs font-black shadow-sm hover:bg-indigo-50 flex items-center gap-1.5">
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                      <a id="pdf-download-btn" href="#" target="_blank" class="w-full sm:w-auto justify-center px-4 py-2.5 rounded-xl bg-white border border-indigo-200 text-indigo-800 text-xs font-black shadow-sm hover:bg-indigo-50 flex items-center gap-1.5 transition-all">
                         <span>📥</span> <span>Open / Download PDF</span>
                       </a>
                     </div>
+                  </div>
+                  <div class="sm:hidden -mt-2 p-2.5 bg-indigo-50/80 rounded-xl border border-indigo-200 text-[11px] font-bold text-indigo-900 flex items-center gap-2">
+                    <span>📱</span>
+                    <span>For the best mobile reading experience, tap <strong>Open / Download PDF</strong> above to view full-screen in your phone's reader.</span>
                   </div>
 
                   <!-- PDF Document Reader Frame -->
@@ -677,7 +684,7 @@ html_content = r'''<!DOCTYPE html>
     <section id="view-admin" class="hidden space-y-8">
       
       <!-- Admin Top Banner -->
-      <div class="rounded-3xl bg-slate-900 text-white p-6 sm:p-8 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 border border-slate-800">
+      <div class="rounded-3xl bg-slate-900 text-white p-5 sm:p-8 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-5 border border-slate-800">
         <div class="space-y-1">
           <div class="flex items-center gap-2">
             <span class="text-xs font-bold uppercase tracking-wider text-teal-400">Supervisor & Clinical Lead Portal</span>
@@ -685,35 +692,37 @@ html_content = r'''<!DOCTYPE html>
               Pedagogical Analytics
             </span>
           </div>
-          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Learning Companion Diagnostics & Attempt Friction</h2>
+          <h2 class="text-xl sm:text-3xl font-extrabold tracking-tight">Learning Companion Diagnostics & Attempt Friction</h2>
           <p class="text-slate-400 text-xs sm:text-sm">
             Drill down into individual trainee attempts, question-level mistake friction, retry counts, and module mastery.
           </p>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2.5">
-          <button type="button" onclick="simulateCompanionAttempt()" class="px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-black text-xs shadow-md shadow-teal-600/20 flex items-center gap-1.5 transition-all">
-            <span>⚡</span> <span>Simulate LC Mistake & Retry</span>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto">
+          <button type="button" onclick="simulateCompanionAttempt()" class="px-4 py-3 sm:py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-black text-xs shadow-md shadow-teal-600/20 flex items-center justify-center gap-1.5 transition-all text-center">
+            <span>⚡</span> <span>Simulate LC Retry</span>
           </button>
-          <button type="button" onclick="exportAttemptsCSV()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs flex items-center gap-1.5 transition-all">
-            <span>📥</span> <span>Export Diagnostic CSV</span>
-          </button>
-          <button type="button" onclick="resetAttemptsLog()" class="px-3.5 py-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 font-bold text-xs transition-all" title="Reset to Sample Data">
-            <span>🗑️</span>
-          </button>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="exportAttemptsCSV()" class="flex-1 sm:flex-none px-4 py-3 sm:py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-all text-center">
+              <span>📥</span> <span>Export CSV</span>
+            </button>
+            <button type="button" onclick="resetAttemptsLog()" class="px-3.5 py-3 sm:py-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 font-bold text-xs transition-all flex items-center justify-center" title="Reset to Sample Data">
+              <span>🗑️</span>
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- DUAL SELECTOR CONTROL BAR: LC + MODULE -->
-      <div class="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
+      <div class="p-4 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 flex-1">
           <!-- LC Dropdown -->
           <div class="space-y-1.5">
             <label for="admin-lc-select" class="block text-[10px] font-black uppercase tracking-wider text-slate-400">
               1. Choose Learning Companion (LC)
             </label>
             <div class="relative">
-              <select id="admin-lc-select" onchange="onAdminFilterChange()" class="w-full rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-black text-slate-900 focus:border-teal-600 focus:bg-white transition-all cursor-pointer">
+              <select id="admin-lc-select" onchange="onAdminFilterChange()" class="w-full rounded-2xl border-2 border-slate-200 bg-slate-50 px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-black text-slate-900 focus:border-teal-600 focus:bg-white transition-all cursor-pointer">
                 <option value="Priya Sharma (Trainee)">Priya Sharma (Trainee)</option>
                 <option value="Rahul Mehta">Rahul Mehta (Specialist Trainee)</option>
                 <option value="Tanya Verma">Tanya Verma (Peer Mentor)</option>
@@ -730,7 +739,7 @@ html_content = r'''<!DOCTYPE html>
               2. Choose Training Module
             </label>
             <div class="relative">
-              <select id="admin-module-select" onchange="onAdminFilterChange()" class="w-full rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-black text-slate-900 focus:border-teal-600 focus:bg-white transition-all cursor-pointer">
+              <select id="admin-module-select" onchange="onAdminFilterChange()" class="w-full rounded-2xl border-2 border-slate-200 bg-slate-50 px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-black text-slate-900 focus:border-teal-600 focus:bg-white transition-all cursor-pointer">
                 <!-- Dynamically populated -->
               </select>
             </div>
@@ -738,74 +747,74 @@ html_content = r'''<!DOCTYPE html>
         </div>
 
         <!-- Selected LC Profile Pill -->
-        <div class="lg:w-72 p-3.5 bg-gradient-to-r from-teal-50 to-indigo-50/50 rounded-2xl border border-teal-200/60 flex items-center justify-between gap-3">
-          <div class="flex items-center gap-3">
-            <div id="admin-lc-avatar" class="w-10 h-10 rounded-2xl bg-teal-700 text-white font-black text-sm flex items-center justify-center shadow-sm">
+        <div class="w-full lg:w-72 p-3 sm:p-3.5 bg-gradient-to-r from-teal-50 to-indigo-50/50 rounded-2xl border border-teal-200/60 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <div id="admin-lc-avatar" class="w-10 h-10 rounded-2xl bg-teal-700 text-white font-black text-sm flex items-center justify-center shadow-sm flex-shrink-0">
               PS
             </div>
-            <div>
-              <h4 id="admin-lc-name" class="text-xs font-black text-slate-900">Priya Sharma</h4>
-              <p id="admin-lc-role" class="text-[10px] text-teal-800 font-extrabold">InclusiveMinds Cohort 2026</p>
+            <div class="min-w-0">
+              <h4 id="admin-lc-name" class="text-xs font-black text-slate-900 truncate">Priya Sharma</h4>
+              <p id="admin-lc-role" class="text-[10px] text-teal-800 font-extrabold truncate">InclusiveMinds Cohort 2026</p>
             </div>
           </div>
-          <span id="admin-lc-badge" class="px-2.5 py-1 rounded-xl text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-300">
+          <span id="admin-lc-badge" class="px-2.5 py-1 rounded-xl text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 flex-shrink-0">
             ✓ Active
           </span>
         </div>
       </div>
 
       <!-- MODULE DIAGNOSTIC SUMMARY STRIP (5 METRIC CARDS) -->
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
-        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1.5">
-          <div class="flex items-center justify-between text-slate-400 text-[10px] font-black uppercase">
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+        <div class="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1 sm:space-y-1.5">
+          <div class="flex items-center justify-between text-slate-400 text-[9px] sm:text-[10px] font-black uppercase">
             <span>Module Accuracy</span>
             <span class="text-sm">🎯</span>
           </div>
-          <div class="text-2xl sm:text-3xl font-black text-slate-900" id="admin-diag-accuracy">--</div>
-          <p class="text-[10px] text-teal-700 font-bold">Total Attempts Accuracy</p>
+          <div class="text-xl sm:text-3xl font-black text-slate-900" id="admin-diag-accuracy">--</div>
+          <p class="text-[9px] sm:text-[10px] text-teal-700 font-bold truncate">Attempts Accuracy</p>
         </div>
 
-        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1.5">
-          <div class="flex items-center justify-between text-slate-400 text-[10px] font-black uppercase">
+        <div class="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1 sm:space-y-1.5">
+          <div class="flex items-center justify-between text-slate-400 text-[9px] sm:text-[10px] font-black uppercase">
             <span>Wrong Attempts</span>
             <span class="text-sm">❌</span>
           </div>
-          <div class="text-2xl sm:text-3xl font-black text-rose-600" id="admin-diag-wrong-count">--</div>
-          <p class="text-[10px] text-rose-700 font-bold">Mistakes Before Right Answer</p>
+          <div class="text-xl sm:text-3xl font-black text-rose-600" id="admin-diag-wrong-count">--</div>
+          <p class="text-[9px] sm:text-[10px] text-rose-700 font-bold truncate">Mistakes Before Right</p>
         </div>
 
-        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1.5">
-          <div class="flex items-center justify-between text-slate-400 text-[10px] font-black uppercase">
+        <div class="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1 sm:space-y-1.5">
+          <div class="flex items-center justify-between text-slate-400 text-[9px] sm:text-[10px] font-black uppercase">
             <span>1st Try Pass Rate</span>
             <span class="text-sm">⚡</span>
           </div>
-          <div class="text-2xl sm:text-3xl font-black text-emerald-600" id="admin-diag-first-try">--</div>
-          <p class="text-[10px] text-emerald-700 font-bold">Mastered without Retries</p>
+          <div class="text-xl sm:text-3xl font-black text-emerald-600" id="admin-diag-first-try">--</div>
+          <p class="text-[9px] sm:text-[10px] text-emerald-700 font-bold truncate">Passed Without Retry</p>
         </div>
 
-        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1.5">
-          <div class="flex items-center justify-between text-slate-400 text-[10px] font-black uppercase">
+        <div class="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1 sm:space-y-1.5">
+          <div class="flex items-center justify-between text-slate-400 text-[9px] sm:text-[10px] font-black uppercase">
             <span>Checkpoints Mastered</span>
             <span class="text-sm">📖</span>
           </div>
-          <div class="text-2xl sm:text-3xl font-black text-indigo-600" id="admin-diag-checkpoints">--</div>
-          <p class="text-[10px] text-indigo-700 font-bold">In-Video & PDF Cleared</p>
+          <div class="text-xl sm:text-3xl font-black text-indigo-600" id="admin-diag-checkpoints">--</div>
+          <p class="text-[9px] sm:text-[10px] text-indigo-700 font-bold truncate">In-Video & PDF Cleared</p>
         </div>
 
-        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1.5 col-span-2 md:col-span-1">
-          <div class="flex items-center justify-between text-slate-400 text-[10px] font-black uppercase">
+        <div class="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1 sm:space-y-1.5 col-span-2 md:col-span-1">
+          <div class="flex items-center justify-between text-slate-400 text-[9px] sm:text-[10px] font-black uppercase">
             <span>Master Quiz Status</span>
             <span class="text-sm">🎓</span>
           </div>
-          <div class="text-xl sm:text-2xl font-black text-purple-700 truncate" id="admin-diag-quiz">--</div>
-          <p class="text-[10px] text-purple-700 font-bold">End-of-Module Exam</p>
+          <div class="text-lg sm:text-2xl font-black text-purple-700 truncate" id="admin-diag-quiz">--</div>
+          <p class="text-[9px] sm:text-[10px] text-purple-700 font-bold truncate">End-of-Module Exam</p>
         </div>
       </div>
 
       <!-- HIGH FRICTION PEDAGOGICAL ALERT BANNER -->
       <div id="admin-friction-alert" class="hidden p-4 sm:p-5 rounded-2xl bg-amber-50 border-2 border-amber-300 text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
         <div class="flex items-start gap-3">
-          <span class="text-2xl">⚠️</span>
+          <span class="text-2xl flex-shrink-0">⚠️</span>
           <div>
             <h4 class="text-xs font-black uppercase text-amber-800 tracking-wider">Pedagogical Friction Alert</h4>
             <p id="admin-friction-desc" class="text-xs font-bold text-amber-950 mt-0.5">
@@ -818,18 +827,18 @@ html_content = r'''<!DOCTYPE html>
         </span>
       </div>
 
-      <!-- PER-QUESTION DIAGNOSTIC TABLE -->
-      <div class="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+      <!-- PER-QUESTION DIAGNOSTIC TABLE & MOBILE CARDS -->
+      <div class="bg-white p-4 sm:p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
           <div>
-            <h3 class="text-base font-extrabold text-slate-900">Per-Question Attempt & Mistake Diagnostics</h3>
+            <h3 class="text-sm sm:text-base font-extrabold text-slate-900">Per-Question Attempt & Mistake Diagnostics</h3>
             <p class="text-xs text-slate-500">Examine how many times each question was answered incorrectly and inspect full answer progressions.</p>
           </div>
 
           <!-- Activity Type Filter -->
           <div class="flex items-center gap-2 text-xs">
             <span class="text-[10px] font-black uppercase text-slate-400">Activity:</span>
-            <select id="admin-filter-qtype" onchange="renderAdminQuestionDiagnostics()" class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 font-bold text-slate-700">
+            <select id="admin-filter-qtype" onchange="renderAdminQuestionDiagnostics()" class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 font-bold text-slate-700 text-xs">
               <option value="ALL">All Activity Types</option>
               <option value="IN_VIDEO_CHECKPOINT">In-Video Reflection (LeD)</option>
               <option value="PDF_CHECKPOINT">PDF Reading Checkpoint</option>
@@ -839,8 +848,8 @@ html_content = r'''<!DOCTYPE html>
           </div>
         </div>
 
-        <!-- Diagnostics Table -->
-        <div class="overflow-x-auto">
+        <!-- Diagnostics Table (Tablets & Desktop >= 768px) -->
+        <div class="hidden md:block overflow-x-auto">
           <table class="w-full text-left text-xs text-slate-700">
             <thead class="bg-slate-50 text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100">
               <tr>
@@ -856,6 +865,9 @@ html_content = r'''<!DOCTYPE html>
             <tbody id="admin-questions-tbody" class="divide-y divide-slate-100"></tbody>
           </table>
         </div>
+
+        <!-- Diagnostics Cards (Mobile Phones < 768px) -->
+        <div id="admin-questions-mobile-cards" class="md:hidden space-y-3.5"></div>
       </div>
 
     </section>
@@ -2001,9 +2013,12 @@ html_content = r'''<!DOCTYPE html>
       const tabAuthor = document.getElementById('tab-author');
       const tabAdmin = document.getElementById('tab-admin');
 
-      // Reset tabs
+      // Reset tabs with responsive 3-segment mobile classes
+      const inactiveTabCls = "w-full justify-center px-2 sm:px-3.5 py-2 rounded-xl transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5 whitespace-nowrap text-center text-xs font-black";
+      const activeTabCls = "w-full justify-center px-2 sm:px-3.5 py-2 rounded-xl transition-all bg-teal-700 text-white shadow-sm flex items-center gap-1.5 whitespace-nowrap text-center text-xs font-black";
+
       [tabStudent, tabAuthor, tabAdmin].forEach(b => {
-        if (b) b.className = "px-3.5 py-2 rounded-xl transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5 whitespace-nowrap";
+        if (b) b.className = inactiveTabCls;
       });
 
       [vStudent, vAuthor, vAdmin].forEach(v => {
@@ -2012,15 +2027,15 @@ html_content = r'''<!DOCTYPE html>
 
       if (view === 'author') {
         if (vAuthor) vAuthor.classList.remove('hidden');
-        if (tabAuthor) tabAuthor.className = "px-3.5 py-2 rounded-xl transition-all bg-teal-700 text-white shadow-sm flex items-center gap-1.5 whitespace-nowrap";
+        if (tabAuthor) tabAuthor.className = activeTabCls;
         initAuthorDesk();
       } else if (view === 'admin') {
         if (vAdmin) vAdmin.classList.remove('hidden');
-        if (tabAdmin) tabAdmin.className = "px-3.5 py-2 rounded-xl transition-all bg-teal-700 text-white shadow-sm flex items-center gap-1.5 whitespace-nowrap";
+        if (tabAdmin) tabAdmin.className = activeTabCls;
         renderAdminDashboard();
       } else {
         if (vStudent) vStudent.classList.remove('hidden');
-        if (tabStudent) tabStudent.className = "px-3.5 py-2 rounded-xl transition-all bg-teal-700 text-white shadow-sm flex items-center gap-1.5 whitespace-nowrap";
+        if (tabStudent) tabStudent.className = activeTabCls;
         
         // Re-sync student view to publishedDb
         if (selectedModuleId && selectedSubmodule && !document.getElementById('student-level-content').classList.contains('hidden')) {
@@ -4417,7 +4432,8 @@ html_content = r'''<!DOCTYPE html>
 
     function renderAdminQuestionDiagnostics(diagData) {
       const tbody = document.getElementById('admin-questions-tbody');
-      if (!tbody) return;
+      const mobileCards = document.getElementById('admin-questions-mobile-cards');
+      if (!tbody && !mobileCards) return;
 
       const diag = diagData || getCompanionModuleDiagnostics(adminActiveCompanion, adminActiveModuleId);
       const fType = document.getElementById('admin-filter-qtype')?.value || 'ALL';
@@ -4428,84 +4444,168 @@ html_content = r'''<!DOCTYPE html>
       }
 
       if (questions.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="7" class="p-8 text-center text-slate-400 italic">
+        if (tbody) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="7" class="p-8 text-center text-slate-400 italic">
+                No checkpoint questions or attempts recorded for this filter combination.
+              </td>
+            </tr>
+          `;
+        }
+        if (mobileCards) {
+          mobileCards.innerHTML = `
+            <div class="p-6 bg-slate-50 rounded-2xl border border-slate-200 text-center text-slate-400 text-xs italic">
               No checkpoint questions or attempts recorded for this filter combination.
-            </td>
-          </tr>
-        `;
+            </div>
+          `;
+        }
         return;
       }
 
-      tbody.innerHTML = questions.map(q => {
-        let typeBadge = "bg-teal-50 text-teal-800 border-teal-200";
-        if (q.type === 'PDF_CHECKPOINT') typeBadge = "bg-indigo-50 text-indigo-800 border-indigo-200";
-        else if (q.type === 'MASTER_QUIZ') typeBadge = "bg-purple-50 text-purple-800 border-purple-200";
-        else if (q.type === 'LXI_DISCUSSION') typeBadge = "bg-amber-50 text-amber-800 border-amber-200";
+      // 1. Render Desktop Table Rows
+      if (tbody) {
+        tbody.innerHTML = questions.map(q => {
+          let typeBadge = "bg-teal-50 text-teal-800 border-teal-200";
+          if (q.type === 'PDF_CHECKPOINT') typeBadge = "bg-indigo-50 text-indigo-800 border-indigo-200";
+          else if (q.type === 'MASTER_QUIZ') typeBadge = "bg-purple-50 text-purple-800 border-purple-200";
+          else if (q.type === 'LXI_DISCUSSION') typeBadge = "bg-amber-50 text-amber-800 border-amber-200";
 
-        // Mistakes badge
-        let wrongBadge = "";
-        if (q.type === 'LXI_DISCUSSION') {
-          wrongBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-50 text-blue-700 border border-blue-200">Reflective Post</span>`;
-        } else if (q.wrongAttempts === 0) {
-          wrongBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-800 border border-emerald-300">0 Wrong (Clean) ✓</span>`;
-        } else if (q.wrongAttempts === 1) {
-          wrongBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-50 text-amber-800 border border-amber-300">1 Wrong Try ⚠️</span>`;
-        } else {
-          wrongBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-300 animate-pulse">${q.wrongAttempts} Wrong Tries ❌</span>`;
-        }
+          // Mistakes badge
+          let wrongBadge = "";
+          if (q.type === 'LXI_DISCUSSION') {
+            wrongBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-50 text-blue-700 border border-blue-200">Reflective Post</span>`;
+          } else if (q.wrongAttempts === 0) {
+            wrongBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-800 border border-emerald-300">0 Wrong (Clean) ✓</span>`;
+          } else if (q.wrongAttempts === 1) {
+            wrongBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-50 text-amber-800 border border-amber-300">1 Wrong Try ⚠️</span>`;
+          } else {
+            wrongBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-300 animate-pulse">${q.wrongAttempts} Wrong Tries ❌</span>`;
+          }
 
-        // Choice sequence trail
-        const trailHtml = q.attempts.map((att, idx) => {
-          const isLast = idx === q.attempts.length - 1;
-          const icon = att.isCorrect ? '✓' : '✕';
-          const colorClass = att.isCorrect ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-rose-700 bg-rose-50 border-rose-200';
-          const shortAns = att.submittedAnswer ? (att.submittedAnswer.length > 25 ? att.submittedAnswer.substring(0, 22) + '...' : att.submittedAnswer) : `Choice #${idx + 1}`;
+          // Choice sequence trail
+          const trailHtml = q.attempts.map((att, idx) => {
+            const isLast = idx === q.attempts.length - 1;
+            const icon = att.isCorrect ? '✓' : '✕';
+            const colorClass = att.isCorrect ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-rose-700 bg-rose-50 border-rose-200';
+            const shortAns = att.submittedAnswer ? (att.submittedAnswer.length > 25 ? att.submittedAnswer.substring(0, 22) + '...' : att.submittedAnswer) : `Choice #${idx + 1}`;
+            return `
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-bold ${colorClass}" title="${att.submittedAnswer || ''}">
+                <span>${icon}</span>
+                <span>${shortAns}</span>
+              </span>
+              ${!isLast ? '<span class="text-slate-300 text-[10px]">➔</span>' : ''}
+            `;
+          }).join('');
+
           return `
-            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-bold ${colorClass}" title="${att.submittedAnswer || ''}">
-              <span>${icon}</span>
-              <span>${shortAns}</span>
-            </span>
-            ${!isLast ? '<span class="text-slate-300 text-[10px]">➔</span>' : ''}
+            <tr class="hover:bg-slate-50/80 transition-colors">
+              <td class="p-3.5 max-w-sm space-y-0.5">
+                <span class="text-[10px] font-black uppercase text-slate-400 block">${q.submoduleTitle || q.moduleTitle}</span>
+                <p class="font-extrabold text-slate-900 text-xs leading-snug">${q.question}</p>
+              </td>
+              <td class="p-3.5 whitespace-nowrap">
+                <span class="px-2.5 py-1 rounded-xl text-[10px] font-black border ${typeBadge}">
+                  ${q.typeName}
+                </span>
+              </td>
+              <td class="p-3.5 text-center font-black text-slate-800">
+                <span class="px-2 py-1 bg-slate-100 rounded-lg text-xs">${q.totalAttempts}</span>
+              </td>
+              <td class="p-3.5 text-center whitespace-nowrap">
+                ${wrongBadge}
+              </td>
+              <td class="p-3.5">
+                <div class="flex flex-wrap items-center gap-1.5 max-w-xs">
+                  ${trailHtml}
+                </div>
+              </td>
+              <td class="p-3.5 whitespace-nowrap">
+                <span class="px-2.5 py-1 rounded-xl text-[10px] font-black border ${q.statusClass}">
+                  ${q.status}
+                </span>
+              </td>
+              <td class="p-3.5 text-right whitespace-nowrap">
+                <button onclick="inspectQuestionHistory('${q.questionId.replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-teal-50 hover:text-teal-800 text-slate-700 text-[11px] font-extrabold border border-slate-200 transition-all">
+                  Inspect History 🔍
+                </button>
+              </td>
+            </tr>
           `;
         }).join('');
+      }
 
-        return `
-          <tr class="hover:bg-slate-50/80 transition-colors">
-            <td class="p-3.5 max-w-sm space-y-0.5">
-              <span class="text-[10px] font-black uppercase text-slate-400 block">${q.submoduleTitle || q.moduleTitle}</span>
-              <p class="font-extrabold text-slate-900 text-xs leading-snug">${q.question}</p>
-            </td>
-            <td class="p-3.5 whitespace-nowrap">
-              <span class="px-2.5 py-1 rounded-xl text-[10px] font-black border ${typeBadge}">
-                ${q.typeName}
+      // 2. Render Mobile Question Diagnostic Cards (< 768px)
+      if (mobileCards) {
+        mobileCards.innerHTML = questions.map(q => {
+          let typeBadge = "bg-teal-50 text-teal-800 border-teal-200";
+          if (q.type === 'PDF_CHECKPOINT') typeBadge = "bg-indigo-50 text-indigo-800 border-indigo-200";
+          else if (q.type === 'MASTER_QUIZ') typeBadge = "bg-purple-50 text-purple-800 border-purple-200";
+          else if (q.type === 'LXI_DISCUSSION') typeBadge = "bg-amber-50 text-amber-800 border-amber-200";
+
+          let wrongBadge = "";
+          if (q.type === 'LXI_DISCUSSION') {
+            wrongBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-50 text-blue-700 border border-blue-200">Reflective Post</span>`;
+          } else if (q.wrongAttempts === 0) {
+            wrongBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-800 border border-emerald-300">0 Wrong (Clean) ✓</span>`;
+          } else if (q.wrongAttempts === 1) {
+            wrongBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-50 text-amber-800 border border-amber-300">1 Wrong Try ⚠️</span>`;
+          } else {
+            wrongBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-300 animate-pulse">${q.wrongAttempts} Wrong Tries ❌</span>`;
+          }
+
+          const trailHtml = q.attempts.map((att, idx) => {
+            const isLast = idx === q.attempts.length - 1;
+            const icon = att.isCorrect ? '✓' : '✕';
+            const colorClass = att.isCorrect ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-rose-700 bg-rose-50 border-rose-200';
+            const shortAns = att.submittedAnswer ? (att.submittedAnswer.length > 22 ? att.submittedAnswer.substring(0, 20) + '...' : att.submittedAnswer) : `Choice #${idx + 1}`;
+            return `
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-bold ${colorClass}" title="${att.submittedAnswer || ''}">
+                <span>${icon}</span>
+                <span>${shortAns}</span>
               </span>
-            </td>
-            <td class="p-3.5 text-center font-black text-slate-800">
-              <span class="px-2 py-1 bg-slate-100 rounded-lg text-xs">${q.totalAttempts}</span>
-            </td>
-            <td class="p-3.5 text-center whitespace-nowrap">
-              ${wrongBadge}
-            </td>
-            <td class="p-3.5">
-              <div class="flex flex-wrap items-center gap-1.5 max-w-xs">
-                ${trailHtml}
+              ${!isLast ? '<span class="text-slate-300 text-[10px]">➔</span>' : ''}
+            `;
+          }).join('');
+
+          return `
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+              <div class="flex items-start justify-between gap-2">
+                <span class="px-2.5 py-1 rounded-xl text-[10px] font-black border ${typeBadge}">
+                  ${q.typeName}
+                </span>
+                <span class="px-2.5 py-1 rounded-xl text-[10px] font-black border ${q.statusClass}">
+                  ${q.status}
+                </span>
               </div>
-            </td>
-            <td class="p-3.5 whitespace-nowrap">
-              <span class="px-2.5 py-1 rounded-xl text-[10px] font-black border ${q.statusClass}">
-                ${q.status}
-              </span>
-            </td>
-            <td class="p-3.5 text-right whitespace-nowrap">
-              <button onclick="inspectQuestionHistory('${q.questionId.replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-teal-50 hover:text-teal-800 text-slate-700 text-[11px] font-extrabold border border-slate-200 transition-all">
-                Inspect History 🔍
+
+              <div class="space-y-0.5">
+                <span class="text-[10px] font-black uppercase text-slate-400 block">${q.submoduleTitle || q.moduleTitle}</span>
+                <p class="font-extrabold text-slate-900 text-xs sm:text-sm leading-snug">${q.question}</p>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
+                <span class="px-2.5 py-1 bg-slate-100 rounded-lg text-[11px] font-bold text-slate-700">
+                  Total Attempts: <strong>${q.totalAttempts}</strong>
+                </span>
+                <div>${wrongBadge}</div>
+              </div>
+
+              <div class="space-y-1.5">
+                <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Sequence Trail:</span>
+                <div class="flex flex-wrap items-center gap-1.5">
+                  ${trailHtml}
+                </div>
+              </div>
+
+              <button onclick="inspectQuestionHistory('${q.questionId.replace(/'/g, "\\'")}')" class="w-full py-2.5 px-3 rounded-xl bg-slate-100 active:bg-teal-50 hover:bg-teal-50 hover:text-teal-800 text-slate-800 text-xs font-black border border-slate-200 transition-all flex items-center justify-center gap-1.5 shadow-sm">
+                <span>Inspect Attempt History</span>
+                <span>🔍</span>
               </button>
-            </td>
-          </tr>
-        `;
-      }).join('');
+            </div>
+          `;
+        }).join('');
+      }
     }
 
     function inspectQuestionHistory(qId) {
@@ -4520,15 +4620,15 @@ html_content = r'''<!DOCTYPE html>
         <div class="space-y-4">
           <!-- Question Header Summary -->
           <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase bg-teal-100 text-teal-800 border border-teal-300">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+              <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase bg-teal-100 text-teal-800 border border-teal-300 w-fit">
                 ${q.typeName}
               </span>
               <span class="text-xs font-black text-slate-500">
                 ${q.totalAttempts} Attempt${q.totalAttempts === 1 ? '' : 's'} (${q.wrongAttempts} Wrong)
               </span>
             </div>
-            <h4 class="text-sm font-black text-slate-900 leading-snug">${q.question}</h4>
+            <h4 class="text-xs sm:text-sm font-black text-slate-900 leading-snug">${q.question}</h4>
             <p class="text-[11px] text-slate-500 font-bold">${q.moduleTitle} • ${q.submoduleTitle}</p>
           </div>
 
@@ -4540,7 +4640,7 @@ html_content = r'''<!DOCTYPE html>
                 const isCorrect = att.isCorrect;
                 return `
                   <div class="p-3.5 rounded-2xl border ${isCorrect ? 'bg-emerald-50/60 border-emerald-300 text-emerald-950' : 'bg-rose-50/60 border-rose-300 text-rose-950'} space-y-2">
-                    <div class="flex items-center justify-between text-xs">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
                       <span class="font-black flex items-center gap-1.5">
                         <span>${isCorrect ? '✓' : '✕'}</span>
                         <span>Attempt #${idx + 1} (${isCorrect ? 'Correct Mastery' : 'Incorrect Choice'})</span>
