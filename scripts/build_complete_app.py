@@ -1046,6 +1046,8 @@ html_content = r'''<!DOCTYPE html>
             format: "pdf", // PDF BASED SUBMODULE
             pdfDoc: {
               title: "Inclusive Classrooms De-escalation Protocol & Sensory Regulation Guide",
+              fileName: "sample_deescalation_guide.pdf",
+              fileSize: "124 KB",
               url: "https://raw.githubusercontent.com/rushilbhat01/learning-companion-studio/main/docs/sample_deescalation_guide.pdf",
               embeddedCheckpoints: [
                 {
@@ -1088,7 +1090,57 @@ html_content = r'''<!DOCTYPE html>
                 }
               ]
             },
-            videoSteps: [], // NO VIDEO! Proves requirement #7
+            videoSteps: [
+              {
+                id: "vstep-sub1-2-pdf",
+                title: "Inclusive Classrooms De-escalation Protocol & Sensory Regulation Guide",
+                format: "pdf",
+                pdfFileName: "sample_deescalation_guide.pdf",
+                pdfFileSize: "124 KB",
+                pdfUrl: "https://raw.githubusercontent.com/rushilbhat01/learning-companion-studio/main/docs/sample_deescalation_guide.pdf",
+                pdfCheckpoints: [
+                  {
+                    id: "pdf-cp-1",
+                    section: "Section 1: Recognizing Early Physiological Arousal",
+                    question: "PDF Checkpoint 1: Which of the following is an early physiological indicator of impending sensory overload?",
+                    choices: [
+                      "Pupil dilation, rapid breathing, and repetitive tactile fidgeting",
+                      "Deep calm abdominal breathing",
+                      "Engaged cooperative peer play",
+                      "Asking politely for more homework"
+                    ],
+                    correctIndex: 0,
+                    feedbacks: [
+                      "Correct! Recognizing subtle autonomic signs enables early de-escalation.",
+                      "Incorrect. Deep breathing indicates a calm nervous system.",
+                      "Incorrect. Cooperative play represents optimal baseline engagement.",
+                      "Incorrect. Not an indicator of sensory overwhelm."
+                    ],
+                    exemplar: "Author Exemplar Feedback: Autonomic signs (breathing rate, fidgeting, motor pacing) precede verbal distress."
+                  },
+                  {
+                    id: "pdf-cp-2",
+                    section: "Section 2: The 3-Step Low-Arousal Co-Regulation Protocol",
+                    question: "PDF Checkpoint 2: What is the first priority when initiating low-arousal de-escalation?",
+                    choices: [
+                      "Demand an immediate verbal explanation of their misbehavior",
+                      "Regulate your own vocal tone and minimize ambient sensory inputs",
+                      "Call the principal and issue a formal written reprimand",
+                      "Restrain the child in their chair"
+                    ],
+                    correctIndex: 1,
+                    feedbacks: [
+                      "Incorrect. Demanding explanations elevates cortisol and panic.",
+                      "Correct! Adult co-regulation sets the emotional baseline for the child.",
+                      "Incorrect. Escort and administrative threats escalate fight-or-flight.",
+                      "Incorrect. Physical restraint is dangerous and prohibited."
+                    ],
+                    exemplar: "Author Exemplar Feedback: Co-regulation precedes de-escalation. Your calm nervous system grounds the student."
+                  }
+                ],
+                transcript: "Clinical protocol covering early physiological warnings of sensory meltdowns and trauma-informed de-escalation sequences."
+              }
+            ],
             mcqs: [
               {
                 question: "PDF Synthesis: What is the primary purpose of a sensory diet toolkit in a classroom?",
@@ -1604,6 +1656,19 @@ html_content = r'''<!DOCTYPE html>
           selectedSubmodule = mod.submodules[0];
         }
 
+        if (selectedSubmodule && (!selectedSubmodule.videoSteps || selectedSubmodule.videoSteps.length === 0) && selectedSubmodule.pdfDoc) {
+          selectedSubmodule.videoSteps = [{
+            id: `vstep-pdf-${selectedSubmodule.id}`,
+            title: selectedSubmodule.pdfDoc.title || "PDF Reading Guide",
+            format: "pdf",
+            pdfUrl: selectedSubmodule.pdfDoc.url,
+            pdfFileName: selectedSubmodule.pdfDoc.fileName || "sample_deescalation_guide.pdf",
+            pdfFileSize: selectedSubmodule.pdfDoc.fileSize || "124 KB",
+            pdfCheckpoints: selectedSubmodule.pdfDoc.embeddedCheckpoints || [],
+            transcript: "Clinical protocol covering early physiological warnings of sensory meltdowns and trauma-informed de-escalation sequences."
+          }];
+        }
+
         document.getElementById('author-sub-title').value = selectedSubmodule ? selectedSubmodule.title : '';
 
         // Render current tabs
@@ -1683,6 +1748,8 @@ html_content = r'''<!DOCTYPE html>
         format: format, // 'video' | 'pdf'
         videoUrl: format === 'video' ? "https://vjs.zencdn.net/v/oceans.mp4" : "",
         pdfUrl: format === 'pdf' ? "https://raw.githubusercontent.com/rushilbhat01/learning-companion-studio/main/docs/sample_deescalation_guide.pdf" : "",
+        pdfFileName: format === 'pdf' ? "sample_deescalation_guide.pdf" : "",
+        pdfFileSize: format === 'pdf' ? "124 KB" : "",
         pdfCheckpoints: format === 'pdf' ? [
           {
             id: `pdf-cp-${Date.now()}`,
@@ -1726,6 +1793,8 @@ html_content = r'''<!DOCTYPE html>
       } else if (newFormat === 'pdf') {
         if (!step.pdfUrl) {
           step.pdfUrl = "https://raw.githubusercontent.com/rushilbhat01/learning-companion-studio/main/docs/sample_deescalation_guide.pdf";
+          step.pdfFileName = "sample_deescalation_guide.pdf";
+          step.pdfFileSize = "124 KB";
         }
         if (!step.pdfCheckpoints) {
           step.pdfCheckpoints = [];
@@ -1883,18 +1952,92 @@ html_content = r'''<!DOCTYPE html>
                   </div>
                 </div>
               ` : `
-                <!-- If PDF: PDF Document & Embedded Checkpoints Configurator (DELIVERABLE #4) -->
+                <!-- If PDF: Direct PDF Document Uploader & Embedded Checkpoints Configurator (DELIVERABLE #4) -->
                 <div class="p-4 bg-indigo-50/60 rounded-2xl border border-indigo-200 space-y-4">
                   <div class="flex items-center justify-between">
                     <span class="text-xs font-black uppercase text-indigo-900 flex items-center gap-1.5">
-                      <span>📄</span> <span>PDF Document Viewer Settings</span>
+                      <span>📄</span> <span>PDF Document Uploader & Settings</span>
                     </span>
-                    <span class="text-[10px] font-bold text-indigo-700">Multi-Modal Reading Path</span>
+                    <span class="text-[10px] font-bold text-indigo-700 bg-indigo-100/80 px-2.5 py-0.5 rounded-full border border-indigo-200">Direct File Upload</span>
                   </div>
 
+                  <!-- Direct PDF Document Upload Section -->
                   <div>
-                    <label class="block text-[10px] font-black uppercase text-indigo-800 mb-1">PDF Document URL</label>
-                    <input type="text" value="${vStep.pdfUrl || ''}" placeholder="URL to PDF file (e.g. https://.../guide.pdf)" oninput="selectedSubmodule.videoSteps[${vIdx}].pdfUrl = this.value; markDraftDirty()" class="w-full rounded-xl border border-indigo-200 px-3 py-2 text-xs font-bold bg-white" />
+                    <input type="file" id="author-pdf-file-${vIdx}" accept=".pdf,application/pdf" class="hidden" onchange="handleAuthorPDFUpload(event, ${vIdx})" />
+                    
+                    ${vStep.pdfUrl ? `
+                      <!-- Attached PDF File Info Badge & Actions -->
+                      <div class="p-4 bg-white rounded-2xl border border-indigo-200 shadow-sm space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div class="flex items-center gap-3 min-w-0">
+                            <div class="w-11 h-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-xl flex-shrink-0 shadow-sm">
+                              📄
+                            </div>
+                            <div class="min-w-0">
+                              <div class="flex items-center gap-2">
+                                <h5 class="text-xs sm:text-sm font-black text-slate-900 truncate">${vStep.pdfFileName || (vStep.pdfUrl.startsWith('data:') ? 'Uploaded_Document.pdf' : vStep.pdfUrl.split('/').pop().split('?')[0])}</h5>
+                                <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-black uppercase tracking-wider">Active PDF</span>
+                              </div>
+                              <p class="text-[11px] text-slate-500 font-medium">
+                                ${vStep.pdfFileSize || 'Ready for Reading & Checkpoints'} · Uploaded directly
+                              </p>
+                            </div>
+                          </div>
+                          <div class="flex items-center gap-2 flex-shrink-0">
+                            <button type="button" onclick="document.getElementById('author-pdf-file-${vIdx}').click()" class="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-bold transition flex items-center gap-1.5 border border-indigo-200">
+                              <span>🔄</span> <span>Replace PDF</span>
+                            </button>
+                            <button type="button" onclick="removeAuthorPDF(${vIdx})" class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition flex items-center gap-1.5 border border-rose-200">
+                              <span>🗑️</span> <span>Remove</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        <!-- Live Inline Document Preview Accordion -->
+                        <details class="group bg-slate-50 rounded-xl border border-slate-200 overflow-hidden">
+                          <summary class="p-2.5 text-xs font-bold text-indigo-900 flex items-center justify-between cursor-pointer hover:bg-indigo-50/50">
+                            <span class="flex items-center gap-1.5"><span>👁️</span> <span>Preview Document in Authoring Desk</span></span>
+                            <span class="text-[10px] text-indigo-600 font-semibold group-open:hidden">Click to preview document</span>
+                          </summary>
+                          <div class="h-72 w-full border-t border-slate-200 bg-white">
+                            <iframe src="${vStep.pdfUrl}" class="w-full h-full border-0"></iframe>
+                          </div>
+                        </details>
+                      </div>
+                    ` : `
+                      <!-- Empty State: Drag & Drop Dropzone for Direct Upload -->
+                      <div 
+                        onclick="document.getElementById('author-pdf-file-${vIdx}').click()" 
+                        ondragover="event.preventDefault(); this.classList.add('border-indigo-600', 'bg-indigo-100/50');"
+                        ondragleave="event.preventDefault(); this.classList.remove('border-indigo-600', 'bg-indigo-100/50');"
+                        ondrop="handleAuthorPDFDrop(event, ${vIdx})"
+                        class="cursor-pointer border-2 border-dashed border-indigo-300 hover:border-indigo-600 bg-white hover:bg-indigo-50/60 rounded-2xl p-6 text-center transition flex flex-col items-center justify-center gap-2 group shadow-sm"
+                      >
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-100 group-hover:bg-indigo-200 text-indigo-700 flex items-center justify-center text-2xl transition shadow-sm">
+                          📄
+                        </div>
+                        <div>
+                          <p class="text-xs sm:text-sm font-black text-indigo-950">Click to upload a PDF directly or drag & drop</p>
+                          <p class="text-[11px] text-slate-500 font-medium mt-0.5">Upload training manuals, handouts, or clinical protocols directly from your device (no external link needed)</p>
+                        </div>
+                        <button type="button" class="mt-1 px-4 py-2 bg-indigo-700 group-hover:bg-indigo-800 text-white rounded-xl text-xs font-black shadow transition flex items-center gap-1.5 pointer-events-none">
+                          <span>⬆️</span> <span>Choose PDF Document</span>
+                        </button>
+                      </div>
+                    `}
+
+                    <!-- Optional secondary fallback (Sample or web URL) -->
+                    <div class="mt-2.5 flex flex-wrap items-center justify-between gap-2 px-1 text-[11px]">
+                      <button type="button" onclick="loadSampleAuthorPDF(${vIdx})" class="text-indigo-700 hover:text-indigo-900 font-bold underline flex items-center gap-1">
+                        <span>📋</span> <span>Load Sample Inclusive Education Protocol</span>
+                      </button>
+                      <details class="text-slate-500">
+                        <summary class="cursor-pointer font-bold hover:text-slate-800">Or enter web link instead</summary>
+                        <div class="mt-1.5 flex gap-2">
+                          <input type="text" value="${vStep.pdfUrl?.startsWith('data:') ? '' : (vStep.pdfUrl || '')}" placeholder="https://.../guide.pdf" oninput="setAuthorPDFUrl(this.value, ${vIdx})" class="rounded-xl border border-indigo-200 px-3 py-1.5 text-xs font-bold bg-white text-slate-800 w-64 shadow-inner" />
+                        </div>
+                      </details>
+                    </div>
                   </div>
 
                   <!-- PDF Checkpoints -->
@@ -2004,6 +2147,85 @@ html_content = r'''<!DOCTYPE html>
       selectedSubmodule.videoSteps[vIdx].pdfCheckpoints.splice(pIdx, 1);
       markDraftDirty();
       renderAuthorContentFormatSteps();
+    }
+
+    function handleAuthorPDFUpload(event, vIdx) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      processAuthorPDFFile(file, vIdx);
+    }
+
+    function handleAuthorPDFDrop(event, vIdx) {
+      event.preventDefault();
+      event.stopPropagation();
+      const dropZone = event.currentTarget;
+      if (dropZone) dropZone.classList.remove('border-indigo-600', 'bg-indigo-100/50');
+      const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+      if (!file) return;
+      processAuthorPDFFile(file, vIdx);
+    }
+
+    function processAuthorPDFFile(file, vIdx) {
+      if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+        showToast('Please upload a valid PDF document (.pdf)', 'rose');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const dataUrl = e.target.result;
+        if (!selectedSubmodule || !selectedSubmodule.videoSteps || !selectedSubmodule.videoSteps[vIdx]) return;
+        const step = selectedSubmodule.videoSteps[vIdx];
+        step.pdfUrl = dataUrl;
+        step.pdfFileName = file.name;
+        step.pdfFileSize = (file.size / 1024 < 1024) 
+          ? (file.size / 1024).toFixed(1) + ' KB' 
+          : (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+
+        // Auto-update step title if default or empty
+        if (!step.title || step.title.startsWith('PDF Reading Guide') || step.title.startsWith('Video Link') || step.title === 'Lecture 1: Core Concepts') {
+          step.title = file.name.replace(/\.[^/.]+$/, "");
+        }
+
+        markDraftDirty();
+        renderAuthorContentFormatSteps();
+        showToast(`Uploaded "${file.name}" successfully! Attached to this step.`, 'emerald');
+      };
+      reader.onerror = function() {
+        showToast('Failed to read the PDF file. Please try again.', 'rose');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeAuthorPDF(vIdx) {
+      if (!selectedSubmodule || !selectedSubmodule.videoSteps || !selectedSubmodule.videoSteps[vIdx]) return;
+      const step = selectedSubmodule.videoSteps[vIdx];
+      step.pdfUrl = "";
+      step.pdfFileName = "";
+      step.pdfFileSize = "";
+      markDraftDirty();
+      renderAuthorContentFormatSteps();
+      showToast('PDF removed from this step.', 'amber');
+    }
+
+    function loadSampleAuthorPDF(vIdx) {
+      if (!selectedSubmodule || !selectedSubmodule.videoSteps || !selectedSubmodule.videoSteps[vIdx]) return;
+      const step = selectedSubmodule.videoSteps[vIdx];
+      step.pdfUrl = "https://raw.githubusercontent.com/rushilbhat01/learning-companion-studio/main/docs/sample_deescalation_guide.pdf";
+      step.pdfFileName = "sample_deescalation_guide.pdf";
+      step.pdfFileSize = "124 KB";
+      markDraftDirty();
+      renderAuthorContentFormatSteps();
+      showToast('Loaded sample De-escalation Protocol PDF.', 'emerald');
+    }
+
+    function setAuthorPDFUrl(url, vIdx) {
+      if (!selectedSubmodule || !selectedSubmodule.videoSteps || !selectedSubmodule.videoSteps[vIdx]) return;
+      const step = selectedSubmodule.videoSteps[vIdx];
+      step.pdfUrl = url;
+      step.pdfFileName = url ? url.split('/').pop().split('?')[0] : "";
+      step.pdfFileSize = url ? "Web Document" : "";
+      markDraftDirty();
     }
 
     // =========================================================================
@@ -2540,8 +2762,12 @@ html_content = r'''<!DOCTYPE html>
       const checkpointsList = document.getElementById('pdf-checkpoints-list');
 
       const pdfUrl = step.pdfUrl || "https://raw.githubusercontent.com/rushilbhat01/learning-companion-studio/main/docs/sample_deescalation_guide.pdf";
-      if (titleEl) titleEl.innerText = step.title || "Inclusive Education Protocol (PDF)";
-      if (downloadBtn) downloadBtn.href = pdfUrl;
+      const fileName = step.pdfFileName || (pdfUrl.startsWith('data:') ? 'Inclusive_Education_Guide.pdf' : (pdfUrl.split('/').pop().split('?')[0] || "guide.pdf"));
+      if (titleEl) titleEl.innerText = step.title || fileName.replace(/\.[^/.]+$/, "");
+      if (downloadBtn) {
+        downloadBtn.href = pdfUrl;
+        downloadBtn.download = fileName;
+      }
       if (embedFrame) embedFrame.src = pdfUrl;
 
       const checkpoints = step.pdfCheckpoints || [];
@@ -3379,7 +3605,21 @@ html_content = r'''<!DOCTYPE html>
 </html>
 '''
 
-with open(output_file, "w") as f:
-    f.write(html_content)
+target_paths = [
+    "/Users/rushilbhat/Desktop/learning-companion-studio/client/public/Learning_Companion_Studio.html",
+    "/Users/rushilbhat/Desktop/learning-companion-studio/client/dist/Learning_Companion_Studio.html",
+    "/Users/rushilbhat/Desktop/learning-companion-studio/client/dist/index.html",
+    "/Users/rushilbhat/Desktop/learning-companion-studio/docs/Learning_Companion_Studio.html",
+    "/Users/rushilbhat/Desktop/learning-companion-studio/docs/index.html",
+    "/Users/rushilbhat/Documents/Codex/2026-08-04/referenced-chatgpt-conversation-this-is-an/client/public/Learning_Companion_Studio.html",
+    "/Users/rushilbhat/Documents/Codex/2026-08-04/referenced-chatgpt-conversation-this-is-an/client/dist/Learning_Companion_Studio.html",
+    "/Users/rushilbhat/Documents/Codex/2026-08-04/referenced-chatgpt-conversation-this-is-an/client/dist/index.html",
+    "/Users/rushilbhat/Documents/Codex/2026-08-04/referenced-chatgpt-conversation-this-is-an/docs/Learning_Companion_Studio.html",
+    "/Users/rushilbhat/Documents/Codex/2026-08-04/referenced-chatgpt-conversation-this-is-an/docs/index.html"
+]
 
-print(f"Successfully generated {output_file} ({len(html_content)} bytes)")
+for p in target_paths:
+    if os.path.exists(os.path.dirname(p)):
+        with open(p, "w", encoding="utf-8") as f:
+            f.write(html_content)
+        print(f"Generated {p} ({len(html_content)} bytes)")
