@@ -1524,9 +1524,33 @@
 
       showToast("🎉 Published Successfully! All module changes and new checkpoints are now live in Companion View.");
       updateAuthorDraftUI();
+
+      // Hydrate publishedDb with active blob URLs from cache
+      for (const mod of publishedDb) {
+        if (!mod.submodules) continue;
+        for (const sub of mod.submodules) {
+          if (sub.videoSteps) {
+            for (const st of sub.videoSteps) {
+              if (st.pdfStorageKey && pdfBlobUrlCache[st.pdfStorageKey]) {
+                st.pdfUrl = pdfBlobUrlCache[st.pdfStorageKey];
+              }
+            }
+          }
+        }
+      }
+      restorePdfBlobs(publishedDb);
       
-      // If currently on companion view, re-render
+      // If currently on companion view, re-render immediate content
       if (currentView === 'student') {
+        if (selectedModuleId && selectedSubmodule && !document.getElementById('student-level-content').classList.contains('hidden')) {
+          const pMod = publishedDb.find(m => m.id === selectedModuleId);
+          const pSub = pMod ? pMod.submodules.find(s => s.id === selectedSubmodule.id) : null;
+          if (pSub) {
+            selectedSubmodule = pSub;
+            renderSubmoduleContent(pSub, pMod);
+            return;
+          }
+        }
         goHome();
       }
     }
@@ -1577,7 +1601,20 @@
       } else {
         if (vStudent) vStudent.classList.remove('hidden');
         if (tabStudent) tabStudent.className = "px-3.5 py-2 rounded-xl transition-all bg-teal-700 text-white shadow-sm flex items-center gap-1.5 whitespace-nowrap";
-        goHome();
+        
+        // Re-sync student view to publishedDb
+        if (selectedModuleId && selectedSubmodule && !document.getElementById('student-level-content').classList.contains('hidden')) {
+          const pMod = publishedDb.find(m => m.id === selectedModuleId);
+          const pSub = pMod ? pMod.submodules.find(s => s.id === selectedSubmodule.id) : null;
+          if (pSub) {
+            selectedSubmodule = pSub;
+            renderSubmoduleContent(pSub, pMod);
+          } else {
+            goHome();
+          }
+        } else {
+          goHome();
+        }
       }
 
       updateAuthorDraftUI();
@@ -1756,13 +1793,13 @@
           mod.submodules = [{ id: `sub-${Date.now()}`, title: "Submodule 1: Core", videoSteps: [] }];
         }
 
+        // CRITICAL FIX: Ensure selectedSubmodule is ALWAYS the object inside draftDb (not publishedDb)
+        const currentSubId = selectedSubmodule ? selectedSubmodule.id : (mod.submodules[0] ? mod.submodules[0].id : null);
+        selectedSubmodule = mod.submodules.find(s => s.id === currentSubId) || mod.submodules[0];
+
         subSelect.innerHTML = mod.submodules.map(s => `
           <option value="${s.id}" ${selectedSubmodule && s.id === selectedSubmodule.id ? 'selected' : ''}>${s.title}</option>
         `).join('');
-
-        if (!selectedSubmodule || !mod.submodules.some(s => s.id === selectedSubmodule.id)) {
-          selectedSubmodule = mod.submodules[0];
-        }
 
         if (selectedSubmodule && (!selectedSubmodule.videoSteps || selectedSubmodule.videoSteps.length === 0) && selectedSubmodule.pdfDoc) {
           selectedSubmodule.videoSteps = [{
@@ -2795,8 +2832,13 @@
     // SUBMODULE CONTENT: VIDEO OR PDF OR HYBRID (DELIVERABLE #1, #4, #7)
     // =========================================================================
     function openSubmodule(subId) {
-      const mod = publishedDb.find(m => m.id === selectedModuleId);
-      const sub = mod.submodules.find(s => s.id === subId);
+      let mod = publishedDb.find(m => m.id === selectedModuleId);
+      if (!mod || !mod.submodules.some(s => s.id === subId)) {
+        mod = publishedDb.find(m => m.submodules && m.submodules.some(s => s.id === subId)) || publishedDb[0];
+        if (mod) selectedModuleId = mod.id;
+      }
+      const sub = mod ? mod.submodules.find(s => s.id === subId) : null;
+      if (!sub) return;
       selectedSubmodule = sub;
       activeVideoStepIndex = 0;
 
