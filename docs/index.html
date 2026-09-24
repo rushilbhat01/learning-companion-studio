@@ -2975,10 +2975,10 @@
               <button type="button" onclick="deleteAuthorMasterQuestion(${idx})" class="text-xs font-bold text-rose-500 hover:underline">Delete</button>
             </div>
             ${isSubj ? `
-              <input type="text" value="${q.prompt}" oninput="db.find(m=>m.id==='${mod.id}').masterQuiz[${idx}].prompt = this.value; markDraftDirty()" class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-bold bg-white" placeholder="Prompt..." />
-              <textarea oninput="db.find(m=>m.id==='${mod.id}').masterQuiz[${idx}].exemplar = this.value; markDraftDirty()" rows="2" class="w-full rounded-xl border border-slate-200 p-2 text-xs bg-white" placeholder="Exemplar answer...">${q.exemplar || ''}</textarea>
+              <input type="text" value="${q.prompt}" oninput="draftDb.find(m=>m.id==='${mod.id}').masterQuiz[${idx}].prompt = this.value; markDraftDirty()" class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-bold bg-white" placeholder="Prompt..." />
+              <textarea oninput="draftDb.find(m=>m.id==='${mod.id}').masterQuiz[${idx}].exemplar = this.value; markDraftDirty()" rows="2" class="w-full rounded-xl border border-slate-200 p-2 text-xs bg-white" placeholder="Exemplar answer...">${q.exemplar || ''}</textarea>
             ` : `
-              <input type="text" value="${q.question}" oninput="db.find(m=>m.id==='${mod.id}').masterQuiz[${idx}].question = this.value; markDraftDirty()" class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-bold bg-white" placeholder="Question..." />
+              <input type="text" value="${q.question}" oninput="draftDb.find(m=>m.id==='${mod.id}').masterQuiz[${idx}].question = this.value; markDraftDirty()" class="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-bold bg-white" placeholder="Question..." />
             `}
           </div>
         `;
