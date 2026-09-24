@@ -476,8 +476,10 @@
                   </div>
 
                   <!-- PDF Document Reader Frame -->
-                  <div class="relative w-full h-80 sm:h-96 rounded-2xl overflow-hidden border border-indigo-200 bg-white shadow-inner">
-                    <iframe id="pdf-embed-frame" src="" class="w-full h-full border-0"></iframe>
+                  <div class="relative w-full h-96 sm:h-[500px] rounded-2xl overflow-hidden border border-indigo-200 bg-slate-100 shadow-inner">
+                    <object id="pdf-embed-object" data="" type="application/pdf" class="w-full h-full">
+                      <iframe id="pdf-embed-frame" src="" class="w-full h-full border-0"></iframe>
+                    </object>
                   </div>
 
                   <!-- PDF READING CHECKPOINTS CONTAINER -->
@@ -870,6 +872,9 @@
             videoSteps: [
               {
                 id: "vstep-1-1-1",
+                format: "video",
+                videoTitle: "Video Link 1: Core Principles of Strength-Based Mentoring",
+                pdfTitle: "Neurodiversity & Strength-Based Mentoring Guide",
                 title: "Video Link 1: Core Principles of Strength-Based Mentoring",
                 videoUrl: "https://vjs.zencdn.net/v/oceans.mp4",
                 transcript: "Neurodiversity recognizes that brain differences are natural human variations. Companions move away from a deficit model (fixing behavior) to a strength-based model.",
@@ -923,6 +928,9 @@
               },
               {
                 id: "vstep-1-1-2",
+                format: "video",
+                videoTitle: "Video Link 2: Processing Pauses & Non-Verbal Cues",
+                pdfTitle: "Processing Pauses & Non-Verbal Cues Protocol",
                 title: "Video Link 2: Processing Pauses & Non-Verbal Cues",
                 videoUrl: "https://vjs.zencdn.net/v/oceans.mp4",
                 transcript: "Learn how to adapt communication using 10-second processing pauses.",
@@ -1077,8 +1085,10 @@
             videoSteps: [
               {
                 id: "vstep-sub1-2-pdf",
-                title: "Inclusive Classrooms De-escalation Protocol & Sensory Regulation Guide",
                 format: "pdf",
+                videoTitle: "De-escalation & Sensory Toolkit Video Lesson",
+                pdfTitle: "Inclusive Classrooms De-escalation Protocol & Sensory Regulation Guide",
+                title: "Inclusive Classrooms De-escalation Protocol & Sensory Regulation Guide",
                 pdfFileName: "sample_deescalation_guide.pdf",
                 pdfFileSize: "124 KB",
                 pdfUrl: "https://raw.githubusercontent.com/rushilbhat01/learning-companion-studio/main/docs/sample_deescalation_guide.pdf",
@@ -1285,11 +1295,118 @@
     ];
 
     // ==========================================
+    // INDEXEDDB RESILIENT PDF STORAGE (NO 5MB LOCALSTORAGE QUOTA LIMITS)
+    // ==========================================
+    const IDB_NAME = "LCS_DOCUMENT_STORE_V2";
+    const IDB_STORE = "pdf_blobs";
+    let idbPromise = null;
+
+    function getIDB() {
+      if (!idbPromise) {
+        idbPromise = new Promise((resolve) => {
+          if (!window.indexedDB) {
+            console.warn("IndexedDB not supported in this environment");
+            return resolve(null);
+          }
+          const req = indexedDB.open(IDB_NAME, 1);
+          req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(IDB_STORE)) {
+              db.createObjectStore(IDB_STORE);
+            }
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => {
+            console.warn("IndexedDB open error", req.error);
+            resolve(null);
+          };
+        });
+      }
+      return idbPromise;
+    }
+
+    const pdfBlobUrlCache = {}; // storageKey -> blobUrl
+
+    async function storePdfBlob(key, blobOrFile) {
+      try {
+        const db = await getIDB();
+        if (!db) return false;
+        return new Promise((resolve) => {
+          const tx = db.transaction(IDB_STORE, "readwrite");
+          const store = tx.objectStore(IDB_STORE);
+          store.put(blobOrFile, key);
+          tx.oncomplete = () => resolve(true);
+          tx.onerror = () => resolve(false);
+        });
+      } catch (e) {
+        console.warn("storePdfBlob error:", e);
+        return false;
+      }
+    }
+
+    async function getPdfBlob(key) {
+      try {
+        const db = await getIDB();
+        if (!db) return null;
+        return new Promise((resolve) => {
+          const tx = db.transaction(IDB_STORE, "readonly");
+          const store = tx.objectStore(IDB_STORE);
+          const req = store.get(key);
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => resolve(null);
+        });
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function restorePdfBlobs(dbArray) {
+      if (!Array.isArray(dbArray)) return;
+      for (const mod of dbArray) {
+        if (!mod.submodules) continue;
+        for (const sub of mod.submodules) {
+          if (sub.pdfDoc && sub.pdfDoc.storageKey) {
+            const blob = await getPdfBlob(sub.pdfDoc.storageKey);
+            if (blob) {
+              const url = URL.createObjectURL(blob);
+              pdfBlobUrlCache[sub.pdfDoc.storageKey] = url;
+              sub.pdfDoc.url = url;
+            }
+          }
+          if (sub.videoSteps) {
+            for (const st of sub.videoSteps) {
+              if (st.pdfStorageKey) {
+                const blob = await getPdfBlob(st.pdfStorageKey);
+                if (blob) {
+                  const url = URL.createObjectURL(blob);
+                  pdfBlobUrlCache[st.pdfStorageKey] = url;
+                  st.pdfUrl = url;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // ==========================================
     // STATE ENGINE: DRAFT VS PUBLISHED IN LOCALSTORAGE
     // ==========================================
     const STORAGE_KEY_PUBLISHED = "lcs_published_courses_v2";
     const STORAGE_KEY_DRAFT = "lcs_draft_courses_v2";
     const STORAGE_KEY_ATTEMPTS = "lcs_admin_attempts_v2";
+
+    function sanitizeForStorage(val) {
+      return JSON.parse(JSON.stringify(val, (k, v) => {
+        // Strip out large data URLs or blob: URLs so localStorage never hits 5MB quota
+        if (k === 'pdfUrl' && typeof v === 'string') {
+          if (v.startsWith('blob:') || (v.startsWith('data:') && v.length > 50000)) {
+            return ""; // Re-hydrated from IndexedDB
+          }
+        }
+        return v;
+      }));
+    }
 
     function loadFromStorage(key, fallback) {
       try {
@@ -1302,13 +1419,20 @@
 
     function saveToStorage(key, val) {
       try {
-        localStorage.setItem(key, JSON.stringify(val));
-      } catch (e) {}
+        const sanitized = sanitizeForStorage(val);
+        localStorage.setItem(key, JSON.stringify(sanitized));
+      } catch (e) {
+        console.warn("Storage save warning:", e);
+      }
     }
 
     let publishedDb = loadFromStorage(STORAGE_KEY_PUBLISHED, DEFAULT_COURSES);
     let draftDb = loadFromStorage(STORAGE_KEY_DRAFT, JSON.parse(JSON.stringify(publishedDb)));
     let adminAttempts = loadFromStorage(STORAGE_KEY_ATTEMPTS, DEFAULT_ATTEMPTS);
+
+    // Hydrate IndexedDB blobs asynchronously
+    restorePdfBlobs(publishedDb);
+    restorePdfBlobs(draftDb);
 
     // Active working pointers
     let currentView = 'student'; // 'student' | 'author' | 'admin'
@@ -1763,6 +1887,19 @@
       showToast("Removed content step.");
     }
 
+    function updateStepTitle(vIdx, val, format) {
+      const step = selectedSubmodule.videoSteps[vIdx];
+      if (!step) return;
+      if (format === 'pdf') {
+        step.pdfTitle = val;
+        step.title = val;
+      } else {
+        step.videoTitle = val;
+        step.title = val;
+      }
+      markDraftDirty();
+    }
+
     function toggleStepFormat(vIdx, newFormat) {
       const step = selectedSubmodule.videoSteps[vIdx];
       if (!step) return;
@@ -1774,14 +1911,28 @@
         if (!step.inVideoCheckpoints) {
           step.inVideoCheckpoints = [];
         }
+        // Restore video title if present without using pdf name
+        if (step.videoTitle) {
+          step.title = step.videoTitle;
+        } else if (!step.title || (step.pdfTitle && step.title === step.pdfTitle)) {
+          step.title = `Video Lesson ${vIdx + 1}: Core Principles`;
+          step.videoTitle = step.title;
+        }
       } else if (newFormat === 'pdf') {
-        if (!step.pdfUrl) {
+        if (!step.pdfUrl && !step.pdfStorageKey) {
           step.pdfUrl = "https://raw.githubusercontent.com/rushilbhat01/learning-companion-studio/main/docs/sample_deescalation_guide.pdf";
           step.pdfFileName = "sample_deescalation_guide.pdf";
           step.pdfFileSize = "124 KB";
         }
         if (!step.pdfCheckpoints) {
           step.pdfCheckpoints = [];
+        }
+        // Restore PDF title without using video title
+        if (step.pdfTitle) {
+          step.title = step.pdfTitle;
+        } else if (!step.title || (step.videoTitle && step.title === step.videoTitle)) {
+          step.title = step.pdfFileName ? step.pdfFileName.replace(/\.[^/.]+$/, "") : `PDF Reading Guide ${vIdx + 1}`;
+          step.pdfTitle = step.title;
         }
       }
       markDraftDirty();
@@ -1830,7 +1981,7 @@
                 <span class="px-2.5 py-1 rounded-lg ${isPdf ? 'bg-indigo-100 text-indigo-800 border-indigo-200' : 'bg-teal-100 text-teal-800 border-teal-200'} text-xs font-black uppercase border">
                   ${isPdf ? '📄 PDF Guide' : '📹 Video Step'} #${vIdx + 1}
                 </span>
-                <span class="text-xs sm:text-sm font-extrabold text-slate-900">${vStep.title}</span>
+                <span class="text-xs sm:text-sm font-extrabold text-slate-900">${isPdf ? (vStep.pdfTitle || vStep.title) : (vStep.videoTitle || vStep.title)}</span>
               </div>
               <div class="flex items-center gap-2">
                 <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-200 text-[10px] font-black">
@@ -1860,8 +2011,8 @@
 
               <!-- Step Title -->
               <div>
-                <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Step Title</label>
-                <input type="text" value="${vStep.title}" oninput="selectedSubmodule.videoSteps[${vIdx}].title = this.value; markDraftDirty()" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold bg-white" />
+                <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">${isPdf ? '📄 PDF Document Guide Title' : '📹 Video Lesson Title'}</label>
+                <input type="text" value="${isPdf ? (vStep.pdfTitle || vStep.title) : (vStep.videoTitle || vStep.title)}" oninput="updateStepTitle(${vIdx}, this.value, '${isPdf ? 'pdf' : 'video'}')" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold bg-white" />
               </div>
 
               <!-- If Video: Video URL & Removable Video Control (DELIVERABLE #7) -->
@@ -2149,36 +2300,41 @@
       processAuthorPDFFile(file, vIdx);
     }
 
-    function processAuthorPDFFile(file, vIdx) {
+    async function processAuthorPDFFile(file, vIdx) {
+      if (!file) return;
       if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
         showToast('Please upload a valid PDF document (.pdf)', 'rose');
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const dataUrl = e.target.result;
-        if (!selectedSubmodule || !selectedSubmodule.videoSteps || !selectedSubmodule.videoSteps[vIdx]) return;
-        const step = selectedSubmodule.videoSteps[vIdx];
-        step.pdfUrl = dataUrl;
-        step.pdfFileName = file.name;
-        step.pdfFileSize = (file.size / 1024 < 1024) 
-          ? (file.size / 1024).toFixed(1) + ' KB' 
-          : (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+      if (!selectedSubmodule || !selectedSubmodule.videoSteps || !selectedSubmodule.videoSteps[vIdx]) return;
+      const step = selectedSubmodule.videoSteps[vIdx];
 
-        // Auto-update step title if default or empty
-        if (!step.title || step.title.startsWith('PDF Reading Guide') || step.title.startsWith('Video Link') || step.title === 'Lecture 1: Core Concepts') {
-          step.title = file.name.replace(/\.[^/.]+$/, "");
-        }
+      // Explicitly set format to 'pdf' when a PDF is uploaded to this step
+      step.format = 'pdf';
 
-        markDraftDirty();
-        renderAuthorContentFormatSteps();
-        showToast(`Uploaded "${file.name}" successfully! Attached to this step.`, 'emerald');
-      };
-      reader.onerror = function() {
-        showToast('Failed to read the PDF file. Please try again.', 'rose');
-      };
-      reader.readAsDataURL(file);
+      // 1. Store raw file/blob in IndexedDB (handles 15MB+ with zero quota errors)
+      const storageKey = `pdf_${selectedSubmodule.id}_step_${step.id || vIdx}_${Date.now()}`;
+      await storePdfBlob(storageKey, file);
+
+      // 2. Generate native Blob URL (Chrome renders blob URLs in iframe/object without blank screens)
+      const blobUrl = URL.createObjectURL(file);
+      pdfBlobUrlCache[storageKey] = blobUrl;
+
+      step.pdfStorageKey = storageKey;
+      step.pdfUrl = blobUrl;
+      step.pdfFileName = file.name;
+      step.pdfFileSize = (file.size / 1024 < 1024) 
+        ? (file.size / 1024).toFixed(1) + ' KB' 
+        : (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+
+      // 3. Set PDF title without modifying videoTitle!
+      step.pdfTitle = file.name.replace(/\.[^/.]+$/, "");
+      step.title = step.pdfTitle;
+
+      markDraftDirty();
+      renderAuthorContentFormatSteps();
+      showToast(`Uploaded "${file.name}" (${step.pdfFileSize}) successfully! Attached to this step.`, 'emerald');
     }
 
     function removeAuthorPDF(vIdx) {
@@ -2739,83 +2895,251 @@
     // =========================================================================
     // MULTI-MODAL PDF DOCUMENT VIEWER & EMBEDDED CHECKPOINTS (DELIVERABLE #4)
     // =========================================================================
+    let activePdfMilestoneIndexMap = {}; // submoduleId -> number (0-indexed current milestone)
+
     function renderStudentPDFView(step) {
       const titleEl = document.getElementById('pdf-doc-title');
       const downloadBtn = document.getElementById('pdf-download-btn');
       const embedFrame = document.getElementById('pdf-embed-frame');
+      const embedObj = document.getElementById('pdf-embed-object');
       const checkpointsList = document.getElementById('pdf-checkpoints-list');
 
+      // Hydrate from blob cache if key exists
+      if (step.pdfStorageKey && pdfBlobUrlCache[step.pdfStorageKey]) {
+        step.pdfUrl = pdfBlobUrlCache[step.pdfStorageKey];
+      }
+
       const pdfUrl = step.pdfUrl || "https://raw.githubusercontent.com/rushilbhat01/learning-companion-studio/main/docs/sample_deescalation_guide.pdf";
-      const fileName = step.pdfFileName || (pdfUrl.startsWith('data:') ? 'Inclusive_Education_Guide.pdf' : (pdfUrl.split('/').pop().split('?')[0] || "guide.pdf"));
-      if (titleEl) titleEl.innerText = step.title || fileName.replace(/\.[^/.]+$/, "");
+      const fileName = step.pdfFileName || (step.pdfTitle ? step.pdfTitle + ".pdf" : (pdfUrl.split('/').pop().split('?')[0] || "guide.pdf"));
+      if (titleEl) titleEl.innerText = step.pdfTitle || step.title || fileName.replace(/\.[^/.]+$/, "");
       if (downloadBtn) {
         downloadBtn.href = pdfUrl;
         downloadBtn.download = fileName;
       }
-      if (embedFrame) embedFrame.src = pdfUrl;
+      if (embedFrame) embedFrame.src = pdfUrl + "#toolbar=0";
+      if (embedObj) embedObj.data = pdfUrl + "#toolbar=0";
 
       const checkpoints = step.pdfCheckpoints || [];
       if (!checkpointsList) return;
 
       if (checkpoints.length === 0) {
-        checkpointsList.innerHTML = `<p class="text-xs text-slate-500 italic">No embedded checkpoints for this reading.</p>`;
+        checkpointsList.innerHTML = `<div class="p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100 text-xs font-bold text-slate-600">No embedded checkpoints for this reading.</div>`;
         unlockPDFReflections();
         return;
       }
 
-      let allPdfCheckpointsPassed = true;
+      const subId = selectedSubmodule.id;
+      if (activePdfMilestoneIndexMap[subId] === undefined) {
+        // default to first unpassed checkpoint
+        const firstUnpassed = checkpoints.findIndex((_, idx) => !pdfCheckpointsCompletedMap[`${subId}_pdf_${idx}`]);
+        activePdfMilestoneIndexMap[subId] = firstUnpassed === -1 ? checkpoints.length - 1 : firstUnpassed;
+      }
+      let currentMilestone = activePdfMilestoneIndexMap[subId];
+      if (currentMilestone >= checkpoints.length) {
+        currentMilestone = checkpoints.length - 1;
+      }
 
-      checkpointsList.innerHTML = checkpoints.map((cp, cpIdx) => {
-        const key = `${selectedSubmodule.id}_pdf_${cpIdx}`;
-        const hasAnswered = pdfCheckpointsCompletedMap[key];
-        if (!hasAnswered) allPdfCheckpointsPassed = false;
-        const selected = selectedChoicesMap[key];
+      const allPdfCheckpointsPassed = checkpoints.every((_, idx) => pdfCheckpointsCompletedMap[`${subId}_pdf_${idx}`]);
+      if (allPdfCheckpointsPassed) {
+        unlockPDFReflections();
+      }
 
-        return `
-          <div class="p-4 sm:p-5 bg-white rounded-2xl border ${hasAnswered ? 'border-emerald-300 bg-emerald-50/20' : 'border-indigo-100'} shadow-sm space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-black uppercase">
-                ${cp.section || `Checkpoint #${cpIdx + 1}`}
+      const completedCount = checkpoints.filter((_, idx) => pdfCheckpointsCompletedMap[`${subId}_pdf_${idx}`]).length;
+      const progressPct = Math.round((completedCount / checkpoints.length) * 100);
+
+      let html = `
+        <div class="space-y-4">
+          <!-- Sequential Milestone Stepper Bar -->
+          <div class="p-4 bg-indigo-50/70 rounded-2xl border border-indigo-200 space-y-2.5 shadow-sm">
+            <div class="flex items-center justify-between text-xs font-black uppercase text-indigo-950">
+              <span class="flex items-center gap-1.5">
+                <span>⏱️</span> <span>Reading Milestones Progression</span>
               </span>
-              <span class="text-xs font-bold ${hasAnswered ? 'text-emerald-600' : 'text-amber-600'}">
-                ${hasAnswered ? '✓ Checkpoint Passed' : '⏱️ Pending Reflection'}
+              <span class="text-indigo-700 font-extrabold">
+                ${allPdfCheckpointsPassed ? '✓ All Completed (100%)' : `Milestone ${currentMilestone + 1} of ${checkpoints.length} (${progressPct}%)`}
               </span>
             </div>
-            
-            <p class="text-xs sm:text-sm font-bold text-slate-900">${cp.question}</p>
 
-            <div class="space-y-2">
+            <!-- Progress bar -->
+            <div class="w-full bg-indigo-200/60 h-2.5 rounded-full overflow-hidden">
+              <div class="bg-indigo-600 h-full rounded-full transition-all duration-500" style="width: ${progressPct}%"></div>
+            </div>
+
+            <!-- Milestone Step Badges -->
+            <div class="flex flex-wrap items-center gap-2 pt-1">
+              ${checkpoints.map((cp, idx) => {
+                const isPassed = pdfCheckpointsCompletedMap[`${subId}_pdf_${idx}`];
+                const isCurrent = idx === currentMilestone && !allPdfCheckpointsPassed;
+                let badgeClass = "px-3 py-1 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all ";
+                if (isPassed) {
+                  badgeClass += "bg-emerald-100 text-emerald-800 border border-emerald-300";
+                } else if (isCurrent) {
+                  badgeClass += "bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-300";
+                } else {
+                  badgeClass += "bg-slate-100 text-slate-400 border border-slate-200 opacity-60";
+                }
+                const shortLabel = cp.section ? cp.section.split(':')[0] : `Milestone ${idx + 1}`;
+                return `
+                  <div class="${badgeClass}">
+                    <span>${isPassed ? '✓' : (isCurrent ? '🎯' : '🔒')}</span>
+                    <span>${shortLabel}</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+      `;
+
+      if (allPdfCheckpointsPassed) {
+        // Celebration Banner
+        html += `
+          <div class="p-5 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-2xl shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <span class="text-3xl">🎉</span>
+              <div>
+                <h5 class="text-sm font-black">All Reading Milestones Mastered!</h5>
+                <p class="text-xs opacity-90 mt-0.5">You have verified your comprehension across all sections of this protocol. The reflections below are unlocked.</p>
+              </div>
+            </div>
+            <button type="button" onclick="activePdfMilestoneIndexMap['${subId}'] = 0; renderStudentPDFView(selectedSubmodule.videoSteps[activeVideoStepIndex] || selectedSubmodule);" class="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-xl text-xs font-bold whitespace-nowrap self-start sm:self-auto border border-white/30">
+              ↺ Review Questions
+            </button>
+          </div>
+        `;
+      } else {
+        // Active Milestone Gated Card
+        const cp = checkpoints[currentMilestone];
+        const key = `${subId}_pdf_${currentMilestone}`;
+        const hasAnswered = pdfCheckpointsCompletedMap[key];
+        const selected = selectedChoicesMap[key];
+        const isCorrect = selected !== undefined && cp.correctIndex === selected;
+
+        html += `
+          <div class="p-5 sm:p-6 bg-white rounded-2xl border-2 border-indigo-200 shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-indigo-100 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 rounded-xl bg-indigo-600 text-white text-[10px] font-black uppercase tracking-wider">
+                  Active Milestone ${currentMilestone + 1} of ${checkpoints.length}
+                </span>
+                <span class="text-xs font-black text-indigo-950">${cp.section || `Milestone ${currentMilestone + 1}`}</span>
+              </div>
+              <span class="text-xs font-bold ${hasAnswered ? 'text-emerald-600' : 'text-amber-600'} flex items-center gap-1">
+                <span>${hasAnswered ? '✓ Mastered' : '⏱️ Reading in Progress'}</span>
+              </span>
+            </div>
+
+            <!-- Target Reading Section Notice -->
+            <div class="p-3.5 bg-indigo-50/70 rounded-xl border border-indigo-100 text-xs text-indigo-950 flex items-start gap-2.5">
+              <span class="text-lg flex-shrink-0">📖</span>
+              <div>
+                <span class="font-black uppercase text-[10px] text-indigo-800">Target Document Section:</span>
+                <p class="font-bold text-slate-800 mt-0.5">${cp.section || 'Read this section in the PDF document above before answering:'}</p>
+              </div>
+            </div>
+
+            <!-- Question Prompt -->
+            <div class="space-y-1">
+              <h4 class="text-sm font-extrabold text-slate-900">${cp.question}</h4>
+              <p class="text-[11px] text-slate-500">Select the correct response according to the reading material to proceed.</p>
+            </div>
+
+            <!-- 4 Options -->
+            <div class="space-y-2 pt-1">
               ${(cp.choices || []).map((ch, chIdx) => {
                 const isSelected = selected === chIdx;
-                const isCorrect = cp.correctIndex === chIdx;
-                let optClass = "p-2.5 rounded-xl border text-xs font-bold cursor-pointer transition-all flex items-center justify-between ";
+                const isChoiceCorrect = cp.correctIndex === chIdx;
+                let optClass = "p-3 rounded-xl border text-xs font-bold cursor-pointer transition-all flex items-center justify-between ";
                 if (hasAnswered) {
-                  if (isCorrect) optClass += "bg-emerald-50 border-emerald-400 text-emerald-900";
+                  if (isChoiceCorrect) optClass += "bg-emerald-50 border-emerald-400 text-emerald-900 shadow-sm";
                   else if (isSelected) optClass += "bg-rose-50 border-rose-400 text-rose-900";
                   else optClass += "bg-slate-50 border-slate-200 text-slate-400 opacity-60";
                 } else {
-                  optClass += "bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-700";
+                  optClass += "bg-slate-50 border-slate-200 hover:bg-indigo-50/70 hover:border-indigo-300 text-slate-700";
                 }
 
                 return `
-                  <div onclick="submitPDFCheckpointAnswer('${key}', ${cpIdx}, ${chIdx})" class="${optClass}">
+                  <div onclick="submitPDFSequentialAnswer('${key}', ${currentMilestone}, ${chIdx})" class="${optClass}">
                     <span>${ch}</span>
-                    ${hasAnswered && isCorrect ? '<span class="text-emerald-600">✓ Correct</span>' : ''}
-                    ${hasAnswered && isSelected && !isCorrect ? '<span class="text-rose-600">✕ Incorrect</span>' : ''}
+                    ${hasAnswered && isChoiceCorrect ? '<span class="text-emerald-600 font-black">✓ Correct</span>' : ''}
+                    ${hasAnswered && isSelected && !isChoiceCorrect ? '<span class="text-rose-600 font-black">✕ Try Again</span>' : ''}
                   </div>
                 `;
               }).join('')}
             </div>
 
+            <!-- Feedback & Next Action Gate -->
             ${hasAnswered ? `
-              <div class="p-3 rounded-xl bg-teal-50 border border-teal-200 text-xs text-teal-900 space-y-1">
-                <span class="font-extrabold uppercase text-[10px] text-teal-800">Author Exemplar Explanation:</span>
-                <p>${cp.exemplar || cp.feedbacks?.[cp.correctIndex] || "Great reflection!"}</p>
+              <div class="pt-3 border-t border-indigo-100 space-y-3">
+                <div class="p-3.5 rounded-xl bg-teal-50 border border-teal-200 text-xs text-teal-900 space-y-1">
+                  <span class="font-extrabold uppercase text-[10px] text-teal-800">Author Exemplar Explanation:</span>
+                  <p>${cp.exemplar || cp.feedbacks?.[cp.correctIndex] || "Mastered! Low-demand and emotional grounding precede de-escalation."}</p>
+                </div>
+
+                <div class="flex justify-end pt-1">
+                  <button type="button" onclick="advancePDFMilestone(${currentMilestone + 1})" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-md transition flex items-center gap-1.5 animate-pulse">
+                    <span>${currentMilestone + 1 < checkpoints.length ? `Unlock & Continue to Milestone ${currentMilestone + 2} →` : 'Complete Reading & Unlock Final Reflections →'}</span>
+                  </button>
+                </div>
               </div>
-            ` : ''}
+            ` : `
+              <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800 flex items-center gap-2">
+                <span>🔒</span>
+                <span class="font-bold">You cannot advance to the next reading section without answering this checkpoint.</span>
+              </div>
+            `}
           </div>
         `;
-      }).join('');
+
+        // Render LOCKED FUTURE MILESTONES (Questions are hidden!)
+        if (currentMilestone + 1 < checkpoints.length) {
+          html += `
+            <div class="space-y-2 pt-2">
+              <span class="text-[10px] font-black uppercase text-slate-400 px-1">Upcoming Locked Milestones</span>
+              ${checkpoints.slice(currentMilestone + 1).map((futureCp, fIdx) => `
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex items-center justify-between opacity-60">
+                  <span class="text-xs font-bold text-slate-500 flex items-center gap-2">
+                    <span>🔒</span> <span>Milestone ${currentMilestone + 2 + fIdx}: ${futureCp.section || 'Next Reading Section'}</span>
+                  </span>
+                  <span class="text-[9px] font-black uppercase bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full">
+                    Complete Milestone ${currentMilestone + 1} to Unlock
+                  </span>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        }
+      }
+
+      // Past Milestones Accordion (if any completed previously)
+      const passedIndices = checkpoints.map((_, i) => i).filter(i => pdfCheckpointsCompletedMap[`${subId}_pdf_${i}`] && (allPdfCheckpointsPassed || i < currentMilestone));
+      if (passedIndices.length > 0 && !allPdfCheckpointsPassed) {
+        html += `
+          <details class="group bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden mt-3">
+            <summary class="p-3 text-xs font-bold text-slate-700 flex items-center justify-between cursor-pointer hover:bg-slate-100">
+              <span class="flex items-center gap-2"><span>✓</span> <span>View Completed Reading Milestones (${passedIndices.length})</span></span>
+              <span class="text-[10px] text-teal-700 font-bold group-open:hidden">Expand</span>
+            </summary>
+            <div class="p-4 border-t border-slate-200 space-y-3 bg-white">
+              ${passedIndices.map(pIdx => {
+                const pCp = checkpoints[pIdx];
+                return `
+                  <div class="p-3 bg-emerald-50/40 rounded-xl border border-emerald-200 text-xs space-y-1">
+                    <div class="flex items-center justify-between">
+                      <span class="font-black text-emerald-900">${pCp.section || `Milestone ${pIdx + 1}`}</span>
+                      <span class="text-emerald-700 font-bold text-[10px]">Passed</span>
+                    </div>
+                    <p class="text-slate-800 font-bold">${pCp.question}</p>
+                    <p class="text-emerald-700 text-[11px]">✓ Answer: ${pCp.choices?.[pCp.correctIndex] || ''}</p>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </details>
+        `;
+      }
+
+      html += `</div>`;
+      checkpointsList.innerHTML = html;
 
       const btnUnlock = document.getElementById('btn-unlock-pdf-reflections');
       const lockText = document.getElementById('pdf-lock-text');
@@ -2829,15 +3153,12 @@
           btnUnlock.disabled = true;
           btnUnlock.className = "bg-slate-300 text-slate-500 cursor-not-allowed px-5 py-2.5 rounded-xl text-xs font-extrabold self-end sm:self-auto";
           btnUnlock.innerText = "🔒 Answer Checkpoints to Unlock";
+          lockText.innerText = `📖 Complete Milestone ${currentMilestone + 1} of ${checkpoints.length} to unlock final reflections.`;
         }
       }
     }
 
-    function submitPDFCheckpointAnswer(key, cpIdx, chIdx) {
-      if (pdfCheckpointsCompletedMap[key]) return;
-      selectedChoicesMap[key] = chIdx;
-      pdfCheckpointsCompletedMap[key] = true;
-
+    function submitPDFSequentialAnswer(key, cpIdx, chIdx) {
       const steps = selectedSubmodule?.videoSteps || [];
       let currentStep = steps[activeVideoStepIndex];
       if (!currentStep && selectedSubmodule?.pdfDoc) {
@@ -2852,7 +3173,17 @@
       const checkpoints = currentStep?.pdfCheckpoints || currentStep?.embeddedCheckpoints || [];
       const cp = checkpoints[cpIdx];
       if (!cp) return;
+
+      selectedChoicesMap[key] = chIdx;
       const isCorrect = cp.correctIndex === chIdx;
+
+      if (isCorrect) {
+        pdfCheckpointsCompletedMap[key] = true;
+        showToast(`✓ Correct! Reading Milestone ${cpIdx + 1} mastered.`, 'emerald');
+      } else {
+        delete pdfCheckpointsCompletedMap[key];
+        showToast(`✕ Incorrect. Review ${cp.section ? cp.section.split(':')[0] : 'the section'} and try again.`, 'rose');
+      }
 
       // Log attempt to Admin Dashboard (DELIVERABLE #8)
       logAdminAttempt({
@@ -2868,6 +3199,24 @@
       });
 
       renderStudentPDFView(currentStep);
+    }
+
+    function advancePDFMilestone(nextIdx) {
+      const subId = selectedSubmodule.id;
+      const steps = selectedSubmodule?.videoSteps || [];
+      const currentStep = steps[activeVideoStepIndex] || selectedSubmodule;
+      const checkpoints = currentStep?.pdfCheckpoints || currentStep?.embeddedCheckpoints || [];
+      
+      if (nextIdx < checkpoints.length) {
+        activePdfMilestoneIndexMap[subId] = nextIdx;
+        showToast(`Unlocked Milestone ${nextIdx + 1}!`, 'teal');
+        renderStudentPDFView(currentStep);
+      } else {
+        // All completed!
+        unlockPDFReflections();
+        showToast(`🎉 All reading checkpoints completed! Final reflections unlocked.`, 'emerald');
+        renderStudentPDFView(currentStep);
+      }
     }
 
     function unlockPDFReflections() {
