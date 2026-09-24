@@ -17,6 +17,8 @@ google_sheets_setup.md
 docs/PRESENTATION_OUTLINE.md
 docs/DEMO_SCRIPT.md
 docs/COMMIT_PLAN.md
+docs/*Learning_Companion_Studio_*.html
+client/public/*Learning_Companion_Studio_*.html
 
 # Ignore legacy meeting minutes and markdown versions of docs
 docs/Weekly_Meeting_Minutes_MoM_Aug_14.*
