@@ -83,6 +83,15 @@ html_content = r'''<!DOCTYPE html>
     </div>
   </header>
 
+  <!-- GLOBAL FLOATING TOAST NOTIFICATION -->
+  <div id="global-toast-container" class="fixed top-20 right-4 sm:right-8 z-50 pointer-events-none transition-all duration-300">
+    <div id="publish-toast" class="hidden pointer-events-auto max-w-md p-4 rounded-2xl bg-slate-900 text-white border border-teal-500/40 shadow-2xl text-xs sm:text-sm font-bold flex items-center gap-3 backdrop-blur-md transition-all">
+      <span class="text-lg">🔔</span>
+      <span id="publish-toast-msg" class="leading-snug">🎉 <strong>Published!</strong> All changes published to LC View.</span>
+      <button type="button" onclick="document.getElementById('publish-toast').classList.add('hidden')" class="text-xs font-bold text-teal-400 hover:text-white ml-auto">✕</button>
+    </div>
+  </div>
+
   <!-- ==================== MAIN CONTAINER ==================== -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-grow w-full">
 
@@ -118,14 +127,6 @@ html_content = r'''<!DOCTYPE html>
             <span>🚀</span> <span>Publish Live to LC View</span>
           </button>
         </div>
-      </div>
-
-      <!-- Toast for Feedback -->
-      <div id="publish-toast" class="hidden p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs sm:text-sm font-semibold flex items-center justify-between shadow-sm">
-        <span id="publish-toast-msg">🎉 <strong>Published!</strong> All changes published to LC View.</span>
-        <button onclick="switchView('student')" class="text-xs bg-teal-800 text-white px-3.5 py-1.5 rounded-xl font-bold hover:bg-teal-700 ml-3">
-          View in Companion Mode →
-        </button>
       </div>
 
       <!-- MODULE & SUBMODULE MANAGEMENT CARD (WITH EDIT & DELETE) -->
@@ -1376,10 +1377,10 @@ html_content = r'''<!DOCTYPE html>
       if (toast && toastMsg) {
         toastMsg.innerHTML = msg;
         toast.classList.remove('hidden');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        setTimeout(() => {
+        if (window.toastTimeout) clearTimeout(window.toastTimeout);
+        window.toastTimeout = setTimeout(() => {
           toast.classList.add('hidden');
-        }, 5000);
+        }, 4500);
       }
     }
 
@@ -2615,9 +2616,20 @@ html_content = r'''<!DOCTYPE html>
       selectedChoicesMap[key] = chIdx;
       pdfCheckpointsCompletedMap[key] = true;
 
-      const steps = selectedSubmodule.videoSteps || [];
-      const currentStep = steps[activeVideoStepIndex] || selectedSubmodule.pdfDoc;
-      const cp = currentStep.pdfCheckpoints[cpIdx];
+      const steps = selectedSubmodule?.videoSteps || [];
+      let currentStep = steps[activeVideoStepIndex];
+      if (!currentStep && selectedSubmodule?.pdfDoc) {
+        currentStep = {
+          format: 'pdf',
+          title: selectedSubmodule.pdfDoc.title,
+          pdfUrl: selectedSubmodule.pdfDoc.url,
+          pdfCheckpoints: selectedSubmodule.pdfDoc.embeddedCheckpoints || [],
+          transcript: ""
+        };
+      }
+      const checkpoints = currentStep?.pdfCheckpoints || currentStep?.embeddedCheckpoints || [];
+      const cp = checkpoints[cpIdx];
+      if (!cp) return;
       const isCorrect = cp.correctIndex === chIdx;
 
       // Log attempt to Admin Dashboard (DELIVERABLE #8)
@@ -2713,7 +2725,14 @@ html_content = r'''<!DOCTYPE html>
     }
 
     // MOBILE-RESPONSIVE IN-VIDEO CHECKPOINT MODAL (DELIVERABLE #1)
+    let hasEvaluatedInVideoCheckpoint = false;
+    let selectedInVideoChoiceIndex = null;
+
     function renderInVideoCheckpointModal(ivc, key, isLxT) {
+      currentActiveInVideoCheckpoint = { key, ivc, isLxT };
+      hasEvaluatedInVideoCheckpoint = false;
+      selectedInVideoChoiceIndex = null;
+
       const modalId = isLxT ? 'lxt-in-video-checkpoint-modal' : 'in-video-checkpoint-modal';
       const modal = document.getElementById(modalId);
       if (!modal) return;
@@ -2743,12 +2762,15 @@ html_content = r'''<!DOCTYPE html>
               </div>
             `).join('')}
           </div>
+
+          <!-- Instant Pedagogical Feedback Box -->
+          <div id="ivc-feedback-box" class="hidden"></div>
         </div>
 
-        <div class="pt-4 border-t border-slate-800 mt-4 flex items-center justify-between gap-3">
-          <span class="text-[11px] text-amber-200/80 font-medium">Select an action to resume video</span>
+        <div class="pt-4 border-t border-slate-800 mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <span id="ivc-action-hint" class="text-[11px] text-amber-200/80 font-medium">Select an answer choice to evaluate</span>
           <button id="btn-submit-ivc" disabled onclick="submitInVideoCheckpointChoice('${key}', ${isLxT})" class="bg-slate-700 text-slate-400 cursor-not-allowed px-5 py-2.5 rounded-xl text-xs font-black transition-all">
-            Submit & Resume →
+            Submit & Check Answer →
           </button>
         </div>
       `;
@@ -2756,9 +2778,8 @@ html_content = r'''<!DOCTYPE html>
       modal.classList.remove('hidden');
     }
 
-    let selectedInVideoChoiceIndex = null;
-
     function selectInVideoChoice(cIdx) {
+      if (hasEvaluatedInVideoCheckpoint) return; // Prevent changing after evaluated
       selectedInVideoChoiceIndex = cIdx;
       const opts = document.querySelectorAll('[id^="ivc-opt-"]');
       opts.forEach((o, i) => {
@@ -2781,6 +2802,23 @@ html_content = r'''<!DOCTYPE html>
     function submitInVideoCheckpointChoice(key, isLxT) {
       if (selectedInVideoChoiceIndex === null) return;
       const ivc = currentActiveInVideoCheckpoint?.ivc;
+      if (!ivc) return;
+
+      const modalId = isLxT ? 'lxt-in-video-checkpoint-modal' : 'in-video-checkpoint-modal';
+      const modal = document.getElementById(modalId);
+
+      // STEP 2: IF ALREADY EVALUATED, PROCEED & RESUME VIDEO
+      if (hasEvaluatedInVideoCheckpoint) {
+        if (modal) modal.classList.add('hidden');
+        answeredInVideoCheckpointsMap[key] = true;
+        currentActiveInVideoCheckpoint = null;
+        selectedInVideoChoiceIndex = null;
+        hasEvaluatedInVideoCheckpoint = false;
+        resumeVideoPlayback(isLxT);
+        return;
+      }
+
+      // STEP 1: EVALUATE & SHOW DETAILED PEDAGOGICAL FEEDBACK
       const isCorrect = ivc.correctIndex === selectedInVideoChoiceIndex;
 
       // Log attempt to Admin Dashboard (DELIVERABLE #8)
@@ -2788,7 +2826,7 @@ html_content = r'''<!DOCTYPE html>
         companionName: "Priya Sharma (Trainee)",
         type: "IN_VIDEO_CHECKPOINT",
         typeName: `In-Video Reflection (${String(ivc.timeMin||0).padStart(2,'0')}:${String(ivc.timeSec||0).padStart(2,'0')})`,
-        moduleTitle: selectedSubmodule.title,
+        moduleTitle: selectedSubmodule ? selectedSubmodule.title : "Module Lesson",
         question: ivc.question,
         submittedAnswer: ivc.choices[selectedInVideoChoiceIndex],
         status: isCorrect ? "Correct (100%)" : "Incorrect / Reviewed",
@@ -2796,15 +2834,49 @@ html_content = r'''<!DOCTYPE html>
         exemplar: ivc.exemplar || "Strength-based mentorship respects sensory limits."
       });
 
-      answeredInVideoCheckpointsMap[key] = true;
-      currentActiveInVideoCheckpoint = null;
-      selectedInVideoChoiceIndex = null;
+      hasEvaluatedInVideoCheckpoint = true;
 
-      const modalId = isLxT ? 'lxt-in-video-checkpoint-modal' : 'in-video-checkpoint-modal';
-      const modal = document.getElementById(modalId);
-      if (modal) modal.classList.add('hidden');
+      // Update choice option borders & badges
+      const opts = document.querySelectorAll('[id^="ivc-opt-"]');
+      opts.forEach((o, i) => {
+        if (i === ivc.correctIndex) {
+          o.className = "p-3 rounded-xl bg-emerald-950/90 border-2 border-emerald-400 text-xs font-black text-emerald-200 flex items-center justify-between shadow-md";
+          o.querySelector('span:last-child').innerHTML = "✓";
+        } else if (i === selectedInVideoChoiceIndex && !isCorrect) {
+          o.className = "p-3 rounded-xl bg-rose-950/90 border-2 border-rose-500 text-xs font-black text-rose-200 flex items-center justify-between shadow-md";
+          o.querySelector('span:last-child').innerHTML = "✕";
+        } else {
+          o.className = "p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs font-medium text-slate-500 opacity-50 flex items-center justify-between";
+        }
+      });
 
-      resumeVideoPlayback(isLxT);
+      const feedbackBox = document.getElementById('ivc-feedback-box');
+      if (feedbackBox) {
+        const feedbackText = ivc.feedbacks?.[selectedInVideoChoiceIndex] || (isCorrect ? "Correct! Excellent strength-based reflection." : "Review the correct response highlighted above.");
+        feedbackBox.className = `p-3.5 rounded-2xl border text-xs space-y-1.5 ${isCorrect ? 'bg-emerald-950/70 border-emerald-500/50 text-emerald-200' : 'bg-amber-950/70 border-amber-500/50 text-amber-200'}`;
+        feedbackBox.innerHTML = `
+          <div class="flex items-center gap-1.5 font-black uppercase text-[10px] ${isCorrect ? 'text-emerald-400' : 'text-amber-400'}">
+            <span>${isCorrect ? '✓ Correct Choice' : '⚠️ Learning Review'}</span>
+          </div>
+          <p class="leading-relaxed font-semibold">${feedbackText}</p>
+          <div class="pt-1.5 border-t border-slate-700/60 text-[11px] text-teal-300">
+            <strong>Exemplar Guidance:</strong> ${ivc.exemplar || "Focus on strength-based co-regulation."}
+          </div>
+        `;
+        feedbackBox.classList.remove('hidden');
+      }
+
+      const hint = document.getElementById('ivc-action-hint');
+      if (hint) {
+        hint.innerText = "Review feedback above, then continue.";
+        hint.className = "text-[11px] text-emerald-300 font-bold";
+      }
+
+      const btn = document.getElementById('btn-submit-ivc');
+      if (btn) {
+        btn.innerText = "Continue Video Playback ▶";
+        btn.className = "bg-teal-600 hover:bg-teal-500 text-white cursor-pointer px-5 py-2.5 rounded-xl text-xs font-black transition-all shadow-lg shadow-teal-600/30";
+      }
     }
 
     function onVideoEnded() {
@@ -3104,6 +3176,9 @@ html_content = r'''<!DOCTYPE html>
       };
       adminAttempts.unshift(newAtt);
       saveToStorage(STORAGE_KEY_ATTEMPTS, adminAttempts);
+      if (currentView === 'admin') {
+        renderAdminDashboard();
+      }
     }
 
     function renderAdminDashboard() {
