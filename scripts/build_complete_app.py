@@ -1716,12 +1716,24 @@ html_content = r'''<!DOCTYPE html>
       const step = selectedSubmodule.videoSteps[vIdx];
       if (!step) return;
       step.format = newFormat;
-      if (newFormat === 'pdf' && !step.pdfUrl) {
-        step.pdfUrl = "https://raw.githubusercontent.com/rushilbhat01/learning-companion-studio/main/docs/sample_deescalation_guide.pdf";
-        if (!step.pdfCheckpoints) step.pdfCheckpoints = [];
+      if (newFormat === 'video') {
+        if (!step.videoUrl) {
+          step.videoUrl = "https://vjs.zencdn.net/v/oceans.mp4";
+        }
+        if (!step.inVideoCheckpoints) {
+          step.inVideoCheckpoints = [];
+        }
+      } else if (newFormat === 'pdf') {
+        if (!step.pdfUrl) {
+          step.pdfUrl = "https://raw.githubusercontent.com/rushilbhat01/learning-companion-studio/main/docs/sample_deescalation_guide.pdf";
+        }
+        if (!step.pdfCheckpoints) {
+          step.pdfCheckpoints = [];
+        }
       }
       markDraftDirty();
       renderAuthorContentFormatSteps();
+      showToast(`Switched to ${newFormat === 'video' ? '📹 Video Lesson' : '📄 PDF Document Guide'}.`);
     }
 
     function removeVideoUrlFromStep(vIdx) {
@@ -1754,7 +1766,7 @@ html_content = r'''<!DOCTYPE html>
       }
 
       container.innerHTML = steps.map((vStep, vIdx) => {
-        const isPdf = vStep.format === 'pdf' || (!vStep.videoUrl && vStep.pdfUrl);
+        const isPdf = vStep.format === 'pdf' || (!vStep.format && !vStep.videoUrl && vStep.pdfUrl);
         const hasVideo = !!vStep.videoUrl;
         const cpCount = isPdf ? (vStep.pdfCheckpoints?.length || 0) : (vStep.inVideoCheckpoints?.length || 0);
 
@@ -2478,7 +2490,7 @@ html_content = r'''<!DOCTYPE html>
       const videoWrapper = document.getElementById('student-video-container-wrapper');
       const pdfWrapper = document.getElementById('student-pdf-container-wrapper');
 
-      const isCurrentStepPdf = currentStep && (currentStep.format === 'pdf' || (!currentStep.videoUrl && currentStep.pdfUrl));
+      const isCurrentStepPdf = currentStep && (currentStep.format === 'pdf' || (!currentStep.format && !currentStep.videoUrl && currentStep.pdfUrl));
 
       if (isCurrentStepPdf) {
         // PDF MODE
