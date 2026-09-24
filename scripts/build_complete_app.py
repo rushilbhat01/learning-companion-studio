@@ -680,111 +680,180 @@ html_content = r'''<!DOCTYPE html>
       <div class="rounded-3xl bg-slate-900 text-white p-6 sm:p-8 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 border border-slate-800">
         <div class="space-y-1">
           <div class="flex items-center gap-2">
-            <span class="text-xs font-bold uppercase tracking-wider text-teal-400">Supervisor Portal</span>
+            <span class="text-xs font-bold uppercase tracking-wider text-teal-400">Supervisor & Clinical Lead Portal</span>
             <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-teal-500/20 text-teal-300 border border-teal-500/30">
-              Live Monitoring
+              Pedagogical Analytics
             </span>
           </div>
-          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Companion Attempt & Progress Analytics</h2>
+          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Learning Companion Diagnostics & Attempt Friction</h2>
           <p class="text-slate-400 text-xs sm:text-sm">
-            Monitor real-time de-escalation practice attempts, video reflections, PDF checkpoints, and quiz mastery across trainee companions.
+            Drill down into individual trainee attempts, question-level mistake friction, retry counts, and module mastery.
           </p>
         </div>
 
         <div class="flex flex-wrap items-center gap-2.5">
           <button type="button" onclick="simulateCompanionAttempt()" class="px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-black text-xs shadow-md shadow-teal-600/20 flex items-center gap-1.5 transition-all">
-            <span>⚡</span> <span>Simulate LC Attempt</span>
+            <span>⚡</span> <span>Simulate LC Mistake & Retry</span>
           </button>
           <button type="button" onclick="exportAttemptsCSV()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs flex items-center gap-1.5 transition-all">
-            <span>📥</span> <span>Export CSV</span>
+            <span>📥</span> <span>Export Diagnostic CSV</span>
           </button>
-          <button type="button" onclick="resetAttemptsLog()" class="px-3.5 py-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 font-bold text-xs transition-all">
+          <button type="button" onclick="resetAttemptsLog()" class="px-3.5 py-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 font-bold text-xs transition-all" title="Reset to Sample Data">
             <span>🗑️</span>
           </button>
         </div>
       </div>
 
-      <!-- KPI METRIC SUMMARY CARDS -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
-          <div class="flex items-center justify-between text-slate-400 text-xs font-bold uppercase">
-            <span>Companions</span>
-            <span class="text-base">👥</span>
+      <!-- DUAL SELECTOR CONTROL BAR: LC + MODULE -->
+      <div class="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
+          <!-- LC Dropdown -->
+          <div class="space-y-1.5">
+            <label for="admin-lc-select" class="block text-[10px] font-black uppercase tracking-wider text-slate-400">
+              1. Choose Learning Companion (LC)
+            </label>
+            <div class="relative">
+              <select id="admin-lc-select" onchange="onAdminFilterChange()" class="w-full rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-black text-slate-900 focus:border-teal-600 focus:bg-white transition-all cursor-pointer">
+                <option value="Priya Sharma (Trainee)">Priya Sharma (Trainee)</option>
+                <option value="Rahul Mehta">Rahul Mehta (Specialist Trainee)</option>
+                <option value="Tanya Verma">Tanya Verma (Peer Mentor)</option>
+                <option value="Jamson">Jamson (Senior Trainee)</option>
+                <option value="Alex Chen">Alex Chen (New Trainee)</option>
+                <option value="ALL">All Companions (Cohort Overview)</option>
+              </select>
+            </div>
           </div>
-          <div class="text-2xl sm:text-3xl font-black text-slate-900" id="admin-kpi-companions">5</div>
-          <p class="text-[11px] text-teal-700 font-bold">InclusiveMinds Cohort</p>
+
+          <!-- Module Dropdown -->
+          <div class="space-y-1.5">
+            <label for="admin-module-select" class="block text-[10px] font-black uppercase tracking-wider text-slate-400">
+              2. Choose Training Module
+            </label>
+            <div class="relative">
+              <select id="admin-module-select" onchange="onAdminFilterChange()" class="w-full rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-black text-slate-900 focus:border-teal-600 focus:bg-white transition-all cursor-pointer">
+                <!-- Dynamically populated -->
+              </select>
+            </div>
+          </div>
         </div>
 
-        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
-          <div class="flex items-center justify-between text-slate-400 text-xs font-bold uppercase">
-            <span>Total Attempts</span>
-            <span class="text-base">⏱️</span>
+        <!-- Selected LC Profile Pill -->
+        <div class="lg:w-72 p-3.5 bg-gradient-to-r from-teal-50 to-indigo-50/50 rounded-2xl border border-teal-200/60 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div id="admin-lc-avatar" class="w-10 h-10 rounded-2xl bg-teal-700 text-white font-black text-sm flex items-center justify-center shadow-sm">
+              PS
+            </div>
+            <div>
+              <h4 id="admin-lc-name" class="text-xs font-black text-slate-900">Priya Sharma</h4>
+              <p id="admin-lc-role" class="text-[10px] text-teal-800 font-extrabold">InclusiveMinds Cohort 2026</p>
+            </div>
           </div>
-          <div class="text-2xl sm:text-3xl font-black text-slate-900" id="admin-kpi-attempts">0</div>
-          <p class="text-[11px] text-teal-700 font-bold">In-Video & PDF Reflections</p>
-        </div>
-
-        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
-          <div class="flex items-center justify-between text-slate-400 text-xs font-bold uppercase">
-            <span>Mastery Pass Rate</span>
-            <span class="text-base">🎯</span>
-          </div>
-          <div class="text-2xl sm:text-3xl font-black text-emerald-600" id="admin-kpi-passrate">100%</div>
-          <p class="text-[11px] text-slate-500 font-medium">Scored above 80%</p>
-        </div>
-
-        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
-          <div class="flex items-center justify-between text-slate-400 text-xs font-bold uppercase">
-            <span>Modules Certified</span>
-            <span class="text-base">🎓</span>
-          </div>
-          <div class="text-2xl sm:text-3xl font-black text-indigo-600" id="admin-kpi-quizzes">0</div>
-          <p class="text-[11px] text-indigo-700 font-bold">Master Quizzes Completed</p>
+          <span id="admin-lc-badge" class="px-2.5 py-1 rounded-xl text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-300">
+            ✓ Active
+          </span>
         </div>
       </div>
 
-      <!-- INTERACTIVE ATTEMPTS LOG TABLE & FILTERS -->
+      <!-- MODULE DIAGNOSTIC SUMMARY STRIP (5 METRIC CARDS) -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1.5">
+          <div class="flex items-center justify-between text-slate-400 text-[10px] font-black uppercase">
+            <span>Module Accuracy</span>
+            <span class="text-sm">🎯</span>
+          </div>
+          <div class="text-2xl sm:text-3xl font-black text-slate-900" id="admin-diag-accuracy">--</div>
+          <p class="text-[10px] text-teal-700 font-bold">Total Attempts Accuracy</p>
+        </div>
+
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1.5">
+          <div class="flex items-center justify-between text-slate-400 text-[10px] font-black uppercase">
+            <span>Wrong Attempts</span>
+            <span class="text-sm">❌</span>
+          </div>
+          <div class="text-2xl sm:text-3xl font-black text-rose-600" id="admin-diag-wrong-count">--</div>
+          <p class="text-[10px] text-rose-700 font-bold">Mistakes Before Right Answer</p>
+        </div>
+
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1.5">
+          <div class="flex items-center justify-between text-slate-400 text-[10px] font-black uppercase">
+            <span>1st Try Pass Rate</span>
+            <span class="text-sm">⚡</span>
+          </div>
+          <div class="text-2xl sm:text-3xl font-black text-emerald-600" id="admin-diag-first-try">--</div>
+          <p class="text-[10px] text-emerald-700 font-bold">Mastered without Retries</p>
+        </div>
+
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1.5">
+          <div class="flex items-center justify-between text-slate-400 text-[10px] font-black uppercase">
+            <span>Checkpoints Mastered</span>
+            <span class="text-sm">📖</span>
+          </div>
+          <div class="text-2xl sm:text-3xl font-black text-indigo-600" id="admin-diag-checkpoints">--</div>
+          <p class="text-[10px] text-indigo-700 font-bold">In-Video & PDF Cleared</p>
+        </div>
+
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1.5 col-span-2 md:col-span-1">
+          <div class="flex items-center justify-between text-slate-400 text-[10px] font-black uppercase">
+            <span>Master Quiz Status</span>
+            <span class="text-sm">🎓</span>
+          </div>
+          <div class="text-xl sm:text-2xl font-black text-purple-700 truncate" id="admin-diag-quiz">--</div>
+          <p class="text-[10px] text-purple-700 font-bold">End-of-Module Exam</p>
+        </div>
+      </div>
+
+      <!-- HIGH FRICTION PEDAGOGICAL ALERT BANNER -->
+      <div id="admin-friction-alert" class="hidden p-4 sm:p-5 rounded-2xl bg-amber-50 border-2 border-amber-300 text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+        <div class="flex items-start gap-3">
+          <span class="text-2xl">⚠️</span>
+          <div>
+            <h4 class="text-xs font-black uppercase text-amber-800 tracking-wider">Pedagogical Friction Alert</h4>
+            <p id="admin-friction-desc" class="text-xs font-bold text-amber-950 mt-0.5">
+              This companion experienced multiple wrong attempts on specific checkpoints. Recommended supervisor debrief.
+            </p>
+          </div>
+        </div>
+        <span class="px-3 py-1 rounded-xl bg-amber-200 text-amber-900 text-[10px] font-black uppercase self-start sm:self-auto whitespace-nowrap">
+          Intervention Recommended
+        </span>
+      </div>
+
+      <!-- PER-QUESTION DIAGNOSTIC TABLE -->
       <div class="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-4">
           <div>
-            <h3 class="text-base font-extrabold text-slate-900">Live Companion Activity Log</h3>
-            <p class="text-xs text-slate-500">Inspect individual answers, scores, and reflection submissions.</p>
+            <h3 class="text-base font-extrabold text-slate-900">Per-Question Attempt & Mistake Diagnostics</h3>
+            <p class="text-xs text-slate-500">Examine how many times each question was answered incorrectly and inspect full answer progressions.</p>
           </div>
 
-          <!-- Filters -->
-          <div class="flex flex-wrap items-center gap-2 text-xs">
-            <select id="admin-filter-companion" onchange="renderAdminAttemptsTable()" class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 font-bold text-slate-700">
-              <option value="ALL">All Companions</option>
-              <option value="Priya Sharma (Trainee)">Priya Sharma</option>
-              <option value="Rahul Mehta">Rahul Mehta</option>
-              <option value="Tanya Verma">Tanya Verma</option>
-              <option value="Jamson">Jamson</option>
-            </select>
-
-            <select id="admin-filter-type" onchange="renderAdminAttemptsTable()" class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 font-bold text-slate-700">
+          <!-- Activity Type Filter -->
+          <div class="flex items-center gap-2 text-xs">
+            <span class="text-[10px] font-black uppercase text-slate-400">Activity:</span>
+            <select id="admin-filter-qtype" onchange="renderAdminQuestionDiagnostics()" class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 font-bold text-slate-700">
               <option value="ALL">All Activity Types</option>
               <option value="IN_VIDEO_CHECKPOINT">In-Video Reflection (LeD)</option>
               <option value="PDF_CHECKPOINT">PDF Reading Checkpoint</option>
               <option value="MASTER_QUIZ">Master Quiz</option>
-              <option value="LXI_DISCUSSION">Module LxI Post</option>
+              <option value="LXI_DISCUSSION">Module LxI Discussion</option>
             </select>
           </div>
         </div>
 
-        <!-- Table Container -->
+        <!-- Diagnostics Table -->
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs text-slate-700">
             <thead class="bg-slate-50 text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100">
               <tr>
-                <th class="p-3.5">Learning Companion</th>
-                <th class="p-3.5">Activity & Question</th>
-                <th class="p-3.5">Module Scope</th>
-                <th class="p-3.5">Timestamp</th>
-                <th class="p-3.5">Status / Score</th>
-                <th class="p-3.5 text-right">Action</th>
+                <th class="p-3.5">Question & Submodule Scope</th>
+                <th class="p-3.5">Activity Medium</th>
+                <th class="p-3.5 text-center">Total Attempts</th>
+                <th class="p-3.5 text-center">Times Done Wrong</th>
+                <th class="p-3.5">Choice Sequence Trail</th>
+                <th class="p-3.5">Mastery Outcome</th>
+                <th class="p-3.5 text-right">Drill Down</th>
               </tr>
             </thead>
-            <tbody id="admin-attempts-tbody" class="divide-y divide-slate-100"></tbody>
+            <tbody id="admin-questions-tbody" class="divide-y divide-slate-100"></tbody>
           </table>
         </div>
       </div>
@@ -1256,57 +1325,392 @@ html_content = r'''<!DOCTYPE html>
     // INITIAL MOCK ATTEMPTS FOR ADMIN DASHBOARD
     // ==========================================
     const DEFAULT_ATTEMPTS = [
+      // Priya Sharma - Module 1
       {
-        id: "att-101",
+        id: "att-ps-1",
         companionName: "Priya Sharma (Trainee)",
+        moduleId: "mod-1",
+        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        submoduleId: "sub-1-1",
+        submoduleTitle: "Submodule 1.1: Understanding Neurodiversity",
+        questionId: "ivc-1-1-1",
+        question: "What is the core focus when mentoring neurodivergent children?",
         type: "IN_VIDEO_CHECKPOINT",
         typeName: "In-Video Reflection (00:15)",
-        moduleTitle: "Module 1 • Submodule 1.1",
-        question: "What is the core focus when mentoring neurodivergent children?",
         submittedAnswer: "Building on unique strengths & providing sensory accommodations",
         status: "Correct (100%)",
         isCorrect: true,
+        attemptNumber: 1,
         timestamp: "Today, 09:15 AM",
         exemplar: "Strength-based focus builds safety and trust without demanding masking."
       },
       {
-        id: "att-102",
-        companionName: "Rahul Mehta",
-        type: "PDF_CHECKPOINT",
-        typeName: "PDF Reading Checkpoint #1",
-        moduleTitle: "Module 1 • Submodule 1.2",
+        id: "att-ps-2a",
+        companionName: "Priya Sharma (Trainee)",
+        moduleId: "mod-1",
+        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        submoduleId: "sub-1-1",
+        submoduleTitle: "Submodule 1.1: Understanding Neurodiversity",
+        questionId: "ivc-1-1-2",
+        question: "How should a companion respond when a child experiences sensory overload?",
+        type: "IN_VIDEO_CHECKPOINT",
+        typeName: "In-Video Reflection (00:30)",
+        submittedAnswer: "Demand immediate eye contact and posture fix",
+        status: "Incorrect (Retry Needed)",
+        isCorrect: false,
+        attemptNumber: 1,
+        timestamp: "Today, 09:18 AM",
+        exemplar: "Demanding eye contact increases neurological distress during sensory overload."
+      },
+      {
+        id: "att-ps-2b",
+        companionName: "Priya Sharma (Trainee)",
+        moduleId: "mod-1",
+        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        submoduleId: "sub-1-1",
+        submoduleTitle: "Submodule 1.1: Understanding Neurodiversity",
+        questionId: "ivc-1-1-2",
+        question: "How should a companion respond when a child experiences sensory overload?",
+        type: "IN_VIDEO_CHECKPOINT",
+        typeName: "In-Video Reflection (00:30)",
+        submittedAnswer: "Provide 10-second processing pauses and respect physical boundaries",
+        status: "Correct (100%)",
+        isCorrect: true,
+        attemptNumber: 2,
+        timestamp: "Today, 09:19 AM",
+        exemplar: "Processing pauses and physical boundaries lower central nervous arousal."
+      },
+      {
+        id: "att-ps-3",
+        companionName: "Priya Sharma (Trainee)",
+        moduleId: "mod-1",
+        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        submoduleId: "sub-1-2",
+        submoduleTitle: "Submodule 1.2: Multi-Modal Reading Guide",
+        questionId: "pdf-cp-1",
         question: "Which of the following is an early physiological indicator of impending sensory overload?",
+        type: "PDF_CHECKPOINT",
+        typeName: "PDF Reading Milestone 1",
         submittedAnswer: "Pupil dilation, rapid breathing, and repetitive tactile fidgeting",
         status: "Correct (100%)",
         isCorrect: true,
-        timestamp: "Today, 08:42 AM",
+        attemptNumber: 1,
+        timestamp: "Today, 09:25 AM",
         exemplar: "Recognizing autonomic signs enables early non-punitive intervention."
       },
       {
-        id: "att-103",
-        companionName: "Tanya Verma",
+        id: "att-ps-4a",
+        companionName: "Priya Sharma (Trainee)",
+        moduleId: "mod-1",
+        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        submoduleId: "sub-1-2",
+        submoduleTitle: "Submodule 1.2: Multi-Modal Reading Guide",
+        questionId: "pdf-cp-2",
+        question: "What is the first priority when initiating low-arousal de-escalation?",
+        type: "PDF_CHECKPOINT",
+        typeName: "PDF Reading Milestone 2",
+        submittedAnswer: "Demand an immediate verbal explanation of their misbehavior",
+        status: "Incorrect (Retry Needed)",
+        isCorrect: false,
+        attemptNumber: 1,
+        timestamp: "Today, 09:28 AM",
+        exemplar: "Verbal demands trigger defensive fight-or-flight reactions during dysregulation."
+      },
+      {
+        id: "att-ps-4b",
+        companionName: "Priya Sharma (Trainee)",
+        moduleId: "mod-1",
+        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        submoduleId: "sub-1-2",
+        submoduleTitle: "Submodule 1.2: Multi-Modal Reading Guide",
+        questionId: "pdf-cp-2",
+        question: "What is the first priority when initiating low-arousal de-escalation?",
+        type: "PDF_CHECKPOINT",
+        typeName: "PDF Reading Milestone 2",
+        submittedAnswer: "Call the principal and issue a formal written reprimand",
+        status: "Incorrect (Retry Needed)",
+        isCorrect: false,
+        attemptNumber: 2,
+        timestamp: "Today, 09:29 AM",
+        exemplar: "Disciplinary threats escalate anxiety and destroy trust."
+      },
+      {
+        id: "att-ps-4c",
+        companionName: "Priya Sharma (Trainee)",
+        moduleId: "mod-1",
+        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        submoduleId: "sub-1-2",
+        submoduleTitle: "Submodule 1.2: Multi-Modal Reading Guide",
+        questionId: "pdf-cp-2",
+        question: "What is the first priority when initiating low-arousal de-escalation?",
+        type: "PDF_CHECKPOINT",
+        typeName: "PDF Reading Milestone 2",
+        submittedAnswer: "Regulate your own vocal tone and minimize ambient sensory inputs",
+        status: "Correct (100%)",
+        isCorrect: true,
+        attemptNumber: 3,
+        timestamp: "Today, 09:31 AM",
+        exemplar: "Self-regulation and environmental reduction are the gold standard of care."
+      },
+      {
+        id: "att-ps-5",
+        companionName: "Priya Sharma (Trainee)",
+        moduleId: "mod-1",
+        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        submoduleId: "sub-1-1",
+        submoduleTitle: "Submodule 1.1: Understanding Neurodiversity",
+        questionId: "lxi-mod-1-q1",
+        question: "Share a practical de-escalation technique you have used when a mentee shows early signs of sensory overload in a classroom.",
         type: "LXI_DISCUSSION",
         typeName: "Module LxI Discussion",
-        moduleTitle: "Module 1: Foundations",
-        question: "Share a practical de-escalation technique you have used...",
-        submittedAnswer: "I match their body positioning and quietly introduce a 10-second processing pause.",
+        submittedAnswer: "I match their body positioning by sitting side-by-side on the floor and quietly introduce a 10-second processing pause before asking any follow-up question.",
         status: "Submitted & Shared",
         isCorrect: true,
-        timestamp: "Yesterday, 04:20 PM",
+        attemptNumber: 1,
+        timestamp: "Today, 09:35 AM",
         exemplar: "Co-regulation and processing pauses lower arousal."
       },
       {
-        id: "att-104",
-        companionName: "Jamson",
+        id: "att-ps-6",
+        companionName: "Priya Sharma (Trainee)",
+        moduleId: "mod-1",
+        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        submoduleId: "master-quiz",
+        submoduleTitle: "Master Certification",
+        questionId: "master-quiz-mod-1",
+        question: "Master Assessment Q1: What is the core physiological difference between a sensory meltdown and a behavioral tantrum?",
         type: "MASTER_QUIZ",
         typeName: "End-of-Module Master Quiz",
-        moduleTitle: "Module 1: Foundations",
-        question: "Comprehensive 2-Part Assessment",
-        submittedAnswer: "Answered all MCQs & Submitted 3-step Assembly Action Plan",
+        submittedAnswer: "Meltdowns stem from neurological involuntary sensory overload; tantrums are goal-oriented",
         status: "Passed (100%)",
         isCorrect: true,
-        timestamp: "Yesterday, 02:10 PM",
-        exemplar: "Demonstrated full mastery of sensory meltdowns vs tantrums."
+        attemptNumber: 1,
+        timestamp: "Today, 09:40 AM",
+        exemplar: "Demonstrated full mastery of sensory meltdowns vs behavioral tantrums."
+      },
+
+      // Rahul Mehta - Module 1
+      {
+        id: "att-rm-1a",
+        companionName: "Rahul Mehta",
+        moduleId: "mod-1",
+        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        submoduleId: "sub-1-1",
+        submoduleTitle: "Submodule 1.1: Understanding Neurodiversity",
+        questionId: "ivc-1-1-1",
+        question: "What is the core focus when mentoring neurodivergent children?",
+        type: "IN_VIDEO_CHECKPOINT",
+        typeName: "In-Video Reflection (00:15)",
+        submittedAnswer: "Focus on correcting behavioral deficits first",
+        status: "Incorrect (Retry Needed)",
+        isCorrect: false,
+        attemptNumber: 1,
+        timestamp: "Yesterday, 02:15 PM",
+        exemplar: "Strength-based model prioritizes accommodations over fixing behavior."
+      },
+      {
+        id: "att-rm-1b",
+        companionName: "Rahul Mehta",
+        moduleId: "mod-1",
+        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        submoduleId: "sub-1-1",
+        submoduleTitle: "Submodule 1.1: Understanding Neurodiversity",
+        questionId: "ivc-1-1-1",
+        question: "What is the core focus when mentoring neurodivergent children?",
+        type: "IN_VIDEO_CHECKPOINT",
+        typeName: "In-Video Reflection (00:15)",
+        submittedAnswer: "Building on unique strengths & providing sensory accommodations",
+        status: "Correct (100%)",
+        isCorrect: true,
+        attemptNumber: 2,
+        timestamp: "Yesterday, 02:16 PM",
+        exemplar: "Strength-based focus builds safety and trust without demanding masking."
+      },
+      {
+        id: "att-rm-2",
+        companionName: "Rahul Mehta",
+        moduleId: "mod-1",
+        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        submoduleId: "sub-1-2",
+        submoduleTitle: "Submodule 1.2: Multi-Modal Reading Guide",
+        questionId: "pdf-cp-1",
+        question: "Which of the following is an early physiological indicator of impending sensory overload?",
+        type: "PDF_CHECKPOINT",
+        typeName: "PDF Reading Milestone 1",
+        submittedAnswer: "Pupil dilation, rapid breathing, and repetitive tactile fidgeting",
+        status: "Correct (100%)",
+        isCorrect: true,
+        attemptNumber: 1,
+        timestamp: "Yesterday, 02:30 PM",
+        exemplar: "Recognizing autonomic signs enables early non-punitive intervention."
+      },
+
+      // Tanya Verma - Module 1
+      {
+        id: "att-tv-1",
+        companionName: "Tanya Verma",
+        moduleId: "mod-1",
+        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        submoduleId: "sub-1-1",
+        submoduleTitle: "Submodule 1.1: Understanding Neurodiversity",
+        questionId: "ivc-1-1-1",
+        question: "What is the core focus when mentoring neurodivergent children?",
+        type: "IN_VIDEO_CHECKPOINT",
+        typeName: "In-Video Reflection (00:15)",
+        submittedAnswer: "Building on unique strengths & providing sensory accommodations",
+        status: "Correct (100%)",
+        isCorrect: true,
+        attemptNumber: 1,
+        timestamp: "Yesterday, 04:10 PM",
+        exemplar: "Strength-based mentorship respects sensory limits."
+      },
+      {
+        id: "att-tv-2a",
+        companionName: "Tanya Verma",
+        moduleId: "mod-1",
+        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        submoduleId: "sub-1-1",
+        submoduleTitle: "Submodule 1.1: Understanding Neurodiversity",
+        questionId: "ivc-1-1-2",
+        question: "How should a companion respond when a child experiences sensory overload?",
+        type: "IN_VIDEO_CHECKPOINT",
+        typeName: "In-Video Reflection (00:30)",
+        submittedAnswer: "Speak louder over background noises",
+        status: "Incorrect (Retry Needed)",
+        isCorrect: false,
+        attemptNumber: 1,
+        timestamp: "Yesterday, 04:14 PM",
+        exemplar: "Loud speech exacerbates sensory overwhelm."
+      },
+      {
+        id: "att-tv-2b",
+        companionName: "Tanya Verma",
+        moduleId: "mod-1",
+        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        submoduleId: "sub-1-1",
+        submoduleTitle: "Submodule 1.1: Understanding Neurodiversity",
+        questionId: "ivc-1-1-2",
+        question: "How should a companion respond when a child experiences sensory overload?",
+        type: "IN_VIDEO_CHECKPOINT",
+        typeName: "In-Video Reflection (00:30)",
+        submittedAnswer: "Force mentee to sit at teacher desk",
+        status: "Incorrect (Retry Needed)",
+        isCorrect: false,
+        attemptNumber: 2,
+        timestamp: "Yesterday, 04:15 PM",
+        exemplar: "Physical constraint heightens fight-or-flight activation."
+      },
+      {
+        id: "att-tv-2c",
+        companionName: "Tanya Verma",
+        moduleId: "mod-1",
+        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        submoduleId: "sub-1-1",
+        submoduleTitle: "Submodule 1.1: Understanding Neurodiversity",
+        questionId: "ivc-1-1-2",
+        question: "How should a companion respond when a child experiences sensory overload?",
+        type: "IN_VIDEO_CHECKPOINT",
+        typeName: "In-Video Reflection (00:30)",
+        submittedAnswer: "Provide 10-second processing pauses and respect physical boundaries",
+        status: "Correct (100%)",
+        isCorrect: true,
+        attemptNumber: 3,
+        timestamp: "Yesterday, 04:17 PM",
+        exemplar: "Processing pauses and physical boundaries lower central nervous arousal."
+      },
+
+      // Jamson - Module 1 (Flawless 1st try pass)
+      {
+        id: "att-jm-1",
+        companionName: "Jamson",
+        moduleId: "mod-1",
+        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        submoduleId: "sub-1-1",
+        submoduleTitle: "Submodule 1.1: Understanding Neurodiversity",
+        questionId: "ivc-1-1-1",
+        question: "What is the core focus when mentoring neurodivergent children?",
+        type: "IN_VIDEO_CHECKPOINT",
+        typeName: "In-Video Reflection (00:15)",
+        submittedAnswer: "Building on unique strengths & providing sensory accommodations",
+        status: "Correct (100%)",
+        isCorrect: true,
+        attemptNumber: 1,
+        timestamp: "Yesterday, 01:10 PM",
+        exemplar: "Strength-based focus builds safety and trust without demanding masking."
+      },
+      {
+        id: "att-jm-2",
+        companionName: "Jamson",
+        moduleId: "mod-1",
+        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        submoduleId: "sub-1-2",
+        submoduleTitle: "Submodule 1.2: Multi-Modal Reading Guide",
+        questionId: "pdf-cp-1",
+        question: "Which of the following is an early physiological indicator of impending sensory overload?",
+        type: "PDF_CHECKPOINT",
+        typeName: "PDF Reading Milestone 1",
+        submittedAnswer: "Pupil dilation, rapid breathing, and repetitive tactile fidgeting",
+        status: "Correct (100%)",
+        isCorrect: true,
+        attemptNumber: 1,
+        timestamp: "Yesterday, 01:25 PM",
+        exemplar: "Recognizing autonomic signs enables early non-punitive intervention."
+      },
+      {
+        id: "att-jm-3",
+        companionName: "Jamson",
+        moduleId: "mod-1",
+        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        submoduleId: "master-quiz",
+        submoduleTitle: "Master Certification",
+        questionId: "master-quiz-mod-1",
+        question: "Master Assessment Q1: What is the core physiological difference between a sensory meltdown and a behavioral tantrum?",
+        type: "MASTER_QUIZ",
+        typeName: "End-of-Module Master Quiz",
+        submittedAnswer: "Meltdowns stem from neurological involuntary sensory overload; tantrums are goal-oriented",
+        status: "Passed (100%)",
+        isCorrect: true,
+        attemptNumber: 1,
+        timestamp: "Yesterday, 01:45 PM",
+        exemplar: "Demonstrated full mastery of sensory meltdowns vs behavioral tantrums."
+      },
+
+      // Alex Chen - Module 1 (Struggling / Needs Review)
+      {
+        id: "att-ac-1a",
+        companionName: "Alex Chen",
+        moduleId: "mod-1",
+        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        submoduleId: "sub-1-1",
+        submoduleTitle: "Submodule 1.1: Understanding Neurodiversity",
+        questionId: "ivc-1-1-1",
+        question: "What is the core focus when mentoring neurodivergent children?",
+        type: "IN_VIDEO_CHECKPOINT",
+        typeName: "In-Video Reflection (00:15)",
+        submittedAnswer: "Focus on correcting behavioral deficits first",
+        status: "Incorrect (Retry Needed)",
+        isCorrect: false,
+        attemptNumber: 1,
+        timestamp: "2 days ago, 11:00 AM",
+        exemplar: "Strength-based model prioritizes accommodations over fixing behavior."
+      },
+      {
+        id: "att-ac-1b",
+        companionName: "Alex Chen",
+        moduleId: "mod-1",
+        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        submoduleId: "sub-1-1",
+        submoduleTitle: "Submodule 1.1: Understanding Neurodiversity",
+        questionId: "ivc-1-1-1",
+        question: "What is the core focus when mentoring neurodivergent children?",
+        type: "IN_VIDEO_CHECKPOINT",
+        typeName: "In-Video Reflection (00:15)",
+        submittedAnswer: "Issue formal disciplinary warning",
+        status: "Incorrect (Needs Review)",
+        isCorrect: false,
+        attemptNumber: 2,
+        timestamp: "2 days ago, 11:02 AM",
+        exemplar: "Needs debrief: neurodivergent traits must not be treated as disciplinary issues."
       }
     ];
 
@@ -3244,15 +3648,23 @@ html_content = r'''<!DOCTYPE html>
       }
 
       // Log attempt to Admin Dashboard (DELIVERABLE #8)
+      const qId = cp.id || `pdf-cp-${cpIdx}`;
+      const mod = publishedDb.find(m => m.id === selectedModuleId);
+      const prevPdfAtts = adminAttempts.filter(a => a.companionName === "Priya Sharma (Trainee)" && a.questionId === qId);
       logAdminAttempt({
         companionName: "Priya Sharma (Trainee)",
+        moduleId: selectedModuleId || "mod-1",
+        moduleTitle: mod ? mod.title : (selectedSubmodule ? selectedSubmodule.title : "Module 1"),
+        submoduleId: selectedSubmodule ? selectedSubmodule.id : "sub-1-2",
+        submoduleTitle: selectedSubmodule ? `${selectedSubmodule.title} (${cp.section || 'Reading'})` : "Submodule 1.2",
+        questionId: qId,
         type: "PDF_CHECKPOINT",
-        typeName: `PDF Reading Checkpoint #${cpIdx + 1}`,
-        moduleTitle: `${selectedSubmodule.title} (${cp.section || 'Reading'})`,
+        typeName: `PDF Reading Milestone #${cpIdx + 1}`,
         question: cp.question,
         submittedAnswer: cp.choices[chIdx],
-        status: isCorrect ? "Correct (100%)" : "Incorrect / Reviewed",
+        status: isCorrect ? "Correct (100%)" : "Incorrect (Retry Needed)",
         isCorrect: isCorrect,
+        attemptNumber: prevPdfAtts.length + 1,
         exemplar: cp.exemplar || cp.feedbacks?.[cp.correctIndex] || "Review low-arousal de-escalation guidelines."
       });
 
@@ -3451,15 +3863,23 @@ html_content = r'''<!DOCTYPE html>
       const isCorrect = ivc.correctIndex === selectedInVideoChoiceIndex;
 
       // Log attempt to Admin Dashboard (DELIVERABLE #8)
+      const qId = ivc.id || `ivc-${ivIdx}`;
+      const mod = publishedDb.find(m => m.id === selectedModuleId);
+      const prevAtts = adminAttempts.filter(a => a.companionName === "Priya Sharma (Trainee)" && a.questionId === qId);
       logAdminAttempt({
         companionName: "Priya Sharma (Trainee)",
+        moduleId: selectedModuleId || "mod-1",
+        moduleTitle: mod ? mod.title : (selectedSubmodule ? selectedSubmodule.title : "Module 1"),
+        submoduleId: selectedSubmodule ? selectedSubmodule.id : "sub-1-1",
+        submoduleTitle: selectedSubmodule ? selectedSubmodule.title : "Submodule 1.1",
+        questionId: qId,
         type: "IN_VIDEO_CHECKPOINT",
         typeName: `In-Video Reflection (${String(ivc.timeMin||0).padStart(2,'0')}:${String(ivc.timeSec||0).padStart(2,'0')})`,
-        moduleTitle: selectedSubmodule ? selectedSubmodule.title : "Module Lesson",
         question: ivc.question,
         submittedAnswer: ivc.choices[selectedInVideoChoiceIndex],
-        status: isCorrect ? "Correct (100%)" : "Incorrect / Reviewed",
+        status: isCorrect ? "Correct (100%)" : "Incorrect (Retry Needed)",
         isCorrect: isCorrect,
+        attemptNumber: prevAtts.length + 1,
         exemplar: ivc.exemplar || "Strength-based mentorship respects sensory limits."
       });
 
@@ -3795,11 +4215,14 @@ html_content = r'''<!DOCTYPE html>
     }
 
     // =========================================================================
-    // ADMIN DASHBOARD IMPLEMENTATION (DELIVERABLE #8)
+    // DETAILED PEDAGOGICAL ADMIN DIAGNOSTICS & ATTEMPT FRICTION (DELIVERABLE #8)
     // =========================================================================
+    let adminActiveCompanion = "Priya Sharma (Trainee)";
+    let adminActiveModuleId = "mod-1";
+
     function logAdminAttempt(att) {
       const newAtt = {
-        id: `att-${Date.now()}`,
+        id: `att-${Date.now()}-${Math.floor(Math.random()*1000)}`,
         timestamp: "Just Now",
         ...att
       };
@@ -3810,71 +4233,274 @@ html_content = r'''<!DOCTYPE html>
       }
     }
 
-    function renderAdminDashboard() {
-      // Calculate KPIs
-      const companionsSet = new Set(adminAttempts.map(a => a.companionName));
-      const totalAttempts = adminAttempts.length;
-      const quizzesPassed = adminAttempts.filter(a => a.type === 'MASTER_QUIZ' && a.isCorrect).length;
-      const correctAttempts = adminAttempts.filter(a => a.isCorrect).length;
-      const passRate = totalAttempts > 0 ? Math.round((correctAttempts / totalAttempts) * 100) : 100;
-
-      document.getElementById('admin-kpi-companions').innerText = Math.max(companionsSet.size, 1);
-      document.getElementById('admin-kpi-attempts').innerText = totalAttempts;
-      document.getElementById('admin-kpi-passrate').innerText = `${passRate}%`;
-      document.getElementById('admin-kpi-quizzes').innerText = quizzesPassed;
-
-      renderAdminAttemptsTable();
+    function onAdminFilterChange() {
+      const lcSelect = document.getElementById('admin-lc-select');
+      const modSelect = document.getElementById('admin-module-select');
+      if (lcSelect) adminActiveCompanion = lcSelect.value;
+      if (modSelect) adminActiveModuleId = modSelect.value;
+      renderAdminDashboard();
     }
 
-    function renderAdminAttemptsTable() {
-      const tbody = document.getElementById('admin-attempts-tbody');
+    function getCompanionModuleDiagnostics(companionName, moduleId) {
+      let list = [...adminAttempts];
+      if (companionName && companionName !== 'ALL') {
+        list = list.filter(a => a.companionName === companionName || a.companionName.includes(companionName) || companionName.includes(a.companionName));
+      }
+      if (moduleId && moduleId !== 'ALL') {
+        list = list.filter(a => a.moduleId === moduleId || (a.moduleTitle && a.moduleTitle.toLowerCase().includes(moduleId.replace('mod-', 'module '))));
+      }
+
+      // Group attempts by question
+      const questionMap = {};
+      for (const att of list) {
+        const qKey = att.questionId || att.question;
+        if (!questionMap[qKey]) {
+          questionMap[qKey] = {
+            questionId: qKey,
+            question: att.question,
+            typeName: att.typeName || att.type,
+            type: att.type,
+            moduleId: att.moduleId || moduleId,
+            moduleTitle: att.moduleTitle || "Module 1",
+            submoduleTitle: att.submoduleTitle || "",
+            attempts: []
+          };
+        }
+        questionMap[qKey].attempts.push(att);
+      }
+
+      const questions = Object.values(questionMap).map(q => {
+        // Sort chronologically (oldest attempt first)
+        q.attempts.sort((a, b) => (a.attemptNumber || 0) - (b.attemptNumber || 0));
+        const totalAttempts = q.attempts.length;
+        const wrongAttempts = q.attempts.filter(a => !a.isCorrect).length;
+        const hasCorrect = q.attempts.some(a => a.isCorrect);
+        const firstTryCorrect = q.attempts[0] && q.attempts[0].isCorrect;
+
+        let status = "Needs Review";
+        let statusClass = "bg-rose-100 text-rose-800 border-rose-300";
+        if (q.type === 'LXI_DISCUSSION') {
+          status = "Submitted & Shared";
+          statusClass = "bg-blue-100 text-blue-800 border-blue-300";
+        } else if (firstTryCorrect) {
+          status = "✓ 1st Try Mastery";
+          statusClass = "bg-emerald-100 text-emerald-800 border-emerald-300";
+        } else if (hasCorrect) {
+          status = `⚠️ Mastered (After ${wrongAttempts} Mistake${wrongAttempts > 1 ? 's' : ''})`;
+          statusClass = "bg-amber-100 text-amber-800 border-amber-300";
+        }
+
+        return {
+          ...q,
+          totalAttempts,
+          wrongAttempts,
+          hasCorrect,
+          firstTryCorrect,
+          status,
+          statusClass
+        };
+      });
+
+      // Calculate KPI aggregates
+      const totalQuestions = questions.length;
+      const totalAttemptsCount = list.length;
+      const totalWrongCount = list.filter(a => !a.isCorrect).length;
+      const correctCount = list.filter(a => a.isCorrect).length;
+      const accuracyRate = totalAttemptsCount > 0 ? Math.round((correctCount / totalAttemptsCount) * 100) : 100;
+      const firstTryPassCount = questions.filter(q => q.firstTryCorrect).length;
+      const firstTryPassRate = totalQuestions > 0 ? Math.round((firstTryPassCount / totalQuestions) * 100) : 100;
+      const checkpointsMastered = questions.filter(q => q.hasCorrect || q.type === 'LXI_DISCUSSION').length;
+      
+      // Master Quiz status
+      const quizAtts = list.filter(a => a.type === 'MASTER_QUIZ');
+      let quizStatus = "Pending Exam";
+      if (quizAtts.length > 0) {
+        const quizCorrect = quizAtts.filter(a => a.isCorrect).length;
+        const quizPct = Math.round((quizCorrect / quizAtts.length) * 100);
+        quizStatus = `${quizPct}% Passed`;
+      }
+
+      const frictionQuestions = questions.filter(q => q.wrongAttempts >= 2);
+
+      return {
+        questions,
+        totalQuestions,
+        totalAttemptsCount,
+        totalWrongCount,
+        accuracyRate,
+        firstTryPassRate,
+        checkpointsMastered,
+        quizStatus,
+        frictionQuestions
+      };
+    }
+
+    function renderAdminDashboard() {
+      // 1. Populate Module dropdown from publishedDb if needed
+      const modSelect = document.getElementById('admin-module-select');
+      if (modSelect) {
+        const currentModVal = adminActiveModuleId;
+        const modOptionsHtml = `
+          <option value="ALL" ${currentModVal === 'ALL' ? 'selected' : ''}>All Modules (Cohort Overview)</option>
+          ${publishedDb.map(m => `
+            <option value="${m.id}" ${m.id === currentModVal ? 'selected' : ''}>${m.title}</option>
+          `).join('')}
+        `;
+        if (modSelect.innerHTML !== modOptionsHtml) {
+          modSelect.innerHTML = modOptionsHtml;
+        }
+      }
+
+      // 2. Ensure LC selector is in sync
+      const lcSelect = document.getElementById('admin-lc-select');
+      if (lcSelect && lcSelect.value !== adminActiveCompanion) {
+        lcSelect.value = adminActiveCompanion;
+      }
+
+      // 3. Update LC Profile Card
+      const lcAvatar = document.getElementById('admin-lc-avatar');
+      const lcName = document.getElementById('admin-lc-name');
+      const lcRole = document.getElementById('admin-lc-role');
+      const lcBadge = document.getElementById('admin-lc-badge');
+
+      if (adminActiveCompanion === 'ALL') {
+        if (lcAvatar) lcAvatar.innerText = "ALL";
+        if (lcName) lcName.innerText = "Cohort Aggregate";
+        if (lcRole) lcRole.innerText = "5 Trainee Companions";
+        if (lcBadge) {
+          lcBadge.className = "px-2.5 py-1 rounded-xl text-[10px] font-black uppercase bg-teal-100 text-teal-800 border border-teal-300";
+          lcBadge.innerText = "👥 Cohort View";
+        }
+      } else {
+        const initials = adminActiveCompanion.split(' ').map(n => n.charAt(0)).slice(0, 2).join('');
+        if (lcAvatar) lcAvatar.innerText = initials || "LC";
+        if (lcName) lcName.innerText = adminActiveCompanion.replace(' (Trainee)', '');
+        if (lcRole) lcRole.innerText = "InclusiveMinds Cohort 2026";
+        if (lcBadge) {
+          lcBadge.className = "px-2.5 py-1 rounded-xl text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-300";
+          lcBadge.innerText = "✓ Active Trainee";
+        }
+      }
+
+      // 4. Calculate Diagnostics
+      const diag = getCompanionModuleDiagnostics(adminActiveCompanion, adminActiveModuleId);
+
+      // 5. Update KPI Cards
+      const elAcc = document.getElementById('admin-diag-accuracy');
+      const elWrong = document.getElementById('admin-diag-wrong-count');
+      const elFirst = document.getElementById('admin-diag-first-try');
+      const elCheck = document.getElementById('admin-diag-checkpoints');
+      const elQuiz = document.getElementById('admin-diag-quiz');
+
+      if (elAcc) elAcc.innerText = `${diag.accuracyRate}%`;
+      if (elWrong) elWrong.innerText = `${diag.totalWrongCount} Mistake${diag.totalWrongCount === 1 ? '' : 's'}`;
+      if (elFirst) elFirst.innerText = `${diag.firstTryPassRate}%`;
+      if (elCheck) elCheck.innerText = `${diag.checkpointsMastered} of ${Math.max(diag.totalQuestions, 1)}`;
+      if (elQuiz) elQuiz.innerText = diag.quizStatus;
+
+      // 6. Friction Alert Banner
+      const frictionBanner = document.getElementById('admin-friction-alert');
+      const frictionDesc = document.getElementById('admin-friction-desc');
+      if (frictionBanner && frictionDesc) {
+        if (diag.frictionQuestions.length > 0) {
+          frictionBanner.classList.remove('hidden');
+          const titles = diag.frictionQuestions.map(q => `"${q.question.substring(0, 40)}..." (${q.wrongAttempts} mistakes)`).join(', ');
+          frictionDesc.innerHTML = `<strong>${adminActiveCompanion === 'ALL' ? 'Companions' : adminActiveCompanion}</strong> experienced high attempt friction on: ${titles}. Suggested supervisor debrief before field sessions.`;
+        } else {
+          frictionBanner.classList.add('hidden');
+        }
+      }
+
+      // 7. Render Questions Diagnostics Matrix
+      renderAdminQuestionDiagnostics(diag);
+    }
+
+    function renderAdminQuestionDiagnostics(diagData) {
+      const tbody = document.getElementById('admin-questions-tbody');
       if (!tbody) return;
 
-      const fComp = document.getElementById('admin-filter-companion').value;
-      const fType = document.getElementById('admin-filter-type').value;
+      const diag = diagData || getCompanionModuleDiagnostics(adminActiveCompanion, adminActiveModuleId);
+      const fType = document.getElementById('admin-filter-qtype')?.value || 'ALL';
 
-      let filtered = adminAttempts;
-      if (fComp !== 'ALL') filtered = filtered.filter(a => a.companionName.includes(fComp) || fComp.includes(a.companionName));
-      if (fType !== 'ALL') filtered = filtered.filter(a => a.type === fType);
+      let questions = diag.questions;
+      if (fType !== 'ALL') {
+        questions = questions.filter(q => q.type === fType);
+      }
 
-      if (filtered.length === 0) {
+      if (questions.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="6" class="p-8 text-center text-slate-400 italic">No activity attempts match the selected filter.</td>
+            <td colspan="7" class="p-8 text-center text-slate-400 italic">
+              No checkpoint questions or attempts recorded for this filter combination.
+            </td>
           </tr>
         `;
         return;
       }
 
-      tbody.innerHTML = filtered.map(att => {
+      tbody.innerHTML = questions.map(q => {
         let typeBadge = "bg-teal-50 text-teal-800 border-teal-200";
-        if (att.type === 'PDF_CHECKPOINT') typeBadge = "bg-indigo-50 text-indigo-800 border-indigo-200";
-        else if (att.type === 'MASTER_QUIZ') typeBadge = "bg-purple-50 text-purple-800 border-purple-200";
-        else if (att.type === 'LXI_DISCUSSION') typeBadge = "bg-amber-50 text-amber-800 border-amber-200";
+        if (q.type === 'PDF_CHECKPOINT') typeBadge = "bg-indigo-50 text-indigo-800 border-indigo-200";
+        else if (q.type === 'MASTER_QUIZ') typeBadge = "bg-purple-50 text-purple-800 border-purple-200";
+        else if (q.type === 'LXI_DISCUSSION') typeBadge = "bg-amber-50 text-amber-800 border-amber-200";
+
+        // Mistakes badge
+        let wrongBadge = "";
+        if (q.type === 'LXI_DISCUSSION') {
+          wrongBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-50 text-blue-700 border border-blue-200">Reflective Post</span>`;
+        } else if (q.wrongAttempts === 0) {
+          wrongBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-800 border border-emerald-300">0 Wrong (Clean) ✓</span>`;
+        } else if (q.wrongAttempts === 1) {
+          wrongBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-50 text-amber-800 border border-amber-300">1 Wrong Try ⚠️</span>`;
+        } else {
+          wrongBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-300 animate-pulse">${q.wrongAttempts} Wrong Tries ❌</span>`;
+        }
+
+        // Choice sequence trail
+        const trailHtml = q.attempts.map((att, idx) => {
+          const isLast = idx === q.attempts.length - 1;
+          const icon = att.isCorrect ? '✓' : '✕';
+          const colorClass = att.isCorrect ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-rose-700 bg-rose-50 border-rose-200';
+          const shortAns = att.submittedAnswer ? (att.submittedAnswer.length > 25 ? att.submittedAnswer.substring(0, 22) + '...' : att.submittedAnswer) : `Choice #${idx + 1}`;
+          return `
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-bold ${colorClass}" title="${att.submittedAnswer || ''}">
+              <span>${icon}</span>
+              <span>${shortAns}</span>
+            </span>
+            ${!isLast ? '<span class="text-slate-300 text-[10px]">➔</span>' : ''}
+          `;
+        }).join('');
 
         return `
           <tr class="hover:bg-slate-50/80 transition-colors">
-            <td class="p-3.5 font-extrabold text-slate-900 flex items-center gap-2">
-              <span class="w-6 h-6 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-black">
-                ${att.companionName.charAt(0)}
+            <td class="p-3.5 max-w-sm space-y-0.5">
+              <span class="text-[10px] font-black uppercase text-slate-400 block">${q.submoduleTitle || q.moduleTitle}</span>
+              <p class="font-extrabold text-slate-900 text-xs leading-snug">${q.question}</p>
+            </td>
+            <td class="p-3.5 whitespace-nowrap">
+              <span class="px-2.5 py-1 rounded-xl text-[10px] font-black border ${typeBadge}">
+                ${q.typeName}
               </span>
-              <span>${att.companionName}</span>
+            </td>
+            <td class="p-3.5 text-center font-black text-slate-800">
+              <span class="px-2 py-1 bg-slate-100 rounded-lg text-xs">${q.totalAttempts}</span>
+            </td>
+            <td class="p-3.5 text-center whitespace-nowrap">
+              ${wrongBadge}
             </td>
             <td class="p-3.5">
-              <span class="px-2 py-0.5 rounded-md text-[10px] font-black border ${typeBadge}">
-                ${att.typeName || att.type}
+              <div class="flex flex-wrap items-center gap-1.5 max-w-xs">
+                ${trailHtml}
+              </div>
+            </td>
+            <td class="p-3.5 whitespace-nowrap">
+              <span class="px-2.5 py-1 rounded-xl text-[10px] font-black border ${q.statusClass}">
+                ${q.status}
               </span>
             </td>
-            <td class="p-3.5 text-slate-600 font-bold max-w-xs truncate">${att.moduleTitle}</td>
-            <td class="p-3.5 text-slate-400 text-[11px]">${att.timestamp}</td>
-            <td class="p-3.5">
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-black ${att.isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
-                ${att.status}
-              </span>
-            </td>
-            <td class="p-3.5 text-right">
-              <button onclick="inspectAdminAttempt('${att.id}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-extrabold">
-                Inspect 🔍
+            <td class="p-3.5 text-right whitespace-nowrap">
+              <button onclick="inspectQuestionHistory('${q.questionId.replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-teal-50 hover:text-teal-800 text-slate-700 text-[11px] font-extrabold border border-slate-200 transition-all">
+                Inspect History 🔍
               </button>
             </td>
           </tr>
@@ -3882,45 +4508,72 @@ html_content = r'''<!DOCTYPE html>
       }).join('');
     }
 
-    function inspectAdminAttempt(attId) {
-      const att = adminAttempts.find(a => a.id === attId);
-      if (!att) return;
+    function inspectQuestionHistory(qId) {
+      const diag = getCompanionModuleDiagnostics(adminActiveCompanion, adminActiveModuleId);
+      const q = diag.questions.find(item => item.questionId === qId);
+      if (!q) return;
 
       const content = document.getElementById('admin-inspect-content');
+      if (!content) return;
+
       content.innerHTML = `
-        <div class="space-y-3">
-          <div class="flex items-center justify-between bg-slate-50 p-3 rounded-2xl border border-slate-100">
-            <div>
-              <span class="text-[10px] font-black uppercase text-slate-400">Companion</span>
-              <p class="font-extrabold text-slate-900 text-sm">${att.companionName}</p>
+        <div class="space-y-4">
+          <!-- Question Header Summary -->
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase bg-teal-100 text-teal-800 border border-teal-300">
+                ${q.typeName}
+              </span>
+              <span class="text-xs font-black text-slate-500">
+                ${q.totalAttempts} Attempt${q.totalAttempts === 1 ? '' : 's'} (${q.wrongAttempts} Wrong)
+              </span>
             </div>
-            <div class="text-right">
-              <span class="text-[10px] font-black uppercase text-slate-400">Timestamp</span>
-              <p class="text-slate-600 text-xs">${att.timestamp}</p>
+            <h4 class="text-sm font-black text-slate-900 leading-snug">${q.question}</h4>
+            <p class="text-[11px] text-slate-500 font-bold">${q.moduleTitle} • ${q.submoduleTitle}</p>
+          </div>
+
+          <!-- Chronological Attempt Steps -->
+          <div class="space-y-3">
+            <h5 class="text-[11px] font-black uppercase tracking-wider text-slate-400">Step-by-Step Trainee Attempt Timeline:</h5>
+            <div class="space-y-2.5">
+              ${q.attempts.map((att, idx) => {
+                const isCorrect = att.isCorrect;
+                return `
+                  <div class="p-3.5 rounded-2xl border ${isCorrect ? 'bg-emerald-50/60 border-emerald-300 text-emerald-950' : 'bg-rose-50/60 border-rose-300 text-rose-950'} space-y-2">
+                    <div class="flex items-center justify-between text-xs">
+                      <span class="font-black flex items-center gap-1.5">
+                        <span>${isCorrect ? '✓' : '✕'}</span>
+                        <span>Attempt #${idx + 1} (${isCorrect ? 'Correct Mastery' : 'Incorrect Choice'})</span>
+                      </span>
+                      <span class="text-[10px] opacity-75 font-semibold">${att.timestamp || 'Recorded'}</span>
+                    </div>
+
+                    <div class="p-2.5 bg-white/80 rounded-xl border border-black/5 text-xs font-bold">
+                      <span class="text-[10px] font-black uppercase opacity-60 block">Selected Choice:</span>
+                      ${att.submittedAnswer}
+                    </div>
+
+                    ${att.exemplar ? `
+                      <div class="text-[11px] opacity-90">
+                        <span class="font-extrabold uppercase text-[9px] block opacity-75">Guidance / Feedback:</span>
+                        <p>${att.exemplar}</p>
+                      </div>
+                    ` : ''}
+                  </div>
+                `;
+              }).join('')}
             </div>
           </div>
 
-          <div>
-            <label class="block text-[10px] font-black uppercase text-slate-400 mb-0.5">Activity & Module</label>
-            <p class="font-bold text-slate-800">${att.typeName} • ${att.moduleTitle}</p>
-          </div>
-
-          <div>
-            <label class="block text-[10px] font-black uppercase text-slate-400 mb-0.5">Question Prompt</label>
-            <p class="p-3 rounded-xl bg-slate-50 text-slate-800 font-semibold">${att.question}</p>
-          </div>
-
-          <div>
-            <label class="block text-[10px] font-black uppercase text-slate-400 mb-0.5">Companion Submitted Response</label>
-            <div class="p-3.5 rounded-xl border ${att.isCorrect ? 'bg-emerald-50/50 border-emerald-200 text-emerald-950' : 'bg-amber-50/50 border-amber-200 text-amber-950'} font-bold">
-              ${att.submittedAnswer}
+          ${q.wrongAttempts >= 2 ? `
+            <!-- Supervisor Recommendation Alert -->
+            <div class="p-3.5 bg-amber-50 rounded-2xl border border-amber-300 text-xs text-amber-950 space-y-1">
+              <span class="font-black uppercase text-[10px] text-amber-800 flex items-center gap-1">
+                <span>⚠️</span> <span>Supervisor Action Recommendation</span>
+              </span>
+              <p>Trainee exhibited persistent confusion regarding this protocol. Recommend conducting a 5-minute verbal roleplay on low-arousal de-escalation prior to field pairing.</p>
             </div>
-          </div>
-
-          <div>
-            <label class="block text-[10px] font-black uppercase text-slate-400 mb-0.5">Author Exemplar / Feedback</label>
-            <p class="p-3 rounded-xl bg-teal-50 border border-teal-200 text-teal-950">${att.exemplar || 'Standard exemplar guidance.'}</p>
-          </div>
+          ` : ''}
         </div>
       `;
 
@@ -3932,35 +4585,58 @@ html_content = r'''<!DOCTYPE html>
     }
 
     function simulateCompanionAttempt() {
-      const companions = ["Priya Sharma (Trainee)", "Rahul Mehta", "Tanya Verma", "Jamson"];
-      const randComp = companions[Math.floor(Math.random() * companions.length)];
-      const types = [
-        { type: "IN_VIDEO_CHECKPOINT", typeName: "In-Video Reflection (00:15)", q: "What is the core focus when mentoring neurodivergent children?", ans: "Building on unique strengths & providing sensory accommodations", correct: true },
-        { type: "PDF_CHECKPOINT", typeName: "PDF Reading Checkpoint #1", q: "Recognizing early physiological signs of sensory agitation", ans: "Pupil dilation and repetitive motor pacing", correct: true },
-        { type: "LXI_DISCUSSION", typeName: "Module LxI Discussion", q: "Non-verbal communication strategies in inclusive classrooms", ans: "I provide visual choice boards and allow 10-second pauses.", correct: true }
-      ];
-      const randType = types[Math.floor(Math.random() * types.length)];
+      const candidates = ["Tanya Verma", "Rahul Mehta", "Alex Chen"];
+      const randComp = candidates[Math.floor(Math.random() * candidates.length)];
+      const qId = `sim-ivc-${Date.now()}`;
+      const qText = "How do you respond when a mentee exhibits acute auditory defensiveness?";
 
+      // Step 1: Simulate Wrong Attempt
       logAdminAttempt({
         companionName: randComp,
-        type: randType.type,
-        typeName: randType.typeName,
-        moduleTitle: "Module 1: Foundations",
-        question: randType.q,
-        submittedAnswer: randType.ans,
-        status: randType.correct ? "Correct (100%)" : "Reviewed",
-        isCorrect: randType.correct,
-        exemplar: "Co-regulation and processing pauses lower arousal."
+        moduleId: "mod-1",
+        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+        submoduleId: "sub-1-1",
+        submoduleTitle: "Submodule 1.1: Understanding Neurodiversity",
+        questionId: qId,
+        type: "IN_VIDEO_CHECKPOINT",
+        typeName: "In-Video Reflection (00:45)",
+        question: qText,
+        submittedAnswer: "Repeat instructions in a louder, firmer tone",
+        status: "Incorrect (Retry Needed)",
+        isCorrect: false,
+        attemptNumber: 1,
+        exemplar: "Louder volume severely aggravates auditory overload."
       });
 
-      renderAdminDashboard();
-      showToast(`⚡ Simulated new live attempt from ${randComp}!`);
+      // Step 2: Simulate Successful Retry
+      setTimeout(() => {
+        logAdminAttempt({
+          companionName: randComp,
+          moduleId: "mod-1",
+          moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+          submoduleId: "sub-1-1",
+          submoduleTitle: "Submodule 1.1: Understanding Neurodiversity",
+          questionId: qId,
+          type: "IN_VIDEO_CHECKPOINT",
+          typeName: "In-Video Reflection (00:45)",
+          question: qText,
+          submittedAnswer: "Offer noise-dampening ear defenders and reduce vocal cadence",
+          status: "Correct (100%)",
+          isCorrect: true,
+          attemptNumber: 2,
+          exemplar: "Noise dampening immediately mitigates fight-or-flight triggers."
+        });
+        showToast(`⚡ Simulated multi-attempt retry for ${randComp}! (1 mistake, then mastered)`);
+      }, 300);
     }
 
     function exportAttemptsCSV() {
-      let csv = "ID,CompanionName,ActivityType,Module,Question,SubmittedAnswer,Status,Timestamp\n";
-      adminAttempts.forEach(a => {
-        csv += `"${a.id}","${a.companionName}","${a.typeName || a.type}","${a.moduleTitle}","${(a.question||'').replace(/"/g, '""')}","${(a.submittedAnswer||'').replace(/"/g, '""')}","${a.status}","${a.timestamp}"\n`;
+      const diag = getCompanionModuleDiagnostics(adminActiveCompanion, adminActiveModuleId);
+      let csv = "Companion,Module,Submodule,ActivityType,Question,TotalAttempts,WrongAttempts,MasteryStatus,ChoiceSequence\n";
+      
+      diag.questions.forEach(q => {
+        const seq = q.attempts.map(a => `${a.isCorrect ? '✓' : '✕'} ${a.submittedAnswer}`).join(' -> ');
+        csv += `"${adminActiveCompanion}","${q.moduleTitle}","${q.submoduleTitle}","${q.typeName}","${q.question.replace(/"/g, '""')}","${q.totalAttempts}","${q.wrongAttempts}","${q.status}","${seq.replace(/"/g, '""')}"\n`;
       });
 
       const blob = new Blob([csv], { type: 'text/csv' });
@@ -3968,19 +4644,19 @@ html_content = r'''<!DOCTYPE html>
       const a = document.createElement('a');
       a.setAttribute('hidden', '');
       a.setAttribute('href', url);
-      a.setAttribute('download', `companion_attempts_${Date.now()}.csv`);
+      a.setAttribute('download', `companion_pedagogical_diagnostics_${Date.now()}.csv`);
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      showToast("📥 Exported companion attempts log as CSV.");
+      showToast("📥 Exported detailed pedagogical diagnostic CSV.");
     }
 
     function resetAttemptsLog() {
-      if (confirm("Reset all companion attempt logs back to default sample records?")) {
+      if (confirm("Reset all companion attempt logs back to default diagnostic records?")) {
         adminAttempts = JSON.parse(JSON.stringify(DEFAULT_ATTEMPTS));
         saveToStorage(STORAGE_KEY_ATTEMPTS, adminAttempts);
         renderAdminDashboard();
-        showToast("Reset attempt logs.");
+        showToast("Reset attempt logs to authentic baseline diagnostic dataset.");
       }
     }
 
