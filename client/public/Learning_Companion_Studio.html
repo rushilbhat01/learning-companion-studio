@@ -100,218 +100,295 @@
   <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-grow w-full">
 
     <!-- ========================================================================= -->
-    <!-- VIEW 1: AUTHORING DESK (WITH DRAFT / PUBLISH STATE & EDIT/DELETE MODULES) -->
+    <!-- VIEW 1: AUTHORING DESK (REDESIGNED 2-COLUMN CURRICULUM STUDIO) -->
     <!-- ========================================================================= -->
     <section id="view-author" class="hidden space-y-6">
 
       <!-- DRAFT NOTIFICATION & PUBLISHING CONTROLS BANNER -->
       <div id="author-state-banner" class="rounded-3xl p-5 sm:p-6 border transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-slate-900 text-white border-slate-800 shadow-xl">
         <div class="space-y-1">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             <span class="text-xs font-black uppercase tracking-wider text-teal-400">Creator Desk</span>
             <span id="author-draft-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
               ✓ Published & Live
             </span>
+            <span id="author-last-saved-text" class="text-[11px] text-teal-300/80 font-semibold">
+              ✓ Draft up to date
+            </span>
           </div>
           <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Course Authoring Studio</h2>
           <p id="author-draft-desc" class="text-slate-400 text-xs sm:text-sm">
-            Configure video links, PDF reading guides with checkpoints, module-scoped LxI discussions, and master quizzes.
+            Structure your course curriculum, edit video and PDF checkpoints, configure module-level LxI discussions, and master quizzes.
           </p>
         </div>
 
-        <!-- Action Buttons: Save Draft vs Publish vs Discard -->
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full lg:w-auto">
-          <button type="button" onclick="saveAuthorDraft()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all text-center">
-            <span>💾</span> <span>Save as Draft</span>
+        <!-- Action Buttons: Preview as Student vs Save Draft vs Discard vs Publish -->
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full lg:w-auto">
+          <button type="button" onclick="previewDraftAsStudent()" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-teal-300 border border-slate-700 font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all text-center" title="Test draft in student view without publishing">
+            <span>👁️</span> <span>Preview as Student</span>
           </button>
-          <button type="button" onclick="discardAuthorDraft()" id="btn-discard-draft" class="hidden w-full sm:w-auto px-3.5 py-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 font-bold text-xs flex items-center justify-center gap-1.5 transition-all text-center">
+          <button type="button" onclick="saveAuthorDraft()" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all text-center">
+            <span>💾</span> <span>Save Draft</span>
+          </button>
+          <button type="button" onclick="discardAuthorDraft()" id="btn-discard-draft" class="hidden flex-1 sm:flex-none px-3.5 py-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 font-bold text-xs flex items-center justify-center gap-1.5 transition-all text-center">
             <span>↺</span> <span>Discard Draft</span>
           </button>
-          <button type="button" onclick="publishContent()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-extrabold text-xs shadow-lg shadow-teal-600/30 flex items-center justify-center gap-1.5 transition-all text-center">
+          <button type="button" onclick="openPublishReviewModal()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-extrabold text-xs shadow-lg shadow-teal-600/30 flex items-center justify-center gap-1.5 transition-all text-center">
             <span>🚀</span> <span>Publish Live to LC View</span>
           </button>
         </div>
       </div>
 
-      <!-- MODULE & SUBMODULE MANAGEMENT CARD (WITH EDIT & DELETE) -->
-      <div class="bg-white p-4 sm:p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-          <div class="flex items-center gap-2">
-            <span class="text-lg">🗂️</span>
-            <h3 class="text-sm font-black uppercase tracking-wider text-slate-800">Module & Submodule Lifecycle Manager</h3>
-          </div>
-          <span class="hidden sm:inline text-[11px] text-slate-400 font-bold">Edit metadata, add or delete modules</span>
-        </div>
-
-        <div class="grid md:grid-cols-2 gap-5">
-          <!-- Module Selector & Actions -->
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <label class="text-xs font-black uppercase tracking-wider text-slate-500">1. Select / Manage Module</label>
-              <div class="flex items-center gap-1.5">
-                <button type="button" onclick="addNewModule()" class="text-[11px] font-black bg-teal-700 text-white px-2.5 py-1 rounded-lg hover:bg-teal-600 shadow-sm">
-                  + Add Module
-                </button>
-                <button type="button" onclick="confirmDeleteCurrentModule()" id="btn-delete-module" class="text-[11px] font-black bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-lg hover:bg-rose-100">
-                  🗑️ Delete Module
-                </button>
-              </div>
+      <!-- CURRENTLY HOSTED IN COMPANION STATUS DRAWER -->
+      <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-slate-800 p-4 sm:p-5 rounded-3xl text-white shadow-md">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-teal-500/20 border border-teal-500/30 flex items-center justify-center text-teal-300 text-lg flex-shrink-0">
+              🌐
             </div>
-            <select id="author-module-select" onchange="onAuthorModuleChange()" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20"></select>
-          </div>
-
-          <!-- Submodule Selector & Actions -->
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <label class="text-xs font-black uppercase tracking-wider text-slate-500">2. Select / Manage Submodule</label>
-              <div class="flex items-center gap-1.5">
-                <button type="button" onclick="addNewSubmodule()" class="text-[11px] font-black bg-teal-50 text-teal-800 border border-teal-200 px-2.5 py-1 rounded-lg hover:bg-teal-100">
-                  + Add Submodule
-                </button>
-                <button type="button" onclick="confirmDeleteCurrentSubmodule()" id="btn-delete-submodule" class="text-[11px] font-black bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-lg hover:bg-rose-100">
-                  🗑️ Delete Submodule
-                </button>
-              </div>
-            </div>
-            <select id="author-submodule-select" onchange="onAuthorSubmoduleChange()" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20"></select>
-          </div>
-        </div>
-
-        <!-- Live Metadata Editor Fields -->
-        <div class="pt-4 border-t border-slate-100 grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div>
-            <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Module Title</label>
-            <input id="author-mod-title" type="text" oninput="markDraftDirty(); updateModuleMeta();" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold bg-slate-50 focus:bg-white focus:border-teal-500" />
-          </div>
-          <div>
-            <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Submodule Title</label>
-            <input id="author-sub-title" type="text" oninput="markDraftDirty(); updateSubmoduleTitle();" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold bg-slate-50 focus:bg-white focus:border-teal-500" />
-          </div>
-          <div>
-            <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Level Tag</label>
-            <input id="author-mod-level" type="text" oninput="markDraftDirty(); updateModuleMeta();" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold bg-slate-50 focus:bg-white focus:border-teal-500" />
-          </div>
-          <div>
-            <label class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Module Description</label>
-            <input id="author-mod-desc" type="text" oninput="markDraftDirty(); updateModuleMeta();" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium bg-slate-50 focus:bg-white focus:border-teal-500" />
-          </div>
-        </div>
-      </div>
-
-      <!-- COMPACT TABBED AUTHORING DESK (Smooth momentum scroll on mobile) -->
-      <div class="flex items-center gap-2 border-b border-slate-200 pb-3 overflow-x-auto no-scrollbar text-xs font-black w-full max-w-full min-w-0">
-        <button id="auth-tab-btn-led" onclick="setAuthorTab('led')" class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl transition-all bg-teal-700 text-white shadow-md whitespace-nowrap flex items-center gap-1.5 flex-shrink-0">
-          <span>🎬</span> <span>Content & PDF Guide</span>
-        </button>
-        <button id="auth-tab-btn-lxt" onclick="setAuthorTab('lxt')" class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 whitespace-nowrap flex items-center gap-1.5 flex-shrink-0">
-          <span>🚀</span> <span>LxT Trajectory</span>
-        </button>
-        <button id="auth-tab-btn-master" onclick="setAuthorTab('master')" class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 whitespace-nowrap flex items-center gap-1.5 flex-shrink-0">
-          <span>🎓</span> <span>Master Quiz</span>
-        </button>
-        <button id="auth-tab-btn-lxi" onclick="setAuthorTab('lxi')" class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 whitespace-nowrap flex items-center gap-1.5 flex-shrink-0">
-          <span>💬</span> <span>LxI Discussion</span>
-        </button>
-      </div>
-
-      <!-- PANEL 1: LED & MULTI-MODAL CONTENT (VIDEO / PDF / HYBRID) -->
-      <div id="auth-panel-led" class="bg-white p-5 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-3">
-          <div>
-            <span class="text-xs font-extrabold uppercase tracking-wider text-teal-700">🎬 Submodule Multi-Modal Lessons</span>
-            <h3 class="text-lg font-extrabold text-slate-900 mt-0.5">Content Formats & Checkpoints Configurator</h3>
-            <p class="text-xs text-slate-500">Supports Videos, PDF documents with checkpoints, or text-only scenarios. Video is completely optional.</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <button type="button" onclick="addVideoStepToSubmodule('video')" class="text-xs font-extrabold bg-teal-700 text-white px-3.5 py-2 rounded-xl hover:bg-teal-600 shadow-sm">
-              + Add Video Step
-            </button>
-            <button type="button" onclick="addVideoStepToSubmodule('pdf')" class="text-xs font-extrabold bg-indigo-50 text-indigo-700 border border-indigo-200 px-3.5 py-2 rounded-xl hover:bg-indigo-100 shadow-sm">
-              + Add PDF Step
-            </button>
-          </div>
-        </div>
-
-        <div id="author-video-steps-container" class="space-y-6"></div>
-      </div>
-
-      <!-- PANEL 2: LXT MULTI-VIDEO EXTENSION TRAJECTORY -->
-      <div id="auth-panel-lxt" class="hidden bg-white p-5 sm:p-8 rounded-3xl border border-teal-200 shadow-sm space-y-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-teal-200/60 pb-4 gap-3">
-          <div>
-            <span class="text-xs font-extrabold uppercase tracking-wider text-teal-800">🚀 LxT Extension Trajectory</span>
-            <h3 class="text-lg font-extrabold text-slate-900 mt-0.5">Multi-Video Extension Lessons & Reflection Configurator</h3>
-            <p class="text-xs text-slate-500">Unlocked for companions ONLY after completing the main submodule lesson.</p>
-          </div>
-          <button type="button" onclick="addLxTVideoLink()" class="text-xs font-extrabold bg-teal-700 text-white px-4 py-2 rounded-xl hover:bg-teal-600">
-            + Add LxT Extension Link
-          </button>
-        </div>
-
-        <div>
-          <label class="block text-[11px] font-extrabold uppercase text-teal-800 mb-1">LxT Extension Title</label>
-          <input id="author-lxt-title" type="text" oninput="markDraftDirty(); updateLxTMeta();" class="w-full rounded-xl border border-teal-200 px-3 py-2 text-xs font-bold bg-slate-50" placeholder="LxT Extension Lesson Title..." />
-        </div>
-
-        <div id="author-lxt-steps-container" class="space-y-6"></div>
-      </div>
-
-      <!-- PANEL 3: END-OF-MODULE MASTER QUIZ -->
-      <div id="auth-panel-master" class="hidden bg-white p-5 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-3">
-          <div>
-            <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">🎓 End-of-Module Assessment</span>
-            <h3 class="text-lg font-extrabold text-slate-900 mt-0.5">Master Quiz Configurator</h3>
-            <p class="text-xs text-slate-500">Configure final comprehensive MCQs and Subjective questions for this module.</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <button type="button" onclick="addAuthorMasterMCQ()" class="text-xs font-bold bg-indigo-700 text-white px-3.5 py-2 rounded-xl hover:bg-indigo-600">+ Add Master MCQ</button>
-            <button type="button" onclick="addAuthorMasterSubjective()" class="text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-3.5 py-2 rounded-xl hover:bg-indigo-100">+ Add Master Subjective</button>
-          </div>
-        </div>
-        <div id="author-master-quiz-list" class="space-y-4"></div>
-      </div>
-
-      <!-- PANEL 4: MODULE-SCOPED LXI DISCUSSION (WITH STALE RESET BUG FIX) -->
-      <div id="auth-panel-lxi" class="hidden space-y-6">
-        <div class="bg-indigo-900 text-white p-6 sm:p-8 rounded-3xl space-y-4 shadow-md border border-indigo-800">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-indigo-800/80 pb-3">
             <div>
-              <span class="text-xs font-bold uppercase tracking-wider text-indigo-300">💬 Module-Scoped LxI Peer Discussion</span>
-              <h3 class="text-lg font-extrabold text-white mt-0.5" id="author-lxi-module-header">Configure Module Discussion</h3>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h4 class="text-xs sm:text-sm font-black uppercase tracking-wider text-teal-300">Live Companion Deployment Status</h4>
+                <span id="author-live-sync-pill" class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  ✓ Live & In Sync
+                </span>
+              </div>
+              <p id="author-live-sync-summary" class="text-xs text-slate-300 mt-0.5">
+                Currently hosting active curriculum in Companion View.
+              </p>
             </div>
-            <span class="px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-200 text-xs font-bold border border-indigo-500/30">
-              Scoped to Selected Module
-            </span>
           </div>
-          
-          <div class="p-3 bg-amber-500/10 border border-amber-400/30 rounded-2xl text-xs text-amber-200 flex items-start gap-2">
-            <span class="text-base">💡</span>
-            <span><strong>Anti-Stale Protection:</strong> When you update this question prompt, the system will automatically archive outdated responses so old peer answers never display under a new question prompt.</span>
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-indigo-200 mb-1.5">Discussion Prompt for this Module</label>
-            <textarea id="author-module-lxi-prompt" rows="3" oninput="markDraftDirty()" class="w-full rounded-2xl border border-indigo-700 bg-indigo-950 p-4 text-xs sm:text-sm text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400 leading-relaxed" placeholder="Set the peer discussion prompt for this module..."></textarea>
-          </div>
-
-          <div class="flex items-center justify-between pt-2">
-            <span id="author-lxi-save-note" class="text-xs text-indigo-300">Save draft or publish to apply prompt updates.</span>
-            <button type="button" onclick="saveModuleLxIPrompt()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-extrabold shadow-sm">
-              Save Prompt Update
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="toggleHostedModulesSnapshot()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs transition flex items-center gap-1.5">
+              <span>📋</span> <span id="toggle-snapshot-btn-text">View Live Modules Snapshot</span>
             </button>
           </div>
         </div>
 
-        <!-- Current Peer Responses in this Module -->
-        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+        <!-- Collapsible Snapshot Grid -->
+        <div id="author-hosted-snapshot" class="hidden mt-4 pt-4 border-t border-slate-800/80">
+          <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">Live Production Curriculum (What students currently experience):</div>
+          <div id="author-hosted-snapshot-list" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+        </div>
+      </div>
+
+      <!-- ==================== 2-COLUMN AUTHORING WORKSPACE ==================== -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- ==================== LEFT COLUMN: INTERACTIVE COURSE OUTLINE (4 COLS) ==================== -->
+        <div class="lg:col-span-4 bg-white rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-4">
           <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h4 class="text-xs font-black uppercase text-slate-700">Active Peer Submissions for this Module (<span id="author-lxi-subs-count">0</span>)</h4>
-            <button type="button" onclick="clearCurrentModuleLxISubmissions()" class="text-xs font-bold text-rose-600 hover:underline">
-              Clear All Responses for this Prompt
+            <div>
+              <span class="text-[10px] font-black uppercase tracking-wider text-teal-700">Course Structure</span>
+              <h3 class="text-sm font-black text-slate-900">Curriculum Outline</h3>
+            </div>
+            <button type="button" onclick="addNewModule()" class="text-xs font-black bg-teal-700 hover:bg-teal-600 text-white px-3 py-1.5 rounded-xl shadow-sm transition flex items-center gap-1">
+              <span>+</span> <span>New Module</span>
             </button>
           </div>
-          <div id="author-lxi-submissions-list" class="space-y-2"></div>
+
+          <!-- Status Legend -->
+          <div class="flex items-center justify-between text-[10px] font-bold text-slate-400 px-1">
+            <div class="flex items-center gap-3">
+              <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Live</span>
+              <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span> Modified</span>
+              <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Draft</span>
+            </div>
+            <span>Click item to edit</span>
+          </div>
+
+          <!-- Interactive Curriculum Tree List -->
+          <div id="author-curriculum-tree" class="space-y-3 max-h-[700px] overflow-y-auto pr-1 no-scrollbar">
+            <!-- Dynamically populated by renderCurriculumTree() -->
+          </div>
+
+          <!-- Create New Module Prominent Bottom Button -->
+          <div class="pt-2 border-t border-slate-100">
+            <button type="button" onclick="addNewModule()" class="w-full py-2.5 rounded-2xl border-2 border-dashed border-teal-300 hover:border-teal-600 bg-teal-50/50 hover:bg-teal-50 text-teal-800 text-xs font-black transition flex items-center justify-center gap-2">
+              <span>➕</span> <span>Create New Module</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== RIGHT COLUMN: FOCUSED EDITOR PANE (8 COLS) ==================== -->
+        <div class="lg:col-span-8 space-y-6">
+
+          <!-- ACTIVE BREADCRUMB & CONTEXT HEADER -->
+          <div class="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Now Editing</span>
+              <div class="flex items-center gap-2 flex-wrap mt-0.5">
+                <span id="editor-active-module-title" class="text-xs sm:text-sm font-extrabold text-slate-700">Module 1</span>
+                <span class="text-slate-300">›</span>
+                <span id="editor-active-item-title" class="text-xs sm:text-sm font-black text-teal-800">Lesson 1.1</span>
+                <span id="editor-active-type-badge" class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-teal-100 text-teal-800">Lesson</span>
+              </div>
+            </div>
+            <div id="editor-quick-actions" class="flex items-center gap-2">
+              <!-- Dynamically populated quick actions -->
+            </div>
+          </div>
+
+          <!-- MODULE SETTINGS & OVERVIEW CARD -->
+          <details id="author-mod-meta-details" open class="group bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden transition-all">
+            <summary class="p-4 sm:p-5 flex items-center justify-between cursor-pointer list-none select-none hover:bg-slate-50 border-b border-slate-100">
+              <div class="flex items-center gap-2.5">
+                <span class="text-base">📁</span>
+                <div>
+                  <h4 class="text-xs sm:text-sm font-black text-slate-900" id="author-meta-card-title">Module Settings & Overview</h4>
+                  <p class="text-[11px] text-slate-400 font-medium">Configure module title, difficulty tier, and pedagogical description</p>
+                </div>
+              </div>
+              <span class="text-xs font-bold text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-4 sm:p-5 space-y-3 bg-slate-50/50">
+              <div class="grid sm:grid-cols-3 gap-3">
+                <div class="sm:col-span-2">
+                  <label class="block text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">Module Title</label>
+                  <input id="author-mod-title" type="text" oninput="markDraftDirty(); updateModuleMeta();" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold bg-white focus:outline-none focus:border-teal-500" placeholder="e.g. Module 1: Foundations of Neurodiversity" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">Audience Level Tag</label>
+                  <input id="author-mod-level" type="text" oninput="markDraftDirty(); updateModuleMeta();" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold bg-white focus:outline-none focus:border-teal-500" placeholder="e.g. Foundational, Advanced" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">Module Description & Pedagogical Goals</label>
+                <textarea id="author-mod-desc" rows="2" oninput="markDraftDirty(); updateModuleMeta();" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium bg-white focus:outline-none focus:border-teal-500" placeholder="Pedagogical objectives for this module..."></textarea>
+              </div>
+            </div>
+          </details>
+
+          <!-- ==================== SUBMODULE / LESSON WORKSPACE ==================== -->
+          <div id="author-editor-submodule" class="space-y-6">
+            <!-- Submodule Title & Actions Card -->
+            <div class="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="text-base">📝</span>
+                  <label class="text-xs font-black uppercase tracking-wider text-slate-700">Lesson / Submodule Title</label>
+                </div>
+                <button type="button" onclick="confirmDeleteCurrentSubmodule()" class="text-xs font-bold text-rose-600 hover:underline">
+                  🗑️ Delete This Lesson
+                </button>
+              </div>
+              <input id="author-sub-title" type="text" oninput="markDraftDirty(); updateSubmoduleTitle();" class="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs sm:text-sm font-bold bg-slate-50 focus:bg-white focus:border-teal-500" placeholder="e.g. Submodule 1.1: Core Principles & Observation" />
+            </div>
+
+            <!-- Tab switcher for Lesson: [🎬 Lesson Content & Checkpoints] vs [🚀 LxT Trajectory] -->
+            <div class="flex items-center gap-2 border-b border-slate-200 pb-3 overflow-x-auto no-scrollbar text-xs font-black">
+              <button id="auth-tab-btn-led" onclick="setAuthorTab('led')" class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl transition-all bg-teal-700 text-white shadow-md whitespace-nowrap flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
+                <span>🎬</span> <span>Lesson Content & Checkpoints</span>
+              </button>
+              <button id="auth-tab-btn-lxt" onclick="setAuthorTab('lxt')" class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 whitespace-nowrap flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
+                <span>🚀</span> <span>LxT Extension Trajectory</span>
+              </button>
+            </div>
+
+            <!-- PANEL 1: LED & MULTI-MODAL CONTENT (VIDEO / PDF / HYBRID) -->
+            <div id="auth-panel-led" class="bg-white p-5 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-3">
+                <div>
+                  <span class="text-xs font-extrabold uppercase tracking-wider text-teal-700">🎬 Submodule Multi-Modal Lessons</span>
+                  <h3 class="text-lg font-extrabold text-slate-900 mt-0.5">Content Formats & Checkpoints Configurator</h3>
+                  <p class="text-xs text-slate-500">Supports Videos, PDF documents with checkpoints, or text-only scenarios. Video is completely optional.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="addVideoStepToSubmodule('video')" class="text-xs font-extrabold bg-teal-700 text-white px-3.5 py-2 rounded-xl hover:bg-teal-600 shadow-sm">
+                    + Add Video Step
+                  </button>
+                  <button type="button" onclick="addVideoStepToSubmodule('pdf')" class="text-xs font-extrabold bg-indigo-50 text-indigo-700 border border-indigo-200 px-3.5 py-2 rounded-xl hover:bg-indigo-100 shadow-sm">
+                    + Add PDF Step
+                  </button>
+                </div>
+              </div>
+
+              <div id="author-video-steps-container" class="space-y-6"></div>
+            </div>
+
+            <!-- PANEL 2: LXT MULTI-VIDEO EXTENSION TRAJECTORY -->
+            <div id="auth-panel-lxt" class="hidden bg-white p-5 sm:p-8 rounded-3xl border border-teal-200 shadow-sm space-y-6">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-teal-200/60 pb-4 gap-3">
+                <div>
+                  <span class="text-xs font-extrabold uppercase tracking-wider text-teal-800">🚀 LxT Extension Trajectory</span>
+                  <h3 class="text-lg font-extrabold text-slate-900 mt-0.5">Multi-Video Extension Lessons & Reflection Configurator</h3>
+                  <p class="text-xs text-slate-500">Unlocked for companions ONLY after completing the main submodule lesson.</p>
+                </div>
+                <button type="button" onclick="addLxTVideoLink()" class="text-xs font-extrabold bg-teal-700 text-white px-4 py-2 rounded-xl hover:bg-teal-600">
+                  + Add LxT Extension Link
+                </button>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-extrabold uppercase text-teal-800 mb-1">LxT Extension Title</label>
+                <input id="author-lxt-title" type="text" oninput="markDraftDirty(); updateLxTMeta();" class="w-full rounded-xl border border-teal-200 px-3 py-2 text-xs font-bold bg-slate-50" placeholder="LxT Extension Lesson Title..." />
+              </div>
+
+              <div id="author-lxt-steps-container" class="space-y-6"></div>
+            </div>
+          </div>
+
+          <!-- ==================== MODULE-LEVEL MASTER QUIZ WORKSPACE ==================== -->
+          <div id="author-editor-master" class="hidden space-y-6">
+            <div class="bg-white p-5 sm:p-8 rounded-3xl border border-indigo-200 shadow-sm space-y-6">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-indigo-100 pb-4 gap-3">
+                <div>
+                  <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">🎓 End-of-Module Assessment</span>
+                  <h3 class="text-lg font-extrabold text-slate-900 mt-0.5" id="author-master-quiz-header">Master Quiz Configurator</h3>
+                  <p class="text-xs text-slate-500">Configure final comprehensive MCQs and Subjective questions for this module certification.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="addAuthorMasterMCQ()" class="text-xs font-bold bg-indigo-700 text-white px-3.5 py-2 rounded-xl hover:bg-indigo-600 shadow-sm">+ Add Master MCQ</button>
+                  <button type="button" onclick="addAuthorMasterSubjective()" class="text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-3.5 py-2 rounded-xl hover:bg-indigo-100 shadow-sm">+ Add Master Subjective</button>
+                </div>
+              </div>
+              <div id="author-master-quiz-list" class="space-y-4"></div>
+            </div>
+          </div>
+
+          <!-- ==================== MODULE-LEVEL LXI DISCUSSION WORKSPACE ==================== -->
+          <div id="author-editor-lxi" class="hidden space-y-6">
+            <div class="bg-indigo-900 text-white p-6 sm:p-8 rounded-3xl space-y-4 shadow-md border border-indigo-800">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-indigo-800/80 pb-3">
+                <div>
+                  <span class="text-xs font-bold uppercase tracking-wider text-indigo-300">💬 Module-Scoped LxI Peer Discussion</span>
+                  <h3 class="text-lg font-extrabold text-white mt-0.5" id="author-lxi-module-header">Configure Module Discussion</h3>
+                </div>
+                <span class="px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-200 text-xs font-bold border border-indigo-500/30">
+                  Scoped to Selected Module
+                </span>
+              </div>
+              
+              <div class="p-3 bg-amber-500/10 border border-amber-400/30 rounded-2xl text-xs text-amber-200 flex items-start gap-2">
+                <span class="text-base">💡</span>
+                <span><strong>Anti-Stale Protection:</strong> When you update this question prompt, the system automatically archives outdated responses so old peer answers never display under a new question prompt.</span>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-indigo-200 mb-1.5">Discussion Prompt for this Module</label>
+                <textarea id="author-module-lxi-prompt" rows="3" oninput="markDraftDirty()" class="w-full rounded-2xl border border-indigo-700 bg-indigo-950 p-4 text-xs sm:text-sm text-white placeholder-indigo-400 focus:outline-none focus:border-indigo-400 leading-relaxed" placeholder="Set the peer discussion prompt for this module..."></textarea>
+              </div>
+
+              <div class="flex items-center justify-between pt-2">
+                <span id="author-lxi-save-note" class="text-xs text-indigo-300">Save draft or publish to apply prompt updates.</span>
+                <button type="button" onclick="saveModuleLxIPrompt()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-extrabold shadow-sm">
+                  Save Prompt Update
+                </button>
+              </div>
+            </div>
+
+            <!-- Current Peer Responses in this Module -->
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+              <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h4 class="text-xs font-black uppercase text-slate-700">Active Peer Submissions for this Module (<span id="author-lxi-subs-count">0</span>)</h4>
+                <button type="button" onclick="clearCurrentModuleLxISubmissions()" class="text-xs font-bold text-rose-600 hover:underline">
+                  Clear All Responses for this Prompt
+                </button>
+              </div>
+              <div id="author-lxi-submissions-list" class="space-y-2"></div>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -322,6 +399,20 @@
     <!-- VIEW 2: LC STUDENT VIEW (COMPANION LEARNING EXPERIENCE) -->
     <!-- ========================================================================= -->
     <section id="view-student" class="space-y-8">
+
+      <!-- DRAFT PREVIEW MODE BANNER (SHOWN WHEN AUTHOR PREVIEWS DRAFT) -->
+      <div id="student-draft-preview-bar" class="hidden p-3.5 sm:p-4 rounded-2xl bg-amber-500 text-slate-950 font-black shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-amber-600">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">👁️</span>
+          <div>
+            <h4 class="text-xs sm:text-sm font-black leading-tight">STUDENT PREVIEW MODE (UNPUBLISHED DRAFT)</h4>
+            <p class="text-[11px] text-amber-950 font-semibold leading-tight">You are simulating the student experience with your active draft changes. Real learners see the published version.</p>
+          </div>
+        </div>
+        <button type="button" onclick="exitStudentPreviewMode()" class="px-3.5 py-1.5 rounded-xl bg-slate-950 hover:bg-black text-white text-xs font-black shadow transition whitespace-nowrap self-start sm:self-auto cursor-pointer">
+          Exit Preview & Return to Author Desk ✕
+        </button>
+      </div>
       
       <!-- Responsive Breadcrumb Navigation -->
       <div id="student-breadcrumb" class="flex items-center gap-1.5 sm:gap-2 text-xs font-bold text-slate-500 overflow-x-auto whitespace-nowrap py-1 w-full max-w-full min-w-0 no-scrollbar">
@@ -891,6 +982,57 @@
       <div class="pt-3 border-t border-slate-100 flex justify-end">
         <button onclick="closeAdminInspectModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs">
           Close Window
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== PRE-FLIGHT PUBLISH REVIEW MODAL ==================== -->
+  <div id="publish-review-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm p-4 flex items-center justify-center overflow-y-auto">
+    <div class="bg-white w-full max-w-xl rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 my-8">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="text-2xl">🚀</span>
+          <div>
+            <h3 class="text-base font-black text-slate-900">Pre-Flight Publish Review</h3>
+            <p class="text-xs text-slate-500 font-medium">Verify changes before publishing live to the student companion view</p>
+          </div>
+        </div>
+        <button onclick="closePublishReviewModal()" class="text-slate-400 hover:text-slate-600 text-sm font-bold">✕</button>
+      </div>
+
+      <!-- Quick Summary Stats -->
+      <div class="grid grid-cols-3 gap-3">
+        <div class="p-3 bg-teal-50 rounded-2xl border border-teal-100 text-center">
+          <span class="text-xs text-teal-700 font-bold block uppercase text-[10px]">Total Modules</span>
+          <span id="pub-stat-modules" class="text-lg font-black text-teal-900">0</span>
+        </div>
+        <div class="p-3 bg-indigo-50 rounded-2xl border border-indigo-100 text-center">
+          <span class="text-xs text-indigo-700 font-bold block uppercase text-[10px]">Total Lessons</span>
+          <span id="pub-stat-lessons" class="text-lg font-black text-indigo-900">0</span>
+        </div>
+        <div class="p-3 bg-amber-50 rounded-2xl border border-amber-100 text-center">
+          <span class="text-xs text-amber-700 font-bold block uppercase text-[10px]">Checkpoints</span>
+          <span id="pub-stat-checkpoints" class="text-lg font-black text-amber-900">0</span>
+        </div>
+      </div>
+
+      <!-- Validation Box -->
+      <div id="pub-validation-box" class="p-3.5 rounded-2xl border text-xs space-y-1"></div>
+
+      <!-- Change Breakdown List -->
+      <div class="space-y-2">
+        <span class="text-[11px] font-black uppercase tracking-wider text-slate-400 block">Changes Being Pushed to Production:</span>
+        <div id="pub-changes-list" class="space-y-2 max-h-48 overflow-y-auto pr-1 no-scrollbar text-xs"></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <button onclick="closePublishReviewModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition text-center">
+          Keep Editing in Draft
+        </button>
+        <button id="btn-confirm-publish-live" onclick="executePublishLive()" class="px-5 py-2.5 bg-teal-700 hover:bg-teal-600 text-white font-black rounded-xl text-xs shadow-lg shadow-teal-700/20 transition flex items-center justify-center gap-1.5 text-center">
+          <span>🚀</span> <span>Confirm & Publish Live Now</span>
         </button>
       </div>
     </div>
@@ -1870,7 +2012,11 @@
     // Active working pointers
     let currentView = 'student'; // 'student' | 'author' | 'admin'
     let authorActiveTab = 'led';
+    let selectedAuthorItemType = 'lesson'; // 'lesson' | 'lxi' | 'master' | 'module_meta'
+    let isStudentPreviewMode = false;
     let isDraftDirty = JSON.stringify(draftDb) !== JSON.stringify(publishedDb);
+    let draftAutoSaveTimeout = null;
+    let lastDraftSavedTimestamp = null;
 
     let selectedModuleId = publishedDb[0] ? publishedDb[0].id : "mod-1";
     let selectedSubmodule = (publishedDb[0] && publishedDb[0].submodules[0]) ? publishedDb[0].submodules[0] : null;
@@ -1892,12 +2038,30 @@
 
     let currentDeleteTarget = null; // For confirmation modal
 
+    function getStudentCourses() {
+      return isStudentPreviewMode ? draftDb : publishedDb;
+    }
+
     // ==========================================
-    // DRAFT & PUBLISH MANAGEMENT (DELIVERABLE #2)
+    // DRAFT & PUBLISH MANAGEMENT (DELIVERABLE #2 & #3)
     // ==========================================
     function markDraftDirty() {
       isDraftDirty = true;
       updateAuthorDraftUI();
+
+      // Debounced auto-save (800ms)
+      if (draftAutoSaveTimeout) clearTimeout(draftAutoSaveTimeout);
+      const saveText = document.getElementById('author-last-saved-text');
+      if (saveText) saveText.innerText = "● Auto-saving draft...";
+
+      draftAutoSaveTimeout = setTimeout(() => {
+        saveToStorage(STORAGE_KEY_DRAFT, draftDb);
+        lastDraftSavedTimestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        if (saveText) saveText.innerText = `✓ Draft auto-saved at ${lastDraftSavedTimestamp}`;
+        updateAuthorDraftUI();
+        renderCurriculumTree();
+        updateHostedSnapshotUI();
+      }, 800);
     }
 
     function updateAuthorDraftUI() {
@@ -1913,7 +2077,7 @@
           badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/40";
           badge.innerText = "⚠️ Draft Mode (Unpublished Edits)";
         }
-        if (desc) desc.innerText = "You have unsaved or unpublished draft changes. Click 'Save as Draft' or 'Publish Live'.";
+        if (desc) desc.innerText = "You have unsaved or unpublished draft changes. Test in Preview or click 'Publish Live' to push to production.";
         if (navDot) navDot.classList.remove('hidden');
         if (discardBtn) discardBtn.classList.remove('hidden');
       } else {
@@ -1928,19 +2092,203 @@
     }
 
     function saveAuthorDraft() {
+      if (draftAutoSaveTimeout) clearTimeout(draftAutoSaveTimeout);
       saveToStorage(STORAGE_KEY_DRAFT, draftDb);
-      showToast("💾 Draft Saved Locally! Changes are kept in draft and not yet visible to students.");
+      lastDraftSavedTimestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const saveText = document.getElementById('author-last-saved-text');
+      if (saveText) saveText.innerText = `✓ Draft manually saved at ${lastDraftSavedTimestamp}`;
+      showToast(`💾 Draft Saved! Working changes saved locally at ${lastDraftSavedTimestamp}.`);
       updateAuthorDraftUI();
+      renderCurriculumTree();
+      updateHostedSnapshotUI();
     }
 
     function discardAuthorDraft() {
-      if (!confirm("Discard all uncommitted draft changes and revert back to the live published version?")) return;
+      if (!confirm("Discard all uncommitted draft changes and revert back to the live published version? Any edits made since last publish will be discarded.")) return;
       draftDb = JSON.parse(JSON.stringify(publishedDb));
       saveToStorage(STORAGE_KEY_DRAFT, draftDb);
       isDraftDirty = false;
+      const saveText = document.getElementById('author-last-saved-text');
+      if (saveText) saveText.innerText = "✓ Draft reverted to live";
       showToast("↺ Draft discarded. Reverted to live published content.");
+      selectedModuleId = draftDb[0] ? draftDb[0].id : null;
+      selectedSubmodule = draftDb[0]?.submodules?.[0] || null;
+      selectedAuthorItemType = 'lesson';
       initAuthorDesk();
       updateAuthorDraftUI();
+      updateHostedSnapshotUI();
+    }
+
+    function previewDraftAsStudent() {
+      saveToStorage(STORAGE_KEY_DRAFT, draftDb);
+      isStudentPreviewMode = true;
+      switchView('student');
+      const previewBar = document.getElementById('student-draft-preview-bar');
+      if (previewBar) previewBar.classList.remove('hidden');
+      showToast("👁️ Student Preview Mode Active: Testing with active draft changes!");
+    }
+
+    function exitStudentPreviewMode() {
+      isStudentPreviewMode = false;
+      const previewBar = document.getElementById('student-draft-preview-bar');
+      if (previewBar) previewBar.classList.add('hidden');
+      switchView('author');
+      showToast("Returned to Course Authoring Studio.");
+    }
+
+    function toggleHostedModulesSnapshot() {
+      const snapshot = document.getElementById('author-hosted-snapshot');
+      const btnText = document.getElementById('toggle-snapshot-btn-text');
+      if (!snapshot) return;
+
+      if (snapshot.classList.contains('hidden')) {
+        snapshot.classList.remove('hidden');
+        if (btnText) btnText.innerText = "Hide Snapshot";
+        updateHostedSnapshotUI();
+      } else {
+        snapshot.classList.add('hidden');
+        if (btnText) btnText.innerText = "View Live Modules Snapshot";
+      }
+    }
+
+    function updateHostedSnapshotUI() {
+      const list = document.getElementById('author-hosted-snapshot-list');
+      const syncPill = document.getElementById('author-live-sync-pill');
+      const syncSummary = document.getElementById('author-live-sync-summary');
+
+      const pubModCount = publishedDb.length;
+      let pubLessonCount = 0;
+      publishedDb.forEach(m => {
+        pubLessonCount += (m.submodules ? m.submodules.length : 0);
+      });
+
+      const isOutOfSync = JSON.stringify(draftDb) !== JSON.stringify(publishedDb);
+
+      if (syncPill) {
+        if (isOutOfSync) {
+          syncPill.className = "px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/40";
+          syncPill.innerText = "⚠️ Unpublished Draft Edits";
+        } else {
+          syncPill.className = "px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+          syncPill.innerText = "✓ Live & In Sync";
+        }
+      }
+
+      if (syncSummary) {
+        syncSummary.innerHTML = `Currently hosting <strong>${pubModCount} Modules</strong> (${pubLessonCount} Lessons) in Companion View. ${isOutOfSync ? '<span class="text-amber-400 font-bold">Draft has pending changes.</span>' : '<span class="text-emerald-400 font-bold">Matches draft version.</span>'}`;
+      }
+
+      if (list) {
+        list.innerHTML = publishedDb.map((m, idx) => {
+          const lessons = m.submodules ? m.submodules.length : 0;
+          return `
+            <div class="p-3 bg-slate-800/90 rounded-2xl border border-slate-700/80 space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-black text-teal-400 uppercase">Module #${idx + 1}</span>
+                <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px] font-bold">Live v1</span>
+              </div>
+              <h5 class="text-xs font-black text-white truncate">${m.title}</h5>
+              <p class="text-[11px] text-slate-400 font-medium">${lessons} Lesson(s) · Tier: ${m.level || 'Foundational'}</p>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function openPublishReviewModal() {
+      const modal = document.getElementById('publish-review-modal');
+      if (!modal) return;
+
+      const totalMods = draftDb.length;
+      let totalLessons = 0;
+      let totalCheckpoints = 0;
+      const warnings = [];
+      const changes = [];
+
+      draftDb.forEach((mod, idx) => {
+        const subCount = mod.submodules ? mod.submodules.length : 0;
+        totalLessons += subCount;
+
+        if (subCount === 0) {
+          warnings.push(`Module ${idx + 1} ("${mod.title}") has 0 lessons.`);
+        }
+
+        const pubMod = publishedDb.find(pm => pm.id === mod.id);
+        if (!pubMod) {
+          changes.push(`➕ Added new Module: "${mod.title}" (${subCount} lessons)`);
+        } else if (JSON.stringify(mod) !== JSON.stringify(pubMod)) {
+          changes.push(`✏️ Modified Module: "${mod.title}" (content/questions updated)`);
+        }
+
+        (mod.submodules || []).forEach(sub => {
+          (sub.videoSteps || []).forEach(st => {
+            const ivcCount = st.inVideoCheckpoints?.length || 0;
+            const pdfCpCount = st.pdfCheckpoints?.length || 0;
+            totalCheckpoints += ivcCount + pdfCpCount;
+
+            (st.inVideoCheckpoints || []).forEach((cp, cpIdx) => {
+              if (!cp.question || !cp.question.trim()) {
+                warnings.push(`Checkpoint #${cpIdx + 1} in "${sub.title}" is missing question text.`);
+              }
+            });
+          });
+        });
+      });
+
+      publishedDb.forEach(pubMod => {
+        if (!draftDb.some(dm => dm.id === pubMod.id)) {
+          changes.push(`🗑️ Deleted Module: "${pubMod.title}"`);
+        }
+      });
+
+      if (changes.length === 0) {
+        changes.push(`ℹ️ Draft matches published version. No changes detected.`);
+      }
+
+      document.getElementById('pub-stat-modules').innerText = totalMods;
+      document.getElementById('pub-stat-lessons').innerText = totalLessons;
+      document.getElementById('pub-stat-checkpoints').innerText = totalCheckpoints;
+
+      const valBox = document.getElementById('pub-validation-box');
+      if (warnings.length > 0) {
+        valBox.className = "p-3.5 rounded-2xl border border-amber-300 bg-amber-50 text-amber-900 text-xs space-y-1.5";
+        valBox.innerHTML = `
+          <div class="font-black flex items-center gap-1.5 text-amber-800">
+            <span>⚠️</span> <span>Pre-Flight Warnings (${warnings.length}):</span>
+          </div>
+          <ul class="list-disc list-inside space-y-0.5 text-[11px] text-amber-700 font-medium">
+            ${warnings.map(w => `<li>${w}</li>`).join('')}
+          </ul>
+        `;
+      } else {
+        valBox.className = "p-3.5 rounded-2xl border border-emerald-300 bg-emerald-50 text-emerald-900 text-xs flex items-center gap-2";
+        valBox.innerHTML = `
+          <span class="text-base text-emerald-600">✓</span>
+          <div>
+            <span class="font-black text-emerald-800">All Pre-Flight Checks Passed!</span>
+            <p class="text-[11px] text-emerald-700 font-medium">Curriculum structure is complete and ready for student deployment.</p>
+          </div>
+        `;
+      }
+
+      const changeList = document.getElementById('pub-changes-list');
+      changeList.innerHTML = changes.map(ch => `
+        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold text-slate-800 flex items-center gap-2">
+          <span>${ch}</span>
+        </div>
+      `).join('');
+
+      modal.classList.remove('hidden');
+    }
+
+    function closePublishReviewModal() {
+      const modal = document.getElementById('publish-review-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function executePublishLive() {
+      closePublishReviewModal();
+      publishContent();
     }
 
     function publishContent() {
@@ -1949,7 +2297,6 @@
       saveToStorage(STORAGE_KEY_DRAFT, draftDb);
       isDraftDirty = false;
       
-      // Reset answered in-video checkpoints for freshly edited questions
       answeredInVideoCheckpointsMap = {};
       currentActiveInVideoCheckpoint = null;
       const mainModal = document.getElementById('in-video-checkpoint-modal');
@@ -1957,8 +2304,9 @@
 
       showToast("🎉 Published Successfully! All module changes and new checkpoints are now live in Companion View.");
       updateAuthorDraftUI();
+      updateHostedSnapshotUI();
+      renderCurriculumTree();
 
-      // Hydrate publishedDb with active blob URLs from cache
       for (const mod of publishedDb) {
         if (!mod.submodules) continue;
         for (const sub of mod.submodules) {
@@ -1973,7 +2321,6 @@
       }
       restorePdfBlobs(publishedDb);
       
-      // If currently on companion view, re-render immediate content
       if (currentView === 'student') {
         if (selectedModuleId && selectedSubmodule && !document.getElementById('student-level-content').classList.contains('hidden')) {
           const pMod = publishedDb.find(m => m.id === selectedModuleId);
@@ -2038,9 +2385,10 @@
         if (vStudent) vStudent.classList.remove('hidden');
         if (tabStudent) tabStudent.className = activeTabCls;
         
-        // Re-sync student view to publishedDb
+        // Re-sync student view to active course database
+        const courses = getStudentCourses();
         if (selectedModuleId && selectedSubmodule && !document.getElementById('student-level-content').classList.contains('hidden')) {
-          const pMod = publishedDb.find(m => m.id === selectedModuleId);
+          const pMod = courses.find(m => m.id === selectedModuleId);
           const pSub = pMod ? pMod.submodules.find(s => s.id === selectedSubmodule.id) : null;
           if (pSub) {
             selectedSubmodule = pSub;
@@ -2063,8 +2411,8 @@
       const newNum = draftDb.length + 1;
       const newMod = {
         id: `mod-${Date.now()}`,
-        title: `Module ${newNum}: New Neurodiversity Intervention Topic`,
-        description: "Configure module overview and pedagogical goals.",
+        title: `Module ${newNum}: New Intervention Topic`,
+        description: "Configure module overview, competencies, and therapeutic goals.",
         level: "Foundational",
         lxi: {
           questionId: `lxi-mod-${Date.now()}`,
@@ -2075,9 +2423,9 @@
           {
             type: "mcq",
             question: "Sample Master Question: What is the primary co-regulation strategy?",
-            choices: ["Option A: Calming presence", "Option B: Strict timeout", "Option C: Ignoring", "Option D: Shouting"],
+            choices: ["Option A: Calming presence & safety", "Option B: Strict timeout", "Option C: Ignoring sensory cues", "Option D: Shouting demands"],
             correctIndex: 0,
-            feedbacks: ["Correct!", "Incorrect.", "Incorrect.", "Incorrect."]
+            feedbacks: ["Correct! Calming presence establishes nervous system safety.", "Incorrect.", "Incorrect.", "Incorrect."]
           }
         ],
         submodules: [
@@ -2100,8 +2448,8 @@
                     question: "Mid-Video Checkpoint (00:15): What is the first priority?",
                     choices: ["Prioritize connection & safety", "Demand immediate compliance", "Leave the area", "Raise voice"],
                     correctIndex: 0,
-                    feedbacks: ["Correct!", "Incorrect.", "Incorrect.", "Incorrect."],
-                    exemplar: "Connection creates emotional safety."
+                    feedbacks: ["Correct! Connection establishes emotional safety.", "Incorrect.", "Incorrect.", "Incorrect."],
+                    exemplar: "Author Exemplar: Maintain low-demand pacing."
                   }
                 ],
                 mcqs: [],
@@ -2115,12 +2463,59 @@
       draftDb.push(newMod);
       markDraftDirty();
       selectedModuleId = newMod.id;
+      selectedSubmodule = newMod.submodules[0];
+      selectedAuthorItemType = 'lesson';
       initAuthorDesk();
-      showToast(`✨ Created "${newMod.title}"! Remember to save draft or publish.`);
+      showToast(`✨ Created "${newMod.title}"! Selected and ready to edit.`);
+      const titleInput = document.getElementById('author-mod-title');
+      if (titleInput) {
+        titleInput.focus();
+        titleInput.select();
+      }
     }
 
-    function confirmDeleteCurrentModule() {
-      const mod = draftDb.find(m => m.id === selectedModuleId);
+    function addNewSubmoduleToMod(modId) {
+      const mod = draftDb.find(m => m.id === modId);
+      if (!mod) return;
+      if (!mod.submodules) mod.submodules = [];
+      const subNum = mod.submodules.length + 1;
+      const modNum = draftDb.indexOf(mod) + 1;
+      const newSub = {
+        id: `sub-${Date.now()}`,
+        title: `Submodule ${modNum}.${subNum}: Practical Application`,
+        format: "video",
+        videoSteps: [
+          {
+            id: `vstep-${Date.now()}`,
+            title: `Lesson ${subNum}: Strategy Video`,
+            videoUrl: "https://vjs.zencdn.net/v/oceans.mp4",
+            transcript: "Take notes on therapeutic pacing and observations...",
+            inVideoCheckpoints: [],
+            mcqs: [],
+            subjectives: []
+          }
+        ]
+      };
+      mod.submodules.push(newSub);
+      markDraftDirty();
+      selectedModuleId = mod.id;
+      selectedSubmodule = newSub;
+      selectedAuthorItemType = 'lesson';
+      initAuthorDesk();
+      showToast(`✨ Added "${newSub.title}" to ${mod.title}.`);
+      const subTitleInput = document.getElementById('author-sub-title');
+      if (subTitleInput) {
+        subTitleInput.focus();
+        subTitleInput.select();
+      }
+    }
+
+    function addNewSubmodule() {
+      if (selectedModuleId) addNewSubmoduleToMod(selectedModuleId);
+    }
+
+    function confirmDeleteModuleById(modId) {
+      const mod = draftDb.find(m => m.id === modId);
       if (!mod) return;
       if (draftDb.length <= 1) {
         alert("You must keep at least one module in the curriculum.");
@@ -2128,49 +2523,31 @@
       }
       currentDeleteTarget = { type: 'module', id: mod.id, title: mod.title };
       document.getElementById('delete-modal-title').innerText = "Delete Entire Module?";
-      document.getElementById('delete-modal-desc').innerHTML = `Are you sure you want to permanently delete <strong>"${mod.title}"</strong> and all of its lessons, checkpoints, and master quizzes?`;
+      document.getElementById('delete-modal-desc').innerHTML = `Are you sure you want to permanently delete <strong>"${mod.title}"</strong> and all of its ${mod.submodules?.length || 0} lesson(s), checkpoints, and quizzes?`;
       document.getElementById('delete-confirm-modal').classList.remove('hidden');
     }
 
-    function addNewSubmodule() {
-      const mod = draftDb.find(m => m.id === selectedModuleId);
+    function confirmDeleteSubmoduleById(modId, subId) {
+      const mod = draftDb.find(m => m.id === modId);
       if (!mod) return;
-      const subNum = (mod.submodules ? mod.submodules.length : 0) + 1;
-      const newSub = {
-        id: `sub-${Date.now()}`,
-        title: `Submodule ${mod.submodules.length + 1}: Practical Application`,
-        format: "video",
-        videoSteps: [
-          {
-            id: `vstep-${Date.now()}`,
-            title: "Lesson 1: Strategy Video",
-            videoUrl: "https://vjs.zencdn.net/v/oceans.mp4",
-            transcript: "Take notes on de-escalation pacing...",
-            inVideoCheckpoints: [],
-            mcqs: [],
-            subjectives: []
-          }
-        ]
-      };
-      if (!mod.submodules) mod.submodules = [];
-      mod.submodules.push(newSub);
-      markDraftDirty();
-      selectedSubmodule = newSub;
-      initAuthorDesk();
-      showToast(`✨ Added "${newSub.title}" to ${mod.title}.`);
-    }
-
-    function confirmDeleteCurrentSubmodule() {
-      const mod = draftDb.find(m => m.id === selectedModuleId);
-      if (!mod || !selectedSubmodule) return;
+      const sub = mod.submodules?.find(s => s.id === subId);
+      if (!sub) return;
       if (mod.submodules.length <= 1) {
         alert("A module must contain at least one submodule lesson.");
         return;
       }
-      currentDeleteTarget = { type: 'submodule', moduleId: mod.id, subId: selectedSubmodule.id, title: selectedSubmodule.title };
-      document.getElementById('delete-modal-title').innerText = "Delete Submodule Lesson?";
-      document.getElementById('delete-modal-desc').innerHTML = `Are you sure you want to delete <strong>"${selectedSubmodule.title}"</strong> from ${mod.title}?`;
+      currentDeleteTarget = { type: 'submodule', moduleId: mod.id, subId: sub.id, title: sub.title, parentTitle: mod.title };
+      document.getElementById('delete-modal-title').innerText = "Delete Lesson / Submodule?";
+      document.getElementById('delete-modal-desc').innerHTML = `Are you sure you want to delete lesson <strong>"${sub.title}"</strong> from "${mod.title}"?`;
       document.getElementById('delete-confirm-modal').classList.remove('hidden');
+    }
+
+    function confirmDeleteCurrentModule() {
+      if (selectedModuleId) confirmDeleteModuleById(selectedModuleId);
+    }
+
+    function confirmDeleteCurrentSubmodule() {
+      if (selectedModuleId && selectedSubmodule) confirmDeleteSubmoduleById(selectedModuleId, selectedSubmodule.id);
     }
 
     function closeDeleteModal() {
@@ -2184,17 +2561,19 @@
         draftDb = draftDb.filter(m => m.id !== currentDeleteTarget.id);
         selectedModuleId = draftDb[0].id;
         selectedSubmodule = draftDb[0].submodules[0];
+        selectedAuthorItemType = 'lesson';
         markDraftDirty();
         initAuthorDesk();
-        showToast(`🗑️ Module deleted successfully.`);
+        showToast(`🗑️ Module "${currentDeleteTarget.title}" deleted.`);
       } else if (currentDeleteTarget.type === 'submodule') {
         const mod = draftDb.find(m => m.id === currentDeleteTarget.moduleId);
         if (mod) {
           mod.submodules = mod.submodules.filter(s => s.id !== currentDeleteTarget.subId);
           selectedSubmodule = mod.submodules[0];
+          selectedAuthorItemType = 'lesson';
           markDraftDirty();
           initAuthorDesk();
-          showToast(`🗑️ Submodule deleted.`);
+          showToast(`🗑️ Lesson "${currentDeleteTarget.title}" deleted.`);
         }
       }
       closeDeleteModal();
@@ -2204,14 +2583,9 @@
     // AUTHOR DESK INITIALIZATION & RENDERING
     // ==========================================
     function initAuthorDesk() {
-      const modSelect = document.getElementById('author-module-select');
-      const subSelect = document.getElementById('author-submodule-select');
-      if (!modSelect || !subSelect) return;
-
-      // Populate Modules
-      modSelect.innerHTML = draftDb.map(m => `
-        <option value="${m.id}" ${m.id === selectedModuleId ? 'selected' : ''}>${m.title}</option>
-      `).join('');
+      if (!draftDb || draftDb.length === 0) {
+        draftDb = JSON.parse(JSON.stringify(DEFAULT_COURSES));
+      }
 
       let mod = draftDb.find(m => m.id === selectedModuleId);
       if (!mod) {
@@ -2220,22 +2594,12 @@
       }
 
       if (mod) {
-        document.getElementById('author-mod-title').value = mod.title || '';
-        document.getElementById('author-mod-level').value = mod.level || '';
-        document.getElementById('author-mod-desc').value = mod.description || '';
-
-        // Submodules
         if (!mod.submodules || mod.submodules.length === 0) {
           mod.submodules = [{ id: `sub-${Date.now()}`, title: "Submodule 1: Core", videoSteps: [] }];
         }
 
-        // CRITICAL FIX: Ensure selectedSubmodule is ALWAYS the object inside draftDb (not publishedDb)
         const currentSubId = selectedSubmodule ? selectedSubmodule.id : (mod.submodules[0] ? mod.submodules[0].id : null);
         selectedSubmodule = mod.submodules.find(s => s.id === currentSubId) || mod.submodules[0];
-
-        subSelect.innerHTML = mod.submodules.map(s => `
-          <option value="${s.id}" ${selectedSubmodule && s.id === selectedSubmodule.id ? 'selected' : ''}>${s.title}</option>
-        `).join('');
 
         if (selectedSubmodule && (!selectedSubmodule.videoSteps || selectedSubmodule.videoSteps.length === 0) && selectedSubmodule.pdfDoc) {
           selectedSubmodule.videoSteps = [{
@@ -2249,32 +2613,251 @@
             transcript: "Clinical protocol covering early physiological warnings of sensory meltdowns and trauma-informed de-escalation sequences."
           }];
         }
-
-        document.getElementById('author-sub-title').value = selectedSubmodule ? selectedSubmodule.title : '';
-
-        // Render current tabs
-        renderAuthorContentFormatSteps();
-        renderAuthorLxTSteps(selectedSubmodule);
-        renderAuthorMasterQuiz(mod);
-        renderAuthorModuleLxI(mod);
       }
 
-      setAuthorTab(authorActiveTab);
+      renderCurriculumTree();
+      renderAuthorDeskWorkspace();
       updateAuthorDraftUI();
+      updateHostedSnapshotUI();
     }
 
-    function onAuthorModuleChange() {
-      selectedModuleId = document.getElementById('author-module-select').value;
-      const mod = draftDb.find(m => m.id === selectedModuleId);
-      selectedSubmodule = mod && mod.submodules ? mod.submodules[0] : null;
-      initAuthorDesk();
+    function renderCurriculumTree() {
+      const container = document.getElementById('author-curriculum-tree');
+      if (!container) return;
+
+      container.innerHTML = draftDb.map((mod, mIdx) => {
+        const isModSelected = (mod.id === selectedModuleId);
+        const pubMod = publishedDb.find(pm => pm.id === mod.id);
+        
+        let statusBadge = '';
+        if (!pubMod) {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-amber-500/10 text-amber-700 border border-amber-300">● Draft</span>`;
+        } else if (JSON.stringify(mod) !== JSON.stringify(pubMod)) {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-blue-500/10 text-blue-700 border border-blue-300">⚠️ Modified</span>`;
+        } else {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-emerald-500/10 text-emerald-700 border border-emerald-300">✓ Live</span>`;
+        }
+
+        const subCount = mod.submodules ? mod.submodules.length : 0;
+
+        return `
+          <div class="rounded-2xl border transition-all ${isModSelected ? 'border-teal-500 bg-teal-50/20 shadow-sm ring-1 ring-teal-500' : 'border-slate-200 bg-white hover:border-slate-300'}">
+            <!-- Module Item Row -->
+            <div class="p-3 sm:p-3.5 flex items-start justify-between gap-2 cursor-pointer select-none" onclick="selectAuthorItem('${mod.id}', null, 'module_meta')">
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="text-xs font-black text-slate-400">#${mIdx + 1}</span>
+                  ${statusBadge}
+                  <span class="text-[10px] font-bold text-slate-500">${subCount} Lesson${subCount === 1 ? '' : 's'}</span>
+                </div>
+                <h4 class="text-xs sm:text-sm font-black text-slate-900 mt-1 truncate ${isModSelected ? 'text-teal-900' : ''}">${mod.title}</h4>
+              </div>
+              <div class="flex items-center gap-1 flex-shrink-0" onclick="event.stopPropagation()">
+                <button type="button" onclick="addNewSubmoduleToMod('${mod.id}')" title="Add Lesson to this Module" class="w-6 h-6 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-700 text-xs font-black flex items-center justify-center transition">
+                  +
+                </button>
+                <button type="button" onclick="confirmDeleteModuleById('${mod.id}')" title="Delete this Module" class="w-6 h-6 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold flex items-center justify-center transition">
+                  🗑️
+                </button>
+              </div>
+            </div>
+
+            <!-- Nested Child Items (Lessons, LxI, Master Quiz) -->
+            <div class="px-2.5 pb-2.5 pt-1 space-y-1 border-t border-slate-100">
+              ${(mod.submodules || []).map((sub, sIdx) => {
+                const isSubSelected = (isModSelected && selectedAuthorItemType === 'lesson' && selectedSubmodule && selectedSubmodule.id === sub.id);
+                const isPdf = sub.videoSteps && sub.videoSteps.some(s => s.format === 'pdf' || s.pdfUrl);
+                const cpCount = (sub.videoSteps || []).reduce((acc, st) => acc + (st.inVideoCheckpoints?.length || 0) + (st.pdfCheckpoints?.length || 0), 0);
+
+                return `
+                  <div 
+                    onclick="selectAuthorItem('${mod.id}', '${sub.id}', 'lesson')"
+                    class="group p-2 rounded-xl text-xs font-bold flex items-center justify-between gap-2 cursor-pointer transition ${isSubSelected ? 'bg-teal-700 text-white shadow-sm' : 'hover:bg-slate-100 text-slate-700'}"
+                  >
+                    <div class="flex items-center gap-2 min-w-0">
+                      <span class="text-xs">${isPdf ? '📄' : '📹'}</span>
+                      <span class="truncate text-[11px] font-extrabold">${sub.title}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 flex-shrink-0">
+                      ${cpCount > 0 ? `
+                        <span class="px-1.5 py-0.5 rounded text-[9px] font-black ${isSubSelected ? 'bg-teal-800 text-teal-100' : 'bg-slate-200 text-slate-600'}">
+                          ${cpCount} CP
+                        </span>
+                      ` : ''}
+                      <button 
+                        type="button" 
+                        onclick="event.stopPropagation(); confirmDeleteSubmoduleById('${mod.id}', '${sub.id}')" 
+                        class="opacity-0 group-hover:opacity-100 hover:text-rose-400 transition text-[10px] p-0.5"
+                        title="Delete Lesson"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+
+              <!-- Module LxI Discussion Item -->
+              <div 
+                onclick="selectAuthorItem('${mod.id}', null, 'lxi')"
+                class="p-2 rounded-xl text-xs font-bold flex items-center justify-between gap-2 cursor-pointer transition ${isModSelected && selectedAuthorItemType === 'lxi' ? 'bg-indigo-800 text-white shadow-sm' : 'hover:bg-indigo-50 text-indigo-700'}"
+              >
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="text-xs">💬</span>
+                  <span class="truncate text-[11px] font-black">Module Discussion (LxI)</span>
+                </div>
+                <span class="text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${isModSelected && selectedAuthorItemType === 'lxi' ? 'bg-indigo-900 text-indigo-200' : 'bg-indigo-100 text-indigo-800'}">
+                  Module
+                </span>
+              </div>
+
+              <!-- Module Master Quiz Item -->
+              <div 
+                onclick="selectAuthorItem('${mod.id}', null, 'master')"
+                class="p-2 rounded-xl text-xs font-bold flex items-center justify-between gap-2 cursor-pointer transition ${isModSelected && selectedAuthorItemType === 'master' ? 'bg-indigo-800 text-white shadow-sm' : 'hover:bg-indigo-50 text-indigo-700'}"
+              >
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="text-xs">🎓</span>
+                  <span class="truncate text-[11px] font-black">Master Quiz</span>
+                </div>
+                <span class="text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${isModSelected && selectedAuthorItemType === 'master' ? 'bg-indigo-900 text-indigo-200' : 'bg-indigo-100 text-indigo-800'}">
+                  ${mod.masterQuiz?.length || 0} Qs
+                </span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
-    function onAuthorSubmoduleChange() {
+    function selectAuthorItem(modId, subId, itemType) {
+      selectedModuleId = modId;
+      const mod = draftDb.find(m => m.id === modId);
+      if (!mod) return;
+
+      selectedAuthorItemType = itemType || 'lesson';
+
+      if (selectedAuthorItemType === 'lesson') {
+        if (subId) {
+          selectedSubmodule = mod.submodules.find(s => s.id === subId) || mod.submodules[0];
+        } else if (!selectedSubmodule || !mod.submodules.some(s => s.id === selectedSubmodule.id)) {
+          selectedSubmodule = mod.submodules[0];
+        }
+      }
+
+      renderAuthorDeskWorkspace();
+      renderCurriculumTree();
+    }
+
+    function renderAuthorDeskWorkspace() {
       const mod = draftDb.find(m => m.id === selectedModuleId);
-      const subId = document.getElementById('author-submodule-select').value;
-      selectedSubmodule = mod ? mod.submodules.find(s => s.id === subId) : null;
-      initAuthorDesk();
+      if (!mod) return;
+
+      // Module meta inputs
+      const modTitleInput = document.getElementById('author-mod-title');
+      const modLevelInput = document.getElementById('author-mod-level');
+      const modDescInput = document.getElementById('author-mod-desc');
+      if (modTitleInput) modTitleInput.value = mod.title || '';
+      if (modLevelInput) modLevelInput.value = mod.level || '';
+      if (modDescInput) modDescInput.value = mod.description || '';
+
+      // Breadcrumb Header
+      const activeModTitle = document.getElementById('editor-active-module-title');
+      const activeItemTitle = document.getElementById('editor-active-item-title');
+      const activeTypeBadge = document.getElementById('editor-active-type-badge');
+      const quickActions = document.getElementById('editor-quick-actions');
+
+      if (activeModTitle) activeModTitle.innerText = mod.title;
+
+      const subEditor = document.getElementById('author-editor-submodule');
+      const masterEditor = document.getElementById('author-editor-master');
+      const lxiEditor = document.getElementById('author-editor-lxi');
+      const metaDetails = document.getElementById('author-mod-meta-details');
+
+      if (selectedAuthorItemType === 'lesson') {
+        if (!selectedSubmodule) {
+          selectedSubmodule = mod.submodules ? mod.submodules[0] : null;
+        }
+        if (activeItemTitle) activeItemTitle.innerText = selectedSubmodule ? selectedSubmodule.title : 'Lesson';
+        if (activeTypeBadge) {
+          activeTypeBadge.className = "px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-teal-100 text-teal-800";
+          activeTypeBadge.innerText = "Lesson";
+        }
+        if (quickActions) {
+          quickActions.innerHTML = `
+            <button type="button" onclick="addNewSubmoduleToMod('${mod.id}')" class="text-xs font-black bg-teal-50 text-teal-800 border border-teal-200 px-3 py-1.5 rounded-xl hover:bg-teal-100 transition">
+              + New Lesson
+            </button>
+          `;
+        }
+
+        if (subEditor) subEditor.classList.remove('hidden');
+        if (masterEditor) masterEditor.classList.add('hidden');
+        if (lxiEditor) lxiEditor.classList.add('hidden');
+
+        const subTitleInput = document.getElementById('author-sub-title');
+        if (subTitleInput && selectedSubmodule) subTitleInput.value = selectedSubmodule.title || '';
+
+        renderAuthorContentFormatSteps();
+        if (selectedSubmodule) renderAuthorLxTSteps(selectedSubmodule);
+        setAuthorTab(authorActiveTab);
+
+      } else if (selectedAuthorItemType === 'master') {
+        if (activeItemTitle) activeItemTitle.innerText = "End-of-Module Assessment";
+        if (activeTypeBadge) {
+          activeTypeBadge.className = "px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-indigo-100 text-indigo-800";
+          activeTypeBadge.innerText = "Master Quiz";
+        }
+        if (quickActions) {
+          quickActions.innerHTML = `
+            <button type="button" onclick="addAuthorMasterMCQ()" class="text-xs font-bold bg-indigo-700 text-white px-3 py-1.5 rounded-xl hover:bg-indigo-600 shadow-sm">+ Add MCQ</button>
+          `;
+        }
+
+        if (subEditor) subEditor.classList.add('hidden');
+        if (masterEditor) masterEditor.classList.remove('hidden');
+        if (lxiEditor) lxiEditor.classList.add('hidden');
+
+        const masterHeader = document.getElementById('author-master-quiz-header');
+        if (masterHeader) masterHeader.innerText = `Master Quiz: ${mod.title}`;
+
+        renderAuthorMasterQuiz(mod);
+
+      } else if (selectedAuthorItemType === 'lxi') {
+        if (activeItemTitle) activeItemTitle.innerText = "Module Discussion Space (LxI)";
+        if (activeTypeBadge) {
+          activeTypeBadge.className = "px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-indigo-100 text-indigo-800";
+          activeTypeBadge.innerText = "LxI Space";
+        }
+        if (quickActions) {
+          quickActions.innerHTML = `
+            <button type="button" onclick="saveModuleLxIPrompt()" class="text-xs font-black bg-indigo-600 text-white px-3 py-1.5 rounded-xl hover:bg-indigo-500 shadow-sm">Save Prompt</button>
+          `;
+        }
+
+        if (subEditor) subEditor.classList.add('hidden');
+        if (masterEditor) masterEditor.classList.add('hidden');
+        if (lxiEditor) lxiEditor.classList.remove('hidden');
+
+        renderAuthorModuleLxI(mod);
+
+      } else if (selectedAuthorItemType === 'module_meta') {
+        if (activeItemTitle) activeItemTitle.innerText = "Module Overview & Settings";
+        if (activeTypeBadge) {
+          activeTypeBadge.className = "px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-slate-200 text-slate-800";
+          activeTypeBadge.innerText = "Settings";
+        }
+        if (quickActions) quickActions.innerHTML = '';
+        if (metaDetails) metaDetails.open = true;
+
+        if (subEditor) subEditor.classList.remove('hidden');
+        if (masterEditor) masterEditor.classList.add('hidden');
+        if (lxiEditor) lxiEditor.classList.add('hidden');
+
+        renderAuthorContentFormatSteps();
+        if (selectedSubmodule) renderAuthorLxTSteps(selectedSubmodule);
+        setAuthorTab(authorActiveTab);
+      }
     }
 
     function updateModuleMeta() {
@@ -2283,9 +2866,9 @@
         mod.title = document.getElementById('author-mod-title').value;
         mod.level = document.getElementById('author-mod-level').value;
         mod.description = document.getElementById('author-mod-desc').value;
-        // update select text
-        const opt = document.querySelector(`#author-module-select option[value="${mod.id}"]`);
-        if (opt) opt.innerText = mod.title;
+        const activeModTitle = document.getElementById('editor-active-module-title');
+        if (activeModTitle) activeModTitle.innerText = mod.title;
+        renderCurriculumTree();
         markDraftDirty();
       }
     }
@@ -2293,15 +2876,16 @@
     function updateSubmoduleTitle() {
       if (selectedSubmodule) {
         selectedSubmodule.title = document.getElementById('author-sub-title').value;
-        const opt = document.querySelector(`#author-submodule-select option[value="${selectedSubmodule.id}"]`);
-        if (opt) opt.innerText = selectedSubmodule.title;
+        const activeItemTitle = document.getElementById('editor-active-item-title');
+        if (activeItemTitle && selectedAuthorItemType === 'lesson') activeItemTitle.innerText = selectedSubmodule.title;
+        renderCurriculumTree();
         markDraftDirty();
       }
     }
 
     function setAuthorTab(tab) {
       authorActiveTab = tab;
-      const tabs = ['led', 'lxt', 'master', 'lxi'];
+      const tabs = ['led', 'lxt'];
       tabs.forEach(t => {
         const btn = document.getElementById(`auth-tab-btn-${t}`);
         const panel = document.getElementById(`auth-panel-${t}`);
@@ -3059,7 +3643,7 @@
       const grid = document.getElementById('modules-grid');
       if (!grid) return;
 
-      grid.innerHTML = publishedDb.map(mod => {
+      grid.innerHTML = getStudentCourses().map(mod => {
         const subCount = mod.submodules ? mod.submodules.length : 0;
         const isMasterFinished = masterQuizSubmittedMap[mod.id];
         
@@ -3097,7 +3681,7 @@
 
     function openModule(modId) {
       selectedModuleId = modId;
-      const mod = publishedDb.find(m => m.id === modId);
+      const mod = getStudentCourses().find(m => m.id === modId);
       if (!mod) return;
 
       document.getElementById('student-level-modules').classList.add('hidden');
@@ -3226,7 +3810,7 @@
     }
 
     function submitModuleLxIResponse() {
-      const mod = publishedDb.find(m => m.id === selectedModuleId);
+      const mod = getStudentCourses().find(m => m.id === selectedModuleId);
       if (!mod || !mod.lxi) return;
       const input = document.getElementById('module-lxi-response');
       const val = input.value.trim();
@@ -3268,9 +3852,9 @@
     // SUBMODULE CONTENT: VIDEO OR PDF OR HYBRID (DELIVERABLE #1, #4, #7)
     // =========================================================================
     function openSubmodule(subId) {
-      let mod = publishedDb.find(m => m.id === selectedModuleId);
+      let mod = getStudentCourses().find(m => m.id === selectedModuleId);
       if (!mod || !mod.submodules.some(s => s.id === subId)) {
-        mod = publishedDb.find(m => m.submodules && m.submodules.some(s => s.id === subId)) || publishedDb[0];
+        mod = getStudentCourses().find(m => m.submodules && m.submodules.some(s => s.id === subId)) || getStudentCourses()[0];
         if (mod) selectedModuleId = mod.id;
       }
       const sub = mod ? mod.submodules.find(s => s.id === subId) : null;
@@ -3367,7 +3951,7 @@
 
     function changeVideoStep(idx) {
       activeVideoStepIndex = idx;
-      const mod = publishedDb.find(m => m.id === selectedModuleId);
+      const mod = getStudentCourses().find(m => m.id === selectedModuleId);
       renderSubmoduleContent(selectedSubmodule, mod);
     }
 
@@ -3666,7 +4250,7 @@
 
       // Log attempt to Admin Dashboard (DELIVERABLE #8)
       const qId = cp.id || `pdf-cp-${cpIdx}`;
-      const mod = publishedDb.find(m => m.id === selectedModuleId);
+      const mod = getStudentCourses().find(m => m.id === selectedModuleId);
       const prevPdfAtts = adminAttempts.filter(a => a.companionName === "Priya Sharma (Trainee)" && a.questionId === qId);
       logAdminAttempt({
         companionName: "Priya Sharma (Trainee)",
@@ -3898,7 +4482,7 @@
 
       // Log attempt to Admin Dashboard (DELIVERABLE #8)
       const qId = ivc.id || `ivc-${Date.now()}`;
-      const mod = publishedDb.find(m => m.id === selectedModuleId);
+      const mod = getStudentCourses().find(m => m.id === selectedModuleId);
       const prevAtts = adminAttempts.filter(a => a.companionName === "Priya Sharma (Trainee)" && a.questionId === qId);
       logAdminAttempt({
         companionName: "Priya Sharma (Trainee)",
@@ -4055,7 +4639,7 @@
     function submitReflectionMCQ(key, mIdx, cIdx) {
       if (selectedChoicesMap[key] !== undefined) return;
       selectedChoicesMap[key] = cIdx;
-      const mod = publishedDb.find(m => m.id === selectedModuleId);
+      const mod = getStudentCourses().find(m => m.id === selectedModuleId);
       const step = selectedSubmodule.videoSteps[activeVideoStepIndex] || selectedSubmodule.pdfDoc;
       const m = step.mcqs[mIdx];
       const isCorrect = m.correctIndex === cIdx;
@@ -4293,7 +4877,7 @@
     // MASTER QUIZ (END-OF-MODULE CERTIFICATION)
     // ==========================================
     function openMasterQuiz() {
-      const mod = publishedDb.find(m => m.id === selectedModuleId);
+      const mod = getStudentCourses().find(m => m.id === selectedModuleId);
       document.getElementById('student-level-modules').classList.add('hidden');
       document.getElementById('student-level-submodules').classList.add('hidden');
       document.getElementById('student-level-content').classList.add('hidden');
@@ -4358,14 +4942,14 @@
     }
 
     function selectMasterMCQ(key, cIdx) {
-      const mod = publishedDb.find(m => m.id === selectedModuleId);
+      const mod = getStudentCourses().find(m => m.id === selectedModuleId);
       if (masterQuizSubmittedMap[mod.id]) return;
       selectedChoicesMap[key] = cIdx;
       renderMasterQuiz(mod);
     }
 
     function submitMasterQuiz() {
-      const mod = publishedDb.find(m => m.id === selectedModuleId);
+      const mod = getStudentCourses().find(m => m.id === selectedModuleId);
       masterQuizSubmittedMap[mod.id] = true;
 
       // Log attempt to Admin Dashboard (DELIVERABLE #8)
