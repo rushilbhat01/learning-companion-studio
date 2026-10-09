@@ -2001,8 +2001,42 @@
       }
     }
 
-    let publishedDb = loadFromStorage(STORAGE_KEY_PUBLISHED, DEFAULT_COURSES);
-    let draftDb = loadFromStorage(STORAGE_KEY_DRAFT, JSON.parse(JSON.stringify(publishedDb)));
+    function hydrateAndValidateDatabase(courses) {
+      if (!courses || !Array.isArray(courses) || courses.length === 0) {
+        return JSON.parse(JSON.stringify(DEFAULT_COURSES));
+      }
+      courses.forEach((mod, mIdx) => {
+        const defaultMod = DEFAULT_COURSES.find(dm => dm.id === mod.id) || DEFAULT_COURSES[mIdx];
+        (mod.submodules || []).forEach((sub, sIdx) => {
+          const defaultSub = defaultMod?.submodules?.find(ds => ds.id === sub.id) || defaultMod?.submodules?.[sIdx];
+          if (!sub.videoSteps || sub.videoSteps.length === 0) {
+            if (defaultSub && defaultSub.videoSteps && defaultSub.videoSteps.length > 0) {
+              sub.videoSteps = JSON.parse(JSON.stringify(defaultSub.videoSteps));
+            }
+          }
+          (sub.videoSteps || []).forEach((st, stIdx) => {
+            const defaultStep = defaultSub?.videoSteps?.find(ds => ds.id === st.id) || defaultSub?.videoSteps?.[stIdx];
+            if (st.format !== 'pdf') {
+              if (!st.videoUrl || typeof st.videoUrl !== 'string' || st.videoUrl.trim() === '') {
+                st.videoUrl = defaultStep?.videoUrl || "https://vjs.zencdn.net/v/oceans.mp4";
+              }
+            }
+          });
+          if (sub.lxt && sub.lxt.videoSteps) {
+            sub.lxt.videoSteps.forEach((lst, lstIdx) => {
+              const defaultLst = defaultSub?.lxt?.videoSteps?.[lstIdx];
+              if (!lst.videoUrl || typeof lst.videoUrl !== 'string' || lst.videoUrl.trim() === '') {
+                lst.videoUrl = defaultLst?.videoUrl || "https://vjs.zencdn.net/v/oceans.mp4";
+              }
+            });
+          }
+        });
+      });
+      return courses;
+    }
+
+    let publishedDb = hydrateAndValidateDatabase(loadFromStorage(STORAGE_KEY_PUBLISHED, DEFAULT_COURSES));
+    let draftDb = hydrateAndValidateDatabase(loadFromStorage(STORAGE_KEY_DRAFT, JSON.parse(JSON.stringify(publishedDb))));
     let adminAttempts = loadFromStorage(STORAGE_KEY_ATTEMPTS, DEFAULT_ATTEMPTS);
 
     // Hydrate IndexedDB blobs asynchronously
@@ -2967,7 +3001,7 @@
       if (!step) return;
       step.format = newFormat;
       if (newFormat === 'video') {
-        if (!step.videoUrl) {
+        if (!step.videoUrl || typeof step.videoUrl !== 'string' || step.videoUrl.trim() === '') {
           step.videoUrl = "https://vjs.zencdn.net/v/oceans.mp4";
         }
         if (!step.inVideoCheckpoints) {
@@ -3006,9 +3040,10 @@
       const step = selectedSubmodule.videoSteps[vIdx];
       if (!step) return;
       step.videoUrl = "";
+      step.format = "text";
       markDraftDirty();
       renderAuthorContentFormatSteps();
-      showToast("Video URL removed. This step is now text/PDF based.");
+      showToast("Video URL removed. This step is now text/scenario based.");
     }
 
     function renderAuthorContentFormatSteps() {
@@ -3921,33 +3956,61 @@
       const pdfWrapper = document.getElementById('student-pdf-container-wrapper');
 
       const isCurrentStepPdf = currentStep && (currentStep.format === 'pdf' || (!currentStep.format && !currentStep.videoUrl && currentStep.pdfUrl));
+      const defaultSampleVideoUrl = "https://vjs.zencdn.net/v/oceans.mp4";
+      const isExplicitTextOnly = currentStep && (currentStep.format === 'text' || currentStep.isTextOnly);
+      const effectiveVideoUrl = (!isCurrentStepPdf && !isExplicitTextOnly) 
+        ? (currentStep?.videoUrl && typeof currentStep.videoUrl === 'string' && currentStep.videoUrl.trim() !== '' ? currentStep.videoUrl.trim() : defaultSampleVideoUrl) 
+        : (currentStep?.videoUrl || '');
 
       if (isCurrentStepPdf) {
         // PDF MODE
         if (videoWrapper) videoWrapper.classList.add('hidden');
         if (pdfWrapper) pdfWrapper.classList.remove('hidden');
         renderStudentPDFView(currentStep);
-      } else if (currentStep && currentStep.videoUrl) {
+      } else if (effectiveVideoUrl) {
         // VIDEO MODE
         if (videoWrapper) videoWrapper.classList.remove('hidden');
         if (pdfWrapper) pdfWrapper.classList.add('hidden');
-        renderUniversalVideoPlayer(currentStep.videoUrl, currentStep.title, 'video-player-container', false);
+        if (currentStep) currentStep.videoUrl = effectiveVideoUrl;
+        renderUniversalVideoPlayer(effectiveVideoUrl, currentStep?.title || sub.title, 'video-player-container', false);
       } else {
         // TEXT / SCENARIO ONLY MODE (Video is omitted, deliverable #7)
         if (videoWrapper) videoWrapper.classList.add('hidden');
         if (pdfWrapper) pdfWrapper.classList.add('hidden');
+        videoStepFinishedMap[`${sub.id}_${activeVideoStepIndex}`] = true;
         unlockReflections(); // Directly unlock reflection scenarios!
       }
 
       // Lecture Notes
       document.getElementById('student-transcript-text').innerText = currentStep?.transcript || "Review the scenario notes above and reflect upon the de-escalation actions.";
 
-      // Check reflections lock state
-      const isStepDone = videoStepFinishedMap[`${sub.id}_${activeVideoStepIndex}`];
+      // Check reflections lock state & sync completion banner
+      const isStepDone = videoStepFinishedMap[`${sub.id}_${activeVideoStepIndex}`] || videoCompletedMap[`${sub.id}_${activeVideoStepIndex}`];
       if (isStepDone) {
         document.getElementById('student-reflections-section').classList.remove('hidden');
       } else {
         document.getElementById('student-reflections-section').classList.add('hidden');
+      }
+
+      const compBanner = document.getElementById('video-completion-banner');
+      const compLockText = document.getElementById('video-lock-text');
+      const compUnlockBtn = document.getElementById('btn-unlock-reflections');
+      if (isStepDone && effectiveVideoUrl) {
+        if (compBanner) compBanner.className = "p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-teal-50 border border-teal-200 flex flex-col md:flex-row md:items-center justify-between gap-3 transition-all w-full max-w-full min-w-0";
+        if (compLockText) compLockText.innerText = "✓ Video completed! Unlock reflection activities below.";
+        if (compUnlockBtn) {
+          compUnlockBtn.disabled = false;
+          compUnlockBtn.className = "w-full md:w-auto bg-teal-700 hover:bg-teal-600 text-white cursor-pointer px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-md transition-all text-center flex-shrink-0";
+          compUnlockBtn.innerText = "Unlock Reflections →";
+        }
+      } else if (effectiveVideoUrl) {
+        if (compBanner) compBanner.className = "p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-100 border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3 transition-all w-full max-w-full min-w-0";
+        if (compLockText) compLockText.innerText = "🔒 Watch video to the end to unlock reflection questions.";
+        if (compUnlockBtn) {
+          compUnlockBtn.disabled = true;
+          compUnlockBtn.className = "w-full md:w-auto bg-slate-300 text-slate-500 cursor-not-allowed px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all text-center flex-shrink-0";
+          compUnlockBtn.innerText = "🔒 Watch Video to Unlock Reflections";
+        }
       }
 
       renderSubmoduleReflections(currentStep, sub);
@@ -4316,7 +4379,7 @@
 
       // Native clean HTML5 video with timeupdate listener
       container.innerHTML = `
-        <video class="w-full h-full object-contain bg-black focus:outline-none" controls playsinline preload="auto" ontimeupdate="${isLxT ? 'onLxTVideoProgress(this)' : 'onVideoProgress(this)'}" onended="${isLxT ? 'onLxTVideoEnded()' : 'onVideoEnded()'}">
+        <video src="${videoUrl}" class="w-full h-full object-contain bg-black focus:outline-none" controls playsinline preload="auto" ontimeupdate="${isLxT ? 'onLxTVideoProgress(this)' : 'onVideoProgress(this)'}" onended="${isLxT ? 'onLxTVideoEnded()' : 'onVideoEnded()'}">
           <source src="${videoUrl}" type="video/mp4">
         </video>
         <div class="absolute top-3 left-3 bg-slate-950/80 px-3 py-1.5 rounded-lg text-xs text-teal-300 font-bold flex items-center gap-2 backdrop-blur-sm pointer-events-none">
@@ -4703,10 +4766,13 @@
     }
 
     function renderLxTExtensionContent() {
-      const lxt = selectedSubmodule.lxt;
-      const vStep = lxt.videoSteps[activeLxTVideoStepIndex];
-      document.getElementById('lxt-view-title').innerText = lxt.title;
-      renderUniversalVideoPlayer(vStep.videoUrl, vStep.title, 'lxt-video-player-container', true);
+      const lxt = selectedSubmodule?.lxt;
+      const steps = lxt?.videoSteps || [];
+      const vStep = steps[activeLxTVideoStepIndex] || steps[0] || { title: "LxT Extension Case Video", videoUrl: "https://vjs.zencdn.net/v/oceans.mp4" };
+      document.getElementById('lxt-view-title').innerText = lxt?.title || "LxT Extension Trajectory";
+      const videoUrl = (vStep.videoUrl && typeof vStep.videoUrl === 'string' && vStep.videoUrl.trim() !== '') ? vStep.videoUrl.trim() : "https://vjs.zencdn.net/v/oceans.mp4";
+      vStep.videoUrl = videoUrl;
+      renderUniversalVideoPlayer(videoUrl, vStep.title || "LxT Extension Video", 'lxt-video-player-container', true);
       document.getElementById('lxt-transcript-text').innerText = vStep.transcript || '';
       renderLxTReflections();
     }
