@@ -27,6 +27,12 @@ docs/Weekly_Meeting_Minutes_MoM_Aug_28.md
 docs/HLD_Document_and_Contract.md
 
 # Ignore root level monorepo setup configurations
-package.json
 package-lock.json
 docker-compose.yml
+
+# Ignore runtime data files and logs
+server/data/users.json
+server/data/events.json
+server/data/presence.json
+server/data/draft_courses.json
+

@@ -1,0 +1,14 @@
+{
+  "name": "learning-companion-studio",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server/src/server.js",
+    "build": "cd client && npm install && npm run build",
+    "install:all": "cd client && npm install && cd ../server && npm install",
+    "client": "cd client && npm run dev",
+    "server": "cd server && npm start",
+    "dev": "cd client && npm run dev"
+  }
+}

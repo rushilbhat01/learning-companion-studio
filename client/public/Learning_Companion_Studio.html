@@ -53,11 +53,11 @@
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased selection:bg-teal-500 selection:text-white">
 
   <!-- ==================== HEADER ==================== -->
-  <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-md transition-all shadow-sm">
+  <header id="main-header" class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-md transition-all shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       
       <!-- Brand Logo -->
-      <div class="flex items-center gap-3 cursor-pointer group" onclick="goHome()">
+      <div class="flex items-center gap-3 cursor-pointer group" onclick="handleBrandClick()">
         <div class="h-10 w-10 rounded-2xl bg-teal-700 flex items-center justify-center text-white font-black text-lg shadow-md shadow-teal-700/20 group-hover:scale-105 transition-transform flex-shrink-0">
           LC
         </div>
@@ -71,29 +71,166 @@
       </div>
 
       <div class="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 w-full sm:w-auto">
-        <!-- 3-Way Responsive View Switcher (Full-width 3-tab segmented control on mobile) -->
-        <nav class="w-full sm:w-auto grid grid-cols-3 sm:flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200 text-xs font-black">
-          <button id="tab-student" onclick="switchView('student')" class="w-full justify-center px-2.5 sm:px-3.5 py-2 rounded-xl transition-all bg-teal-700 text-white shadow-sm flex items-center gap-1.5 whitespace-nowrap text-center text-xs font-black">
-            <span>🎓</span> <span>Companion</span><span class="hidden md:inline">View</span>
-          </button>
-          <button id="tab-author" onclick="switchView('author')" class="w-full justify-center px-2.5 sm:px-3.5 py-2 rounded-xl transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5 whitespace-nowrap text-center text-xs font-black">
-            <span>✏️</span> <span>Authoring</span><span class="hidden md:inline">Desk</span>
+        <!-- 2-Way View Switcher (Author & Admin ONLY - strictly hidden for companions via inline style) -->
+        <nav id="view-switcher-nav" style="display: none !important;" class="w-full sm:w-auto grid grid-cols-2 items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200 text-xs font-black">
+          <button id="tab-author" onclick="switchView('author')" class="w-full justify-center px-2.5 sm:px-3.5 py-2 rounded-xl transition-all bg-teal-700 text-white shadow-sm flex items-center gap-1.5 whitespace-nowrap text-center text-xs font-black">
+            <span>✏️</span> <span>Authoring</span><span class="hidden md:inline"> Desk</span>
             <span id="nav-draft-indicator" class="hidden w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
           </button>
           <button id="tab-admin" onclick="switchView('admin')" class="w-full justify-center px-2.5 sm:px-3.5 py-2 rounded-xl transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5 whitespace-nowrap text-center text-xs font-black">
-            <span>📊</span> <span>Admin</span><span class="hidden md:inline">Dashboard</span>
+            <span>📊</span> <span>Admin</span><span class="hidden md:inline"> Dashboard</span>
           </button>
         </nav>
 
-        <!-- Backend Online / Offline Mode Badge -->
-        <div id="backend-status-badge" class="self-end sm:self-center px-2.5 py-1 rounded-full text-[11px] font-black flex items-center gap-1.5 border transition-all bg-amber-50 text-amber-800 border-amber-300 shadow-sm cursor-help" title="Checking Express / MongoDB API connection...">
-          <span id="backend-status-dot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-          <span id="backend-status-text">Connecting...</span>
+        <!-- User Profile Chip (shows only the user's name) -->
+        <div id="user-profile-chip" class="hidden self-end sm:self-center px-3 py-1.5 rounded-2xl text-xs font-black flex items-center gap-2 border transition-all bg-white text-slate-800 border-slate-200 shadow-sm">
+          <span id="user-profile-icon" class="text-sm">👤</span>
+          <span id="user-profile-name" class="font-black text-slate-900 max-w-[140px] truncate"></span>
         </div>
+
+        <!-- Live User Online Indicator Badge -->
+        <div id="user-status-badge" class="self-end sm:self-center px-2.5 py-1.5 rounded-full text-[11px] font-black flex items-center gap-1.5 border transition-all bg-emerald-50 text-emerald-800 border-emerald-300 shadow-sm" title="Active on Learning Companion Studio">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span id="user-status-text">Online</span>
+        </div>
+
+        <!-- Dedicated Logout Button in Corner -->
+        <button id="logout-btn" onclick="logoutUser()" class="hidden self-end sm:self-center px-3 py-1.5 rounded-2xl text-xs font-black flex items-center gap-1.5 border border-slate-200 hover:border-rose-300 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-700 transition-all shadow-sm" title="Log Out of your account">
+          <span>🚪</span>
+          <span>Log Out</span>
+        </button>
       </div>
 
     </div>
   </header>
+
+  <!-- ========================================================================= -->
+  <!-- DEDICATED AUTHENTICATION VIEW (FULL SCREEN LOGIN / SIGNUP PAGE) -->
+  <!-- ========================================================================= -->
+  <section id="view-auth" class="hidden min-h-screen w-full flex-col justify-center items-center py-12 px-4 bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950 text-slate-100 relative overflow-hidden">
+    <!-- Ambient background glows -->
+    <div class="absolute -top-32 -left-32 w-96 h-96 bg-teal-600/15 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-emerald-600/15 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="relative z-10 w-full max-w-md mx-auto">
+      
+      <!-- Brand & Title Header -->
+      <div class="text-center mb-8">
+        <div class="inline-flex h-16 w-16 rounded-3xl bg-gradient-to-tr from-teal-700 to-emerald-500 items-center justify-center text-white font-black text-2xl shadow-xl shadow-teal-900/40 mb-4 ring-4 ring-teal-500/20">
+          LC
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight font-['Outfit']">Learning Companion Studio</h1>
+        <p class="text-xs sm:text-sm font-semibold text-teal-300/90 mt-1">InclusiveMinds • Neurodivergent Mentorship Training Platform</p>
+      </div>
+
+      <!-- Auth Card Container -->
+      <div class="bg-slate-900/90 backdrop-blur-xl rounded-3xl border border-slate-800 shadow-2xl shadow-black/60 overflow-hidden">
+        
+        <!-- Tab Navigation (Sign In vs Create Account) -->
+        <div class="grid grid-cols-2 border-b border-slate-800/80 bg-slate-950/40 p-1">
+          <button id="auth-tab-login" onclick="navigateTo('/login')" class="py-3 px-4 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-2">
+            <span>🔑</span> <span>Sign In</span>
+          </button>
+          <button id="auth-tab-signup" onclick="navigateTo('/signup')" class="py-3 px-4 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-2">
+            <span>✨</span> <span>Create Account</span>
+          </button>
+        </div>
+
+        <!-- FORM 1: SIGN IN -->
+        <div id="auth-form-login" class="p-6 sm:p-8 space-y-4">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Email Address or Username</label>
+            <div class="relative">
+              <span class="absolute left-3.5 top-3 text-slate-500 text-sm">✉️</span>
+              <input id="login-email" type="text" onkeydown="if(event.key === 'Enter') handleLogin()" placeholder="you@example.com" class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950/60 border border-slate-700/80 text-white placeholder-slate-500 text-sm font-semibold focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Password</label>
+            <div class="relative">
+              <span class="absolute left-3.5 top-3 text-slate-500 text-sm">🔒</span>
+              <input id="login-password" type="password" onkeydown="if(event.key === 'Enter') handleLogin()" placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950/60 border border-slate-700/80 text-white placeholder-slate-500 text-sm font-semibold focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all" />
+            </div>
+          </div>
+
+          <div id="login-error" class="hidden text-xs font-bold text-rose-400 bg-rose-950/50 border border-rose-800/60 rounded-xl px-3.5 py-2.5"></div>
+
+          <button type="button" onclick="handleLogin()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white text-sm font-black shadow-lg shadow-teal-900/30 active:scale-[0.99] transition-all">
+            Sign In to Studio →
+          </button>
+
+          <div class="text-center pt-2 border-t border-slate-800/60">
+            <p class="text-xs text-slate-400">
+              New to Learning Companion Studio? 
+              <button type="button" onclick="navigateTo('/signup')" class="text-teal-400 hover:text-teal-300 font-extrabold underline ml-1">Create an account</button>
+            </p>
+          </div>
+        </div>
+
+        <!-- FORM 2: CREATE ACCOUNT (SIGN UP) -->
+        <div id="auth-form-signup" class="hidden p-6 sm:p-8 space-y-4">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Full Name</label>
+            <div class="relative">
+              <span class="absolute left-3.5 top-3 text-slate-500 text-sm">👤</span>
+              <input id="signup-name" type="text" onkeydown="if(event.key === 'Enter') handleSignup()" placeholder="e.g. Tester 1" class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950/60 border border-slate-700/80 text-white placeholder-slate-500 text-sm font-semibold focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Email Address</label>
+            <div class="relative">
+              <span class="absolute left-3.5 top-3 text-slate-500 text-sm">✉️</span>
+              <input id="signup-email" type="email" onkeydown="if(event.key === 'Enter') handleSignup()" placeholder="tester1@example.com" class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950/60 border border-slate-700/80 text-white placeholder-slate-500 text-sm font-semibold focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Password (min 6 characters)</label>
+            <div class="relative">
+              <span class="absolute left-3.5 top-3 text-slate-500 text-sm">🔒</span>
+              <input id="signup-password" type="password" onkeydown="if(event.key === 'Enter') handleSignup()" placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950/60 border border-slate-700/80 text-white placeholder-slate-500 text-sm font-semibold focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Account Type / Role</label>
+            <div class="grid grid-cols-2 gap-2.5">
+              <button type="button" id="role-companion-btn" onclick="selectSignupRole('companion')" class="p-3 rounded-2xl border-2 border-teal-500 bg-teal-950/50 text-teal-200 text-xs font-black transition-all text-center">
+                <span class="text-base block mb-1">🎓</span>
+                <span>Learning Companion</span>
+              </button>
+              <button type="button" id="role-author-btn" onclick="selectSignupRole('author')" class="p-3 rounded-2xl border-2 border-slate-800 bg-slate-950/40 text-slate-400 text-xs font-black transition-all text-center hover:border-slate-700">
+                <span class="text-base block mb-1">✏️</span>
+                <span>Course Author</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="author-signup-notice" class="hidden text-xs font-bold text-amber-300 bg-amber-950/60 border border-amber-800/80 rounded-xl p-3">
+            ⚠️ Author accounts are pre-provisioned for administrative security. Please switch to <strong>Sign In</strong> using author credentials.
+          </div>
+
+          <div id="signup-error" class="hidden text-xs font-bold text-rose-400 bg-rose-950/50 border border-rose-800/60 rounded-xl px-3.5 py-2.5"></div>
+
+          <button type="button" id="signup-submit-btn" onclick="handleSignup()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white text-sm font-black shadow-lg shadow-teal-900/30 active:scale-[0.99] transition-all">
+            Create Companion Account →
+          </button>
+
+          <div class="text-center pt-1">
+            <p class="text-xs text-slate-400">
+              Already have an account? 
+              <button type="button" onclick="navigateTo('/login')" class="text-teal-400 hover:text-teal-300 font-extrabold underline ml-1">Sign In</button>
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Trust Footer / Security Note -->
+      <div class="text-center mt-6 text-[11px] text-slate-500">
+        🔒 Role-Based Mentorship Workspace • Movement Auditing Enabled
+      </div>
+
+    </div>
+  </section>
 
   <!-- GLOBAL FLOATING TOAST NOTIFICATION -->
   <div id="global-toast-container" class="fixed top-20 right-4 sm:right-8 z-50 pointer-events-none transition-all duration-300">
@@ -105,7 +242,7 @@
   </div>
 
   <!-- ==================== MAIN CONTAINER ==================== -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-grow w-full">
+  <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-grow w-full">
 
     <!-- ========================================================================= -->
     <!-- VIEW 1: AUTHORING DESK (REDESIGNED 2-COLUMN CURRICULUM STUDIO) -->
@@ -445,7 +582,7 @@
             <p class="text-slate-500 text-xs sm:text-sm mt-1">Select a module to view video checkpoints, PDF reading guides, and discussion spaces.</p>
           </div>
           <div class="flex items-center gap-2 text-xs font-bold text-slate-600 bg-white px-3.5 py-2 rounded-2xl border border-slate-200 shadow-sm">
-            <span>🛡️ Active Learner:</span> <span class="text-teal-800 font-black">Priya Sharma (Trainee)</span>
+            <span>🛡️ Active Learner:</span> <span id="active-learner-name-badge" class="text-teal-800 font-black">Tester 1</span>
           </div>
         </div>
 
@@ -813,6 +950,30 @@
         </div>
       </div>
 
+      <!-- REAL-TIME USER PRESENCE & ACTIVE SESSIONS ROSTER -->
+      <div class="rounded-3xl bg-white border border-slate-200 p-5 sm:p-6 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xl">👥</span>
+              <h3 class="text-base font-black text-slate-900 tracking-tight">Active Users & Trainee Presence Roster</h3>
+              <span id="admin-presence-online-count" class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-50 text-emerald-800 border border-emerald-300">
+                ● 1 Online Now
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 font-medium mt-1">Live presence monitor showing who is currently online or offline on the platform and their current activity.</p>
+          </div>
+          <button onclick="renderAdminPresenceRoster()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-teal-50 hover:text-teal-800 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 self-start sm:self-auto">
+            <span>🔄</span> <span>Refresh Presence</span>
+          </button>
+        </div>
+
+        <!-- Presence Grid -->
+        <div id="admin-presence-roster-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          <!-- Dynamically populated presence cards -->
+        </div>
+      </div>
+
       <!-- DUAL SELECTOR CONTROL BAR: LC + MODULE -->
       <div class="p-4 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-5">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 flex-1">
@@ -823,11 +984,7 @@
             </label>
             <div class="relative">
               <select id="admin-lc-select" onchange="onAdminFilterChange()" class="w-full rounded-2xl border-2 border-slate-200 bg-slate-50 px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-black text-slate-900 focus:border-teal-600 focus:bg-white transition-all cursor-pointer">
-                <option value="Priya Sharma (Trainee)">Priya Sharma (Trainee)</option>
-                <option value="Rahul Mehta">Rahul Mehta (Specialist Trainee)</option>
-                <option value="Tanya Verma">Tanya Verma (Peer Mentor)</option>
-                <option value="Jamson">Jamson (Senior Trainee)</option>
-                <option value="Alex Chen">Alex Chen (New Trainee)</option>
+                <option value="Tester 1">Tester 1 (Learning Companion)</option>
                 <option value="ALL">All Companions (Cohort Overview)</option>
               </select>
             </div>
@@ -850,11 +1007,11 @@
         <div class="w-full lg:w-72 p-3 sm:p-3.5 bg-gradient-to-r from-teal-50 to-indigo-50/50 rounded-2xl border border-teal-200/60 flex items-center justify-between gap-3">
           <div class="flex items-center gap-3 min-w-0">
             <div id="admin-lc-avatar" class="w-10 h-10 rounded-2xl bg-teal-700 text-white font-black text-sm flex items-center justify-center shadow-sm flex-shrink-0">
-              PS
+              T1
             </div>
             <div class="min-w-0">
-              <h4 id="admin-lc-name" class="text-xs font-black text-slate-900 truncate">Priya Sharma</h4>
-              <p id="admin-lc-role" class="text-[10px] text-teal-800 font-extrabold truncate">InclusiveMinds Cohort 2026</p>
+              <h4 id="admin-lc-name" class="text-xs font-black text-slate-900 truncate">Tester 1</h4>
+              <p id="admin-lc-role" class="text-[10px] text-teal-800 font-extrabold truncate">Learning Companion</p>
             </div>
           </div>
           <span id="admin-lc-badge" class="px-2.5 py-1 rounded-xl text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 flex-shrink-0">
@@ -968,6 +1125,49 @@
 
         <!-- Diagnostics Cards (Mobile Phones < 768px) -->
         <div id="admin-questions-mobile-cards" class="md:hidden space-y-3.5"></div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- TRAINEE MOVEMENT & TELEMETRY LOG (USER AUDIT TRAIL) -->
+      <!-- ========================================================================= -->
+      <div class="rounded-3xl bg-white border border-slate-200 p-5 sm:p-6 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xl">🚶</span>
+              <h3 class="text-base font-black text-slate-900 tracking-tight">Trainee Movement & Navigation Telemetry</h3>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-teal-50 text-teal-700 border border-teal-200">Live Audit Trail</span>
+            </div>
+            <p class="text-xs text-slate-500 font-medium mt-1">Real-time log of companion logins, module views, video play/pause events, and checkpoint activities tagged with unique user IDs.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <select id="admin-telemetry-filter-user" onchange="renderAdminTelemetryLog()" class="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 bg-white outline-none">
+              <option value="ALL">All Trainees</option>
+            </select>
+            <button onclick="clearTelemetryLogs()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 text-xs font-bold transition-all">
+              Clear Logs
+            </button>
+          </div>
+        </div>
+
+        <!-- Telemetry Log Table -->
+        <div class="overflow-x-auto rounded-2xl border border-slate-100 max-h-96 overflow-y-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-500 font-black text-[10px] uppercase tracking-wider sticky top-0">
+              <tr>
+                <th class="p-3">Timestamp</th>
+                <th class="p-3">Trainee</th>
+                <th class="p-3">User ID</th>
+                <th class="p-3">Movement / Event</th>
+                <th class="p-3">Module / Context</th>
+                <th class="p-3">Details</th>
+              </tr>
+            </thead>
+            <tbody id="admin-telemetry-tbody" class="divide-y divide-slate-100 font-medium text-slate-700">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </section>
@@ -1488,10 +1688,10 @@
     // INITIAL MOCK ATTEMPTS FOR ADMIN DASHBOARD
     // ==========================================
     const DEFAULT_ATTEMPTS = [
-      // Priya Sharma - Module 1
+      // Tester 1 - Module 1
       {
         id: "att-ps-1",
-        companionName: "Priya Sharma (Trainee)",
+        companionName: "Tester 1",
         moduleId: "mod-1",
         moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
         submoduleId: "sub-1-1",
@@ -1509,7 +1709,7 @@
       },
       {
         id: "att-ps-2a",
-        companionName: "Priya Sharma (Trainee)",
+        companionName: "Tester 1",
         moduleId: "mod-1",
         moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
         submoduleId: "sub-1-1",
@@ -1527,7 +1727,7 @@
       },
       {
         id: "att-ps-2b",
-        companionName: "Priya Sharma (Trainee)",
+        companionName: "Tester 1",
         moduleId: "mod-1",
         moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
         submoduleId: "sub-1-1",
@@ -1545,7 +1745,7 @@
       },
       {
         id: "att-ps-3",
-        companionName: "Priya Sharma (Trainee)",
+        companionName: "Tester 1",
         moduleId: "mod-1",
         moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
         submoduleId: "sub-1-2",
@@ -1563,7 +1763,7 @@
       },
       {
         id: "att-ps-4a",
-        companionName: "Priya Sharma (Trainee)",
+        companionName: "Tester 1",
         moduleId: "mod-1",
         moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
         submoduleId: "sub-1-2",
@@ -1581,7 +1781,7 @@
       },
       {
         id: "att-ps-4b",
-        companionName: "Priya Sharma (Trainee)",
+        companionName: "Tester 1",
         moduleId: "mod-1",
         moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
         submoduleId: "sub-1-2",
@@ -1599,7 +1799,7 @@
       },
       {
         id: "att-ps-4c",
-        companionName: "Priya Sharma (Trainee)",
+        companionName: "Tester 1",
         moduleId: "mod-1",
         moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
         submoduleId: "sub-1-2",
@@ -1617,7 +1817,7 @@
       },
       {
         id: "att-ps-5",
-        companionName: "Priya Sharma (Trainee)",
+        companionName: "Tester 1",
         moduleId: "mod-1",
         moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
         submoduleId: "sub-1-1",
@@ -1635,7 +1835,7 @@
       },
       {
         id: "att-ps-6",
-        companionName: "Priya Sharma (Trainee)",
+        companionName: "Tester 1",
         moduleId: "mod-1",
         moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
         submoduleId: "master-quiz",
@@ -1975,7 +2175,26 @@
     // ==========================================
     // HYBRID BACKEND & STATE PERSISTENCE ENGINE
     // ==========================================
-    const API_BASE_URL = "http://localhost:5050/api";
+    const API_BASE_URL = (() => {
+      if (window.LCS_API_URL) return window.LCS_API_URL;
+      const stored = localStorage.getItem("lcs_custom_api_url");
+      if (stored) return stored;
+
+      // In local Vite dev server (port 5173), target the Express backend on port 5050
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        if (window.location.port === '5173') {
+          return 'http://localhost:5050/api';
+        }
+        return `${window.location.protocol}//${window.location.host}/api`;
+      }
+
+      // Deployed cloud environments (Render, Railway, Vercel, or custom domains)
+      if (window.location.origin && window.location.origin.startsWith('http')) {
+        return `${window.location.origin}/api`;
+      }
+
+      return "http://localhost:5050/api";
+    })();
     let isBackendOnline = false;
 
     const STORAGE_KEY_PUBLISHED = "lcs_published_courses_v2";
@@ -2057,6 +2276,42 @@
           }
         }
 
+        // Fetch presence roster from backend
+        try {
+          const resPres = await fetch(`${API_BASE_URL}/v2/events/presence`);
+          if (resPres.ok) {
+            const json = await resPres.json();
+            if (json.success && json.data) {
+              const map = loadFromStorage(STORAGE_KEY_PRESENCE, {});
+              json.data.forEach(item => { map[item.userId] = item; });
+              saveToStorage(STORAGE_KEY_PRESENCE, map);
+              if (currentView === 'admin') renderAdminPresenceRoster();
+            }
+          }
+        } catch (_) {}
+
+        // Fetch registered users from backend
+        try {
+          const resUsers = await fetch(`${API_BASE_URL}/v2/auth/users`);
+          if (resUsers.ok) {
+            const json = await resUsers.json();
+            if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+              const usersDb = loadFromStorage(STORAGE_KEY_USERS_DB, getDefaultUsersDb());
+              json.data.forEach(remoteUser => {
+                const uId = remoteUser.customId || remoteUser.id || remoteUser._id;
+                const idx = usersDb.findIndex(u => (u.email && remoteUser.email && u.email.toLowerCase() === remoteUser.email.toLowerCase()) || u.id === uId);
+                if (idx >= 0) {
+                  usersDb[idx] = { ...usersDb[idx], ...remoteUser, id: uId };
+                } else {
+                  usersDb.push({ ...remoteUser, id: uId });
+                }
+              });
+              saveToStorage(STORAGE_KEY_USERS_DB, usersDb);
+              if (currentView === 'admin') renderAdminDashboard();
+            }
+          }
+        } catch (_) {}
+
         // Re-render views if current view requires fresh data
         if (currentView === 'student') {
           renderStudentCatalog();
@@ -2098,6 +2353,697 @@
       }
     }
 
+    // ==========================================
+    // AUTHENTICATION, RBAC & TELEMETRY ENGINE
+    // ==========================================
+    const STORAGE_KEY_AUTH_USER = "lcs_auth_user_v2";
+    const STORAGE_KEY_USERS_DB = "lcs_users_db_v2";
+    const STORAGE_KEY_MOVEMENTS = "lcs_user_movements_v2";
+
+    const FIXED_AUTHOR = {
+      id: "AUTH-001",
+      name: "Lead Author",
+      email: "author@imlc.org",
+      role: "author"
+    };
+
+    let currentUser = loadFromStorage(STORAGE_KEY_AUTH_USER, null);
+    let selectedSignupRole = 'companion';
+    let userMovementLogs = loadFromStorage(STORAGE_KEY_MOVEMENTS, []);
+
+    function getDefaultUsersDb() {
+      return [
+        {
+          id: "AUTH-001",
+          name: "Lead Author",
+          email: "author@imlc.org",
+          password: "Author@IMLC2026",
+          role: "author"
+        }
+      ];
+    }
+
+    // ==========================================
+    // CLIENT-SIDE ROUTER & DEEP LINKING (HTML5 History API)
+    // ==========================================
+    function getNormalizedPath(pathname) {
+      let p = pathname || window.location.pathname || '/';
+      p = p.trim().toLowerCase();
+      if (p.length > 1 && p.endsWith('/')) {
+        p = p.slice(0, -1);
+      }
+      return p;
+    }
+
+    function navigateTo(path, replace = false) {
+      if (replace) {
+        window.history.replaceState({ path }, '', path);
+      } else {
+        if (window.location.pathname !== path) {
+          window.history.pushState({ path }, '', path);
+        }
+      }
+      handleRoute(path);
+    }
+
+    window.addEventListener('popstate', () => {
+      handleRoute(window.location.pathname);
+    });
+
+    function handleRoute(path) {
+      const normPath = getNormalizedPath(path);
+      const header = document.getElementById('main-header');
+      const mainContent = document.getElementById('main-content');
+      const authSection = document.getElementById('view-auth');
+
+      // -------------------------------------------------------------
+      // Case 1: Unauthenticated Visitor
+      // -------------------------------------------------------------
+      if (!currentUser) {
+        // Hide studio header and main workspace
+        if (header) header.classList.add('hidden');
+        if (mainContent) mainContent.classList.add('hidden');
+
+        // Reveal the dedicated Auth Page
+        if (authSection) {
+          authSection.classList.remove('hidden');
+          authSection.classList.add('flex');
+        }
+
+        // Deep-link to signup or login
+        if (normPath === '/signup') {
+          switchAuthTab('signup', false);
+          document.title = "Create Account — Learning Companion Studio";
+          if (window.location.pathname !== '/signup') {
+            window.history.replaceState({ path: '/signup' }, '', '/signup');
+          }
+        } else {
+          switchAuthTab('login', false);
+          document.title = "Sign In — Learning Companion Studio";
+          if (window.location.pathname !== '/login') {
+            window.history.replaceState({ path: '/login' }, '', '/login');
+          }
+        }
+        return;
+      }
+
+      // -------------------------------------------------------------
+      // Case 2: Authenticated User
+      // -------------------------------------------------------------
+      if (authSection) {
+        authSection.classList.remove('flex');
+        authSection.classList.add('hidden');
+      }
+      if (header) header.classList.remove('hidden');
+      if (mainContent) mainContent.classList.remove('hidden');
+      updateUserHeaderUI();
+
+      // If authenticated user visits /login, /signup, root, or legacy HTML: redirect to role default
+      if (normPath === '/login' || normPath === '/signup' || normPath === '/' || normPath === '/learning_companion_studio.html' || normPath === '/index.html') {
+        const dest = currentUser.role === 'author' ? '/author' : '/home';
+        navigateTo(dest, true);
+        return;
+      }
+
+      // Route: /author
+      if (normPath === '/author') {
+        if (currentUser.role !== 'author') {
+          showToast("Access restricted: Course Author credentials required.", "rose");
+          navigateTo('/home', true);
+          return;
+        }
+        document.title = "Authoring Desk — Learning Companion Studio";
+        switchView('author', false);
+        return;
+      }
+
+      // Route: /admin
+      if (normPath === '/admin') {
+        if (currentUser.role !== 'author') {
+          showToast("Access restricted: Admin Dashboard is restricted to Course Authors.", "rose");
+          navigateTo('/home', true);
+          return;
+        }
+        document.title = "Admin Dashboard — Learning Companion Studio";
+        switchView('admin', false);
+        return;
+      }
+
+      // Route: /home
+      if (normPath === '/home') {
+        document.title = "Training Portal — Learning Companion Studio";
+        switchView('student', false);
+        return;
+      }
+
+      // Fallback for any other path
+      const fallbackDest = currentUser.role === 'author' ? '/author' : '/home';
+      navigateTo(fallbackDest, true);
+    }
+
+    function handleBrandClick() {
+      if (!currentUser) {
+        navigateTo('/login');
+        return;
+      }
+      if (currentUser.role === 'author') {
+        navigateTo('/author');
+      } else {
+        navigateTo('/home');
+      }
+    }
+
+    function switchAuthTab(tab, updateUrl = true) {
+      const btnLogin = document.getElementById('auth-tab-login');
+      const btnSignup = document.getElementById('auth-tab-signup');
+      const formLogin = document.getElementById('auth-form-login');
+      const formSignup = document.getElementById('auth-form-signup');
+      const errLogin = document.getElementById('login-error');
+      const errSignup = document.getElementById('signup-error');
+
+      if (errLogin) errLogin.classList.add('hidden');
+      if (errSignup) errSignup.classList.add('hidden');
+
+      const activeTabCls = "py-3 px-4 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-2 bg-slate-800 text-teal-300 shadow-sm border border-slate-700/60";
+      const inactiveTabCls = "py-3 px-4 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border border-transparent";
+
+      if (tab === 'login') {
+        if (btnLogin) btnLogin.className = activeTabCls;
+        if (btnSignup) btnSignup.className = inactiveTabCls;
+        if (formLogin) formLogin.classList.remove('hidden');
+        if (formSignup) formSignup.classList.add('hidden');
+        if (updateUrl && window.location.pathname !== '/login') {
+          navigateTo('/login');
+        }
+      } else {
+        if (btnLogin) btnLogin.className = inactiveTabCls;
+        if (btnSignup) btnSignup.className = activeTabCls;
+        if (formLogin) formLogin.classList.add('hidden');
+        if (formSignup) formSignup.classList.remove('hidden');
+        if (updateUrl && window.location.pathname !== '/signup') {
+          navigateTo('/signup');
+        }
+      }
+    }
+
+    function selectSignupRole(role) {
+      selectedSignupRole = role;
+      const compBtn = document.getElementById('role-companion-btn');
+      const authBtn = document.getElementById('role-author-btn');
+      const notice = document.getElementById('author-signup-notice');
+      const submitBtn = document.getElementById('signup-submit-btn');
+
+      if (role === 'companion') {
+        if (compBtn) compBtn.className = "p-3 rounded-2xl border-2 border-teal-500 bg-teal-950/50 text-teal-200 text-xs font-black transition-all text-center";
+        if (authBtn) authBtn.className = "p-3 rounded-2xl border-2 border-slate-800 bg-slate-950/40 text-slate-400 text-xs font-black transition-all text-center hover:border-slate-700";
+        if (notice) notice.classList.add('hidden');
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.classList.remove('opacity-50', 'cursor-not-allowed'); }
+      } else {
+        if (compBtn) compBtn.className = "p-3 rounded-2xl border-2 border-slate-800 bg-slate-950/40 text-slate-400 text-xs font-black transition-all text-center hover:border-slate-700";
+        if (authBtn) authBtn.className = "p-3 rounded-2xl border-2 border-amber-500 bg-amber-950/50 text-amber-200 text-xs font-black transition-all text-center";
+        if (notice) notice.classList.remove('hidden');
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.classList.add('opacity-50', 'cursor-not-allowed'); }
+      }
+    }
+
+    async function handleLogin() {
+      const emailInput = document.getElementById('login-email');
+      const passInput = document.getElementById('login-password');
+      const errEl = document.getElementById('login-error');
+
+      const email = emailInput ? emailInput.value.trim() : "";
+      const pass = passInput ? passInput.value : "";
+
+      if (!email || !pass) {
+        if (errEl) { errEl.innerText = "Please enter both email and password."; errEl.classList.remove('hidden'); }
+        return;
+      }
+
+      // 1. Try Backend if Online
+      if (isBackendOnline) {
+        try {
+          const res = await fetch(`${API_BASE_URL}/v2/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password: pass })
+          });
+          const json = await res.json();
+          if (res.ok && json.success && json.data) {
+            loginUserSuccess(json.data);
+            return;
+          }
+        } catch (e) {
+          console.warn("Backend auth failed, falling back to local:", e);
+        }
+      }
+
+      // 2. Local Fallback Authentication
+      const isAuthorEmail = (email.toLowerCase() === 'author@imlc.org' || email.toLowerCase() === 'author');
+      if (isAuthorEmail && pass === 'Author@IMLC2026') {
+        loginUserSuccess({
+          id: "AUTH-001",
+          name: "Lead Author",
+          email: "author@imlc.org",
+          role: "author"
+        });
+        return;
+      }
+
+      const usersDb = loadFromStorage(STORAGE_KEY_USERS_DB, getDefaultUsersDb());
+      const matched = usersDb.find(u => u.email.toLowerCase() === email.toLowerCase());
+      if (matched && (matched.password === pass)) {
+        loginUserSuccess({
+          id: matched.id,
+          name: matched.name,
+          email: matched.email,
+          role: matched.role
+        });
+        return;
+      }
+
+      if (errEl) {
+        errEl.innerText = "Invalid email or password. Please try again.";
+        errEl.classList.remove('hidden');
+      }
+    }
+
+    async function handleSignup() {
+      const nameInput = document.getElementById('signup-name');
+      const emailInput = document.getElementById('signup-email');
+      const passInput = document.getElementById('signup-password');
+      const errEl = document.getElementById('signup-error');
+
+      const name = nameInput ? nameInput.value.trim() : "";
+      const email = emailInput ? emailInput.value.trim() : "";
+      const pass = passInput ? passInput.value : "";
+
+      if (selectedSignupRole === 'author') {
+        if (errEl) {
+          errEl.innerText = "Author accounts cannot be registered. Please switch to Sign In and use your author credentials.";
+          errEl.classList.remove('hidden');
+        }
+        return;
+      }
+
+      if (!name || !email || !pass) {
+        if (errEl) { errEl.innerText = "Please fill out all fields."; errEl.classList.remove('hidden'); }
+        return;
+      }
+      if (pass.length < 6) {
+        if (errEl) { errEl.innerText = "Password must be at least 6 characters."; errEl.classList.remove('hidden'); }
+        return;
+      }
+
+      // Try Backend if Online
+      if (isBackendOnline) {
+        try {
+          const res = await fetch(`${API_BASE_URL}/v2/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password: pass, role: 'companion' })
+          });
+          const json = await res.json();
+          if (res.ok && json.success && json.data) {
+            const usersDb = loadFromStorage(STORAGE_KEY_USERS_DB, getDefaultUsersDb());
+            usersDb.push({ ...json.data, password: pass });
+            saveToStorage(STORAGE_KEY_USERS_DB, usersDb);
+            loginUserSuccess(json.data);
+            return;
+          } else if (json.message) {
+            if (errEl) { errEl.innerText = json.message; errEl.classList.remove('hidden'); }
+            return;
+          }
+        } catch (e) {
+          console.warn("Backend register error, using local fallback:", e);
+        }
+      }
+
+      // Local Signup Fallback
+      const usersDb = loadFromStorage(STORAGE_KEY_USERS_DB, getDefaultUsersDb());
+      if (usersDb.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+        if (errEl) { errEl.innerText = "An account with this email already exists."; errEl.classList.remove('hidden'); }
+        return;
+      }
+
+      const year = new Date().getFullYear();
+      const randId = Math.floor(1000 + Math.random() * 9000);
+      const newUser = {
+        id: `LC-${year}-${randId}`,
+        name: name,
+        email: email.toLowerCase(),
+        password: pass,
+        role: "companion",
+        createdAt: new Date().toISOString()
+      };
+
+      usersDb.push(newUser);
+      saveToStorage(STORAGE_KEY_USERS_DB, usersDb);
+
+      loginUserSuccess({
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role
+      });
+    }
+
+    function loginUserSuccess(user) {
+      currentUser = user;
+      saveToStorage(STORAGE_KEY_AUTH_USER, currentUser);
+      updateUserHeaderUI();
+
+      // Log movement event
+      logUserMovement('USER_LOGIN', {
+        role: user.role,
+        message: `${user.name} logged in.`
+      });
+
+      sendPresenceHeartbeat(true);
+      showToast(`Welcome, ${user.name}!`);
+
+      if (user.token) {
+        localStorage.setItem('lcs_auth_token_v2', user.token);
+      }
+
+      const dest = user.role === 'author' ? '/author' : '/home';
+      navigateTo(dest);
+    }
+
+    function logoutUser() {
+      if (currentUser) {
+        sendPresenceHeartbeat(false);
+        logUserMovement('USER_LOGOUT', {
+          role: currentUser.role,
+          message: `${currentUser.name} logged out.`
+        });
+      }
+      currentUser = null;
+      localStorage.removeItem(STORAGE_KEY_AUTH_USER);
+      localStorage.removeItem('lcs_auth_token_v2');
+      updateUserHeaderUI();
+      navigateTo('/login');
+    }
+
+    function showAuthModal() {
+      navigateTo('/login');
+    }
+
+    function hideAuthModal() {
+      // Handled automatically by handleRoute
+    }
+
+    function updateUserHeaderUI() {
+      const chip = document.getElementById('user-profile-chip');
+      const nameEl = document.getElementById('user-profile-name');
+      const iconEl = document.getElementById('user-profile-icon');
+      const nav = document.getElementById('view-switcher-nav');
+      const logoutBtn = document.getElementById('logout-btn');
+      const statusBadge = document.getElementById('user-status-badge');
+      const statusText = document.getElementById('user-status-text');
+      const learnerBadge = document.getElementById('active-learner-name-badge');
+
+      if (!currentUser) {
+        if (chip) chip.classList.add('hidden');
+        if (logoutBtn) logoutBtn.classList.add('hidden');
+        if (statusBadge) statusBadge.classList.add('hidden');
+        if (nav) nav.style.setProperty('display', 'none', 'important');
+        return;
+      }
+
+      if (chip) chip.classList.remove('hidden');
+      if (logoutBtn) logoutBtn.classList.remove('hidden');
+      if (statusBadge) statusBadge.classList.remove('hidden');
+      if (nameEl) nameEl.innerText = currentUser.name;
+      if (iconEl) iconEl.innerText = currentUser.role === 'author' ? '👑' : '👤';
+      if (statusText) statusText.innerText = "Online";
+
+      // Dynamically sync Active Learner badge on training catalog (shows only name, private ID is strictly hidden)
+      if (learnerBadge) {
+        learnerBadge.innerText = currentUser.name;
+      }
+
+      // STRICT ROLE-BASED ACCESS CONTROL FOR HEADER TABS:
+      // Authoring Desk & Admin Dashboard are strictly hidden for Learning Companions!
+      if (currentUser.role === 'author') {
+        if (nav) nav.style.setProperty('display', 'grid', 'important');
+      } else {
+        if (nav) nav.style.setProperty('display', 'none', 'important');
+      }
+    }
+
+    function applyRoleRestrictions() {
+      if (!currentUser) {
+        navigateTo('/login');
+        return;
+      }
+
+      if (currentUser.role === 'author') {
+        navigateTo('/author');
+      } else {
+        navigateTo('/home');
+      }
+    }
+
+    // ==========================================
+    // USER PRESENCE & ACTIVE SESSIONS ENGINE
+    // ==========================================
+    const STORAGE_KEY_PRESENCE = "lcs_user_presence_v2";
+
+    function sendPresenceHeartbeat(isOnline = true) {
+      if (!currentUser) return;
+
+      const presenceMap = loadFromStorage(STORAGE_KEY_PRESENCE, {});
+      const now = Date.now();
+
+      let currentActivity = "Browsing Modules";
+      if (currentView === 'author') currentActivity = "Authoring Desk (Curriculum)";
+      else if (currentView === 'admin') currentActivity = "Admin Dashboard";
+      else if (selectedSubmodule && document.getElementById('student-level-content') && !document.getElementById('student-level-content').classList.contains('hidden')) {
+        currentActivity = `In Lesson: ${selectedSubmodule.title}`;
+      }
+
+      presenceMap[currentUser.id] = {
+        userId: currentUser.id,
+        name: currentUser.name,
+        role: currentUser.role,
+        lastHeartbeat: now,
+        lastActivity: currentActivity,
+        online: isOnline
+      };
+
+      saveToStorage(STORAGE_KEY_PRESENCE, presenceMap);
+
+      if (isBackendOnline) {
+        fetch(`${API_BASE_URL}/v2/events/presence`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(presenceMap[currentUser.id])
+        }).catch(() => {});
+      }
+
+      if (currentView === 'admin') {
+        renderAdminPresenceRoster();
+      }
+    }
+
+    function renderAdminPresenceRoster() {
+      const container = document.getElementById('admin-presence-roster-grid');
+      const countBadge = document.getElementById('admin-presence-online-count');
+      if (!container) return;
+
+      const presenceMap = loadFromStorage(STORAGE_KEY_PRESENCE, {});
+      const now = Date.now();
+
+      // Ensure all registered users exist
+      const usersDb = loadFromStorage(STORAGE_KEY_USERS_DB, getDefaultUsersDb());
+      usersDb.forEach(u => {
+        if (!presenceMap[u.id]) {
+          presenceMap[u.id] = {
+            userId: u.id,
+            name: u.name,
+            role: u.role,
+            lastHeartbeat: 0,
+            lastActivity: 'Never active',
+            online: false
+          };
+        }
+      });
+
+      // Always guarantee current user is marked online
+      if (currentUser) {
+        presenceMap[currentUser.id] = {
+          userId: currentUser.id,
+          name: currentUser.name,
+          role: currentUser.role,
+          lastHeartbeat: now,
+          lastActivity: currentView === 'author' ? 'Authoring Desk' : (currentView === 'admin' ? 'Monitoring Admin' : 'In Training Content'),
+          online: true
+        };
+      }
+
+      const usersList = Object.values(presenceMap);
+      let onlineCount = 0;
+
+      container.innerHTML = usersList.map(u => {
+        const isOnline = u.online && (now - u.lastHeartbeat < 30000);
+        if (isOnline) onlineCount++;
+
+        const timeDiffSec = Math.floor((now - u.lastHeartbeat) / 1000);
+        let timeStr = "Active right now";
+        if (!isOnline) {
+          if (!u.lastHeartbeat || u.lastHeartbeat === 0) timeStr = "Never logged in";
+          else if (timeDiffSec < 60) timeStr = `${timeDiffSec}s ago`;
+          else if (timeDiffSec < 3600) timeStr = `${Math.floor(timeDiffSec / 60)}m ago`;
+          else timeStr = `${Math.floor(timeDiffSec / 3600)}h ago`;
+        }
+
+        const avatarColor = u.role === 'author' ? 'bg-amber-600' : 'bg-teal-700';
+        const roleLabel = u.role === 'author' ? 'Course Author' : 'Learning Companion';
+        const statusBadge = isOnline 
+          ? 'bg-emerald-50 text-emerald-800 border-emerald-300' 
+          : 'bg-slate-100 text-slate-500 border-slate-200';
+
+        return `
+          <div class="p-3.5 rounded-2xl border transition-all ${isOnline ? 'bg-emerald-50/40 border-emerald-300 shadow-sm' : 'bg-slate-50 border-slate-200/80 opacity-75'} flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <div class="w-9 h-9 rounded-xl ${avatarColor} text-white font-black text-xs flex items-center justify-center flex-shrink-0 shadow-sm">
+                ${(u.name || 'U').split(' ').map(n=>n[0]).slice(0,2).join('')}
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <h4 class="text-xs font-black text-slate-900 truncate">${u.name}</h4>
+                  <span class="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold text-teal-800 bg-teal-50 border border-teal-200">${u.userId}</span>
+                </div>
+                <p class="text-[10px] text-slate-500 truncate mt-0.5">${u.lastActivity}</p>
+              </div>
+            </div>
+            <div class="flex flex-col items-end gap-1 flex-shrink-0">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-black border flex items-center gap-1 ${statusBadge}">
+                <span class="w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}"></span>
+                <span>${isOnline ? 'Online' : 'Offline'}</span>
+              </span>
+              <span class="text-[9px] font-bold text-slate-400 whitespace-nowrap">${timeStr}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (countBadge) {
+        countBadge.innerHTML = `● ${onlineCount} Online Now`;
+        countBadge.className = onlineCount > 0 
+          ? "px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-50 text-emerald-800 border border-emerald-300"
+          : "px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-slate-100 text-slate-600 border border-slate-300";
+      }
+    }
+
+    // ==========================================
+    // USER MOVEMENT & TELEMETRY TRACKER
+    // ==========================================
+    function logUserMovement(eventType, details = {}) {
+      if (!currentUser) return;
+
+      const event = {
+        id: `evt-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        userId: currentUser.id,
+        userName: currentUser.name,
+        role: currentUser.role,
+        eventType: eventType,
+        moduleId: selectedModuleId || details.moduleId || "none",
+        submoduleId: selectedSubmodule ? selectedSubmodule.id : (details.submoduleId || "none"),
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        isoTime: new Date().toISOString(),
+        details: details
+      };
+
+      userMovementLogs.unshift(event);
+      if (userMovementLogs.length > 1000) userMovementLogs.length = 1000;
+      saveToStorage(STORAGE_KEY_MOVEMENTS, userMovementLogs);
+
+      // Async push to backend if online
+      if (isBackendOnline) {
+        fetch(`${API_BASE_URL}/v2/events`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(event)
+        }).catch(err => console.warn("Failed to push telemetry to backend:", err));
+      }
+
+      // Refresh admin telemetry table if currently on admin view
+      if (currentView === 'admin') {
+        renderAdminTelemetryLog();
+      }
+    }
+
+    function renderAdminTelemetryLog() {
+      const tbody = document.getElementById('admin-telemetry-tbody');
+      const userFilter = document.getElementById('admin-telemetry-filter-user');
+      if (!tbody) return;
+
+      if (userFilter) {
+        const uniqueUsers = [...new Map(userMovementLogs.map(item => [item.userId, item])).values()];
+        const curVal = userFilter.value;
+        userFilter.innerHTML = `
+          <option value="ALL" ${curVal === 'ALL' ? 'selected' : ''}>All Trainees & Authors</option>
+          ${uniqueUsers.map(u => `
+            <option value="${u.userId}" ${curVal === u.userId ? 'selected' : ''}>${u.userName} (${u.userId})</option>
+          `).join('')}
+        `;
+      }
+
+      const selectedUser = userFilter ? userFilter.value : 'ALL';
+      let logs = userMovementLogs;
+      if (selectedUser !== 'ALL') {
+        logs = logs.filter(l => l.userId === selectedUser);
+      }
+
+      if (logs.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="p-6 text-center text-slate-400 italic">No movement logs recorded yet. All actions like video watch, module clicks, and checkpoints will appear here in real-time.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = logs.map(l => {
+        let actionBadge = "bg-slate-100 text-slate-700 border-slate-200";
+        if (l.eventType === 'USER_LOGIN') actionBadge = "bg-emerald-50 text-emerald-800 border-emerald-300";
+        else if (l.eventType === 'USER_LOGOUT') actionBadge = "bg-rose-50 text-rose-800 border-rose-300";
+        else if (l.eventType === 'MODULE_OPENED' || l.eventType === 'SUBMODULE_VIEWED') actionBadge = "bg-blue-50 text-blue-800 border-blue-200";
+        else if (l.eventType.startsWith('VIDEO_')) actionBadge = "bg-purple-50 text-purple-800 border-purple-200";
+        else if (l.eventType.includes('CHECKPOINT') || l.eventType.includes('QUIZ') || l.eventType.includes('ATTEMPT')) actionBadge = "bg-amber-50 text-amber-800 border-amber-300";
+
+        const detailStr = l.details ? (typeof l.details === 'string' ? l.details : (l.details.message || JSON.stringify(l.details))) : "—";
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition-colors">
+            <td class="p-3 text-[11px] text-slate-500 whitespace-nowrap">${l.timestamp}</td>
+            <td class="p-3 font-bold text-slate-900 whitespace-nowrap">${l.userName}</td>
+            <td class="p-3 font-mono text-[10px] text-teal-700 whitespace-nowrap">${l.userId}</td>
+            <td class="p-3 whitespace-nowrap">
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-black border ${actionBadge}">
+                ${l.eventType}
+              </span>
+            </td>
+            <td class="p-3 text-[11px] text-slate-600 truncate max-w-[160px]">${l.submoduleId !== 'none' ? l.submoduleId : l.moduleId}</td>
+            <td class="p-3 text-[11px] text-slate-600 max-w-xs truncate" title="${detailStr.replace(/"/g, '&quot;')}">${detailStr}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function clearTelemetryLogs() {
+      if (confirm("Clear all recorded user movement and telemetry logs?")) {
+        userMovementLogs = [];
+        saveToStorage(STORAGE_KEY_MOVEMENTS, userMovementLogs);
+        if (isBackendOnline) {
+          fetch(`${API_BASE_URL}/v2/events/reset`, { method: 'POST' }).catch(() => {});
+        }
+        renderAdminTelemetryLog();
+        showToast("Telemetry audit trail cleared.");
+      }
+    }
+
     function hydrateAndValidateDatabase(courses) {
       if (!courses || !Array.isArray(courses) || courses.length === 0) {
         return JSON.parse(JSON.stringify(DEFAULT_COURSES));
@@ -2132,9 +3078,23 @@
       return courses;
     }
 
+    function sanitizeAdminAttempts(attempts) {
+      const legacyNames = ["Priya Sharma (Trainee)", "Priya Sharma", "Rahul Mehta", "Tanya Verma", "Jamson", "Alex Chen"];
+      return (attempts || []).map(att => {
+        if (!att.companionName || legacyNames.includes(att.companionName)) {
+          return {
+            ...att,
+            companionName: "Tester 1"
+          };
+        }
+        return att;
+      });
+    }
+
     let publishedDb = hydrateAndValidateDatabase(loadFromStorage(STORAGE_KEY_PUBLISHED, DEFAULT_COURSES));
     let draftDb = hydrateAndValidateDatabase(loadFromStorage(STORAGE_KEY_DRAFT, JSON.parse(JSON.stringify(publishedDb))));
-    let adminAttempts = loadFromStorage(STORAGE_KEY_ATTEMPTS, DEFAULT_ATTEMPTS);
+    let adminAttempts = sanitizeAdminAttempts(loadFromStorage(STORAGE_KEY_ATTEMPTS, DEFAULT_ATTEMPTS));
+    saveToStorage(STORAGE_KEY_ATTEMPTS, adminAttempts);
 
     // Hydrate IndexedDB blobs asynchronously
     restorePdfBlobs(publishedDb);
@@ -2197,6 +3157,14 @@
         updateAuthorDraftUI();
         renderCurriculumTree();
         updateHostedSnapshotUI();
+
+        if (isBackendOnline) {
+          fetch(`${API_BASE_URL}/v2/courses/draft`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ courses: draftDb })
+          }).catch(err => console.warn("Failed to push draft to backend:", err));
+        }
       }, 800);
     }
 
@@ -2432,6 +3400,14 @@
       saveToStorage(STORAGE_KEY_PUBLISHED, publishedDb);
       saveToStorage(STORAGE_KEY_DRAFT, draftDb);
       isDraftDirty = false;
+
+      if (isBackendOnline) {
+        fetch(`${API_BASE_URL}/v2/courses/publish`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ courses: publishedDb })
+        }).catch(err => console.warn("Failed to push published courses to backend:", err));
+      }
       
       answeredInVideoCheckpointsMap = {};
       currentActiveInVideoCheckpoint = null;
@@ -2487,21 +3463,47 @@
     // ==========================================
     // VIEW SWITCHING (STUDENT / AUTHOR / ADMIN)
     // ==========================================
-    function switchView(view) {
+    function switchView(view, updateUrl = true) {
+      if (!currentUser) {
+        navigateTo('/login');
+        return;
+      }
+
+      // Role-Based Access Control: Companions are strictly locked to student view
+      if (currentUser.role !== 'author' && (view === 'author' || view === 'admin')) {
+        showToast("Access restricted: Course Author credentials required.", "rose");
+        view = 'student';
+      }
+
+      if (updateUrl) {
+        if (view === 'author') {
+          navigateTo('/author');
+          return;
+        } else if (view === 'admin') {
+          navigateTo('/admin');
+          return;
+        } else {
+          navigateTo('/home');
+          return;
+        }
+      }
+
       currentView = view;
+      updateUserHeaderUI();
+      sendPresenceHeartbeat(true);
+      logUserMovement('VIEW_SWITCHED', { targetView: view });
+
       const vStudent = document.getElementById('view-student');
       const vAuthor = document.getElementById('view-author');
       const vAdmin = document.getElementById('view-admin');
 
-      const tabStudent = document.getElementById('tab-student');
       const tabAuthor = document.getElementById('tab-author');
       const tabAdmin = document.getElementById('tab-admin');
 
-      // Reset tabs with responsive 3-segment mobile classes
       const inactiveTabCls = "w-full justify-center px-2 sm:px-3.5 py-2 rounded-xl transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5 whitespace-nowrap text-center text-xs font-black";
       const activeTabCls = "w-full justify-center px-2 sm:px-3.5 py-2 rounded-xl transition-all bg-teal-700 text-white shadow-sm flex items-center gap-1.5 whitespace-nowrap text-center text-xs font-black";
 
-      [tabStudent, tabAuthor, tabAdmin].forEach(b => {
+      [tabAuthor, tabAdmin].forEach(b => {
         if (b) b.className = inactiveTabCls;
       });
 
@@ -2517,9 +3519,9 @@
         if (vAdmin) vAdmin.classList.remove('hidden');
         if (tabAdmin) tabAdmin.className = activeTabCls;
         renderAdminDashboard();
+        renderAdminTelemetryLog();
       } else {
         if (vStudent) vStudent.classList.remove('hidden');
-        if (tabStudent) tabStudent.className = activeTabCls;
         
         // Re-sync student view to active course database
         const courses = getStudentCourses();
@@ -3764,6 +4766,7 @@
     // COMPANION VIEW (STUDENT PORTAL RENDERING)
     // =========================================================================
     function goHome() {
+      updateUserHeaderUI();
       document.getElementById('student-level-modules').classList.remove('hidden');
       document.getElementById('student-level-submodules').classList.add('hidden');
       document.getElementById('student-level-content').classList.add('hidden');
@@ -3820,6 +4823,8 @@
       selectedModuleId = modId;
       const mod = getStudentCourses().find(m => m.id === modId);
       if (!mod) return;
+
+      logUserMovement('MODULE_OPENED', { moduleId: mod.id, moduleTitle: mod.title });
 
       document.getElementById('student-level-modules').classList.add('hidden');
       document.getElementById('student-level-submodules').classList.remove('hidden');
@@ -3959,8 +4964,9 @@
       const qKey = `${mod.id}_${mod.lxi.questionId}`;
       if (!mod.lxi.submissions) mod.lxi.submissions = [];
 
+      const currentDisplayName = currentUser ? `${currentUser.name} (You)` : "Tester 1 (You)";
       const submission = {
-        companionName: "Priya Sharma (You)",
+        companionName: currentDisplayName,
         timestamp: "Just Now",
         answer: val
       };
@@ -3971,7 +4977,7 @@
 
       // Log attempt to Admin Dashboard (DELIVERABLE #8)
       logAdminAttempt({
-        companionName: "Priya Sharma (Trainee)",
+        companionName: currentUser ? currentUser.name : "Tester 1",
         type: "LXI_DISCUSSION",
         typeName: "Module LxI Discussion",
         moduleTitle: mod.title,
@@ -4012,6 +5018,8 @@
     }
 
     function renderSubmoduleContent(sub, mod) {
+      logUserMovement('SUBMODULE_VIEWED', { moduleId: mod.id, submoduleId: sub.id, submoduleTitle: sub.title });
+
       document.getElementById('student-module-badge').innerText = mod.title;
       document.getElementById('student-sub-title').innerText = sub.title;
 
@@ -4416,9 +5424,10 @@
       // Log attempt to Admin Dashboard (DELIVERABLE #8)
       const qId = cp.id || `pdf-cp-${cpIdx}`;
       const mod = getStudentCourses().find(m => m.id === selectedModuleId);
-      const prevPdfAtts = adminAttempts.filter(a => a.companionName === "Priya Sharma (Trainee)" && a.questionId === qId);
+      const currentActiveName = currentUser ? currentUser.name : "Tester 1";
+      const prevPdfAtts = adminAttempts.filter(a => a.companionName === currentActiveName && a.questionId === qId);
       logAdminAttempt({
-        companionName: "Priya Sharma (Trainee)",
+        companionName: currentActiveName,
         moduleId: selectedModuleId || "mod-1",
         moduleTitle: mod ? mod.title : (selectedSubmodule ? selectedSubmodule.title : "Module 1"),
         submoduleId: selectedSubmodule ? selectedSubmodule.id : "sub-1-2",
@@ -4476,7 +5485,7 @@
 
       // Native clean HTML5 video with timeupdate listener
       container.innerHTML = `
-        <video src="${videoUrl}" class="w-full h-full object-contain bg-black focus:outline-none" controls playsinline preload="auto" ontimeupdate="${isLxT ? 'onLxTVideoProgress(this)' : 'onVideoProgress(this)'}" onended="${isLxT ? 'onLxTVideoEnded()' : 'onVideoEnded()'}">
+        <video src="${videoUrl}" class="w-full h-full object-contain bg-black focus:outline-none" controls playsinline preload="auto" onplay="onVideoPlayEvent(this, ${isLxT})" onpause="onVideoPauseEvent(this, ${isLxT})" ontimeupdate="${isLxT ? 'onLxTVideoProgress(this)' : 'onVideoProgress(this)'}" onended="${isLxT ? 'onLxTVideoEnded()' : 'onVideoEnded()'}">
           <source src="${videoUrl}" type="video/mp4">
         </video>
         <div class="absolute top-3 left-3 bg-slate-950/80 px-3 py-1.5 rounded-lg text-xs text-teal-300 font-bold flex items-center gap-2 backdrop-blur-sm pointer-events-none">
@@ -4484,6 +5493,24 @@
           <span>${titleOverlay}</span>
         </div>
       `;
+    }
+
+    function onVideoPlayEvent(vid, isLxT) {
+      logUserMovement('VIDEO_PLAY', {
+        format: isLxT ? 'lxt' : 'main',
+        timeSeconds: Math.round(vid.currentTime || 0),
+        duration: Math.round(vid.duration || 0)
+      });
+    }
+
+    function onVideoPauseEvent(vid, isLxT) {
+      if (!currentActiveInVideoCheckpoint) {
+        logUserMovement('VIDEO_PAUSE', {
+          format: isLxT ? 'lxt' : 'main',
+          timeSeconds: Math.round(vid.currentTime || 0),
+          duration: Math.round(vid.duration || 0)
+        });
+      }
     }
 
     function onVideoProgress(vid) {
@@ -4648,9 +5675,10 @@
       // Log attempt to Admin Dashboard (DELIVERABLE #8)
       const qId = ivc.id || `ivc-${Date.now()}`;
       const mod = getStudentCourses().find(m => m.id === selectedModuleId);
-      const prevAtts = adminAttempts.filter(a => a.companionName === "Priya Sharma (Trainee)" && a.questionId === qId);
+      const currentActiveName = currentUser ? currentUser.name : "Tester 1";
+      const prevAtts = adminAttempts.filter(a => a.companionName === currentActiveName && a.questionId === qId);
       logAdminAttempt({
-        companionName: "Priya Sharma (Trainee)",
+        companionName: currentActiveName,
         moduleId: selectedModuleId || "mod-1",
         moduleTitle: mod ? mod.title : (selectedSubmodule ? selectedSubmodule.title : "Module 1"),
         submoduleId: selectedSubmodule ? selectedSubmodule.id : "sub-1-1",
@@ -4810,7 +5838,7 @@
       const isCorrect = m.correctIndex === cIdx;
 
       logAdminAttempt({
-        companionName: "Priya Sharma (Trainee)",
+        companionName: currentUser ? currentUser.name : "Tester 1",
         type: "IN_VIDEO_CHECKPOINT",
         typeName: `Post-Lesson MCQ #${mIdx + 1}`,
         moduleTitle: selectedSubmodule.title,
@@ -5003,7 +6031,7 @@
       if (q) {
         const isCorrect = q.correctIndex === cIdx;
         logAdminAttempt({
-          companionName: "Priya Sharma (Trainee)",
+          companionName: currentUser ? currentUser.name : "Tester 1",
           moduleId: selectedModuleId || "mod-1",
           moduleTitle: "Module 1",
           submoduleId: selectedSubmodule ? selectedSubmodule.id : "sub-1-1",
@@ -5129,7 +6157,7 @@
 
       // Log attempt to Admin Dashboard (DELIVERABLE #8)
       logAdminAttempt({
-        companionName: "Priya Sharma (Trainee)",
+        companionName: currentUser ? currentUser.name : "Tester 1",
         type: "MASTER_QUIZ",
         typeName: "End-of-Module Master Quiz",
         moduleTitle: mod.title,
@@ -5149,19 +6177,95 @@
     // =========================================================================
     // DETAILED PEDAGOGICAL ADMIN DIAGNOSTICS & ATTEMPT FRICTION (DELIVERABLE #8)
     // =========================================================================
-    let adminActiveCompanion = "Priya Sharma (Trainee)";
+    function getRegisteredLearningCompanions() {
+      const companions = new Map();
+
+      // 1. Registered users from local users database
+      const usersDb = loadFromStorage(STORAGE_KEY_USERS_DB, getDefaultUsersDb());
+      usersDb.forEach(u => {
+        if (u.role === 'companion' && u.name) {
+          companions.set(u.name, {
+            id: u.id,
+            name: u.name,
+            role: "Learning Companion"
+          });
+        }
+      });
+
+      // 2. Trainees registered in presence tracking
+      const presenceMap = loadFromStorage(STORAGE_KEY_PRESENCE, {});
+      Object.values(presenceMap).forEach(p => {
+        if (p.role === 'companion' && p.name) {
+          if (!companions.has(p.name)) {
+            companions.set(p.name, {
+              id: p.userId || p.id,
+              name: p.name,
+              role: "Learning Companion"
+            });
+          }
+        }
+      });
+
+      // 3. Current active user if companion
+      if (currentUser && currentUser.role === 'companion' && currentUser.name) {
+        companions.set(currentUser.name, {
+          id: currentUser.id,
+          name: currentUser.name,
+          role: "Learning Companion"
+        });
+      }
+
+      // 4. Any companions who have recorded attempts in adminAttempts
+      (adminAttempts || []).forEach(att => {
+        const legacyNames = ["Priya Sharma (Trainee)", "Priya Sharma", "Rahul Mehta", "Tanya Verma", "Jamson", "Alex Chen", "ALL"];
+        if (att.companionName && !legacyNames.includes(att.companionName)) {
+          if (!companions.has(att.companionName)) {
+            companions.set(att.companionName, {
+              id: att.userId || "LC-COMP",
+              name: att.companionName,
+              role: "Learning Companion"
+            });
+          }
+        }
+      });
+
+      // 5. Always ensure "Tester 1" exists as baseline companion
+      if (companions.size === 0 || !companions.has("Tester 1")) {
+        companions.set("Tester 1", {
+          id: "LC-2026-2611",
+          name: "Tester 1",
+          role: "Learning Companion"
+        });
+      }
+
+      return Array.from(companions.values());
+    }
+
+    let adminActiveCompanion = "Tester 1";
     let adminActiveModuleId = "mod-1";
 
     function logAdminAttempt(att) {
+      const activeName = currentUser ? currentUser.name : "Tester 1";
       const newAtt = {
         id: `att-${Date.now()}-${Math.floor(Math.random()*1000)}`,
+        companionName: att.companionName || activeName,
+        userId: currentUser ? currentUser.id : "anonymous",
         timestamp: "Just Now",
         ...att
       };
       adminAttempts.unshift(newAtt);
       saveToStorage(STORAGE_KEY_ATTEMPTS, adminAttempts);
+
+      logUserMovement('ATTEMPT_RECORDED', {
+        questionId: newAtt.questionId || "assessment",
+        type: newAtt.type,
+        status: newAtt.status,
+        isCorrect: newAtt.isCorrect
+      });
+
       if (currentView === 'admin') {
         renderAdminDashboard();
+        renderAdminTelemetryLog();
       }
 
       // Sync attempt to backend asynchronously
@@ -5180,6 +6284,7 @@
       if (lcSelect) adminActiveCompanion = lcSelect.value;
       if (modSelect) adminActiveModuleId = modSelect.value;
       renderAdminDashboard();
+      renderAdminTelemetryLog();
     }
 
     function getCompanionModuleDiagnostics(companionName, moduleId) {
@@ -5292,9 +6397,24 @@
         }
       }
 
-      // 2. Ensure LC selector is in sync
+      // 2. Populate and sync LC selector dynamically from registered companions
+      const registeredCompanions = getRegisteredLearningCompanions();
       const lcSelect = document.getElementById('admin-lc-select');
-      if (lcSelect && lcSelect.value !== adminActiveCompanion) {
+      if (lcSelect) {
+        const companionNames = registeredCompanions.map(c => c.name);
+        if (!companionNames.includes(adminActiveCompanion) && adminActiveCompanion !== 'ALL') {
+          adminActiveCompanion = companionNames[0] || "Tester 1";
+        }
+
+        const lcOptionsHtml = `
+          ${registeredCompanions.map(c => `
+            <option value="${c.name}" ${c.name === adminActiveCompanion ? 'selected' : ''}>${c.name} (${c.id ? c.id + ' • ' : ''}Learning Companion)</option>
+          `).join('')}
+          <option value="ALL" ${adminActiveCompanion === 'ALL' ? 'selected' : ''}>All Companions (Cohort Overview)</option>
+        `;
+        if (lcSelect.innerHTML !== lcOptionsHtml) {
+          lcSelect.innerHTML = lcOptionsHtml;
+        }
         lcSelect.value = adminActiveCompanion;
       }
 
@@ -5307,16 +6427,17 @@
       if (adminActiveCompanion === 'ALL') {
         if (lcAvatar) lcAvatar.innerText = "ALL";
         if (lcName) lcName.innerText = "Cohort Aggregate";
-        if (lcRole) lcRole.innerText = "5 Trainee Companions";
+        if (lcRole) lcRole.innerText = `${registeredCompanions.length} Learning Companion${registeredCompanions.length === 1 ? '' : 's'}`;
         if (lcBadge) {
           lcBadge.className = "px-2.5 py-1 rounded-xl text-[10px] font-black uppercase bg-teal-100 text-teal-800 border border-teal-300";
           lcBadge.innerText = "👥 Cohort View";
         }
       } else {
-        const initials = adminActiveCompanion.split(' ').map(n => n.charAt(0)).slice(0, 2).join('');
+        const selectedComp = registeredCompanions.find(c => c.name === adminActiveCompanion) || { name: adminActiveCompanion, id: "LC-2026-2611" };
+        const initials = adminActiveCompanion.split(' ').map(n => n.charAt(0)).slice(0, 2).join('').toUpperCase();
         if (lcAvatar) lcAvatar.innerText = initials || "LC";
-        if (lcName) lcName.innerText = adminActiveCompanion.replace(' (Trainee)', '');
-        if (lcRole) lcRole.innerText = "InclusiveMinds Cohort 2026";
+        if (lcName) lcName.innerText = adminActiveCompanion;
+        if (lcRole) lcRole.innerText = `${selectedComp.id || 'LC-2026-2611'} • Active Learner`;
         if (lcBadge) {
           lcBadge.className = "px-2.5 py-1 rounded-xl text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-300";
           lcBadge.innerText = "✓ Active Trainee";
@@ -5352,8 +6473,10 @@
         }
       }
 
-      // 7. Render Questions Diagnostics Matrix
+      // 7. Render Questions Diagnostics Matrix & Roster
       renderAdminQuestionDiagnostics(diag);
+      renderAdminTelemetryLog();
+      renderAdminPresenceRoster();
     }
 
     function renderAdminQuestionDiagnostics(diagData) {
@@ -5611,8 +6734,8 @@
     }
 
     function simulateCompanionAttempt() {
-      const candidates = ["Tanya Verma", "Rahul Mehta", "Alex Chen"];
-      const randComp = candidates[Math.floor(Math.random() * candidates.length)];
+      const candidates = getRegisteredLearningCompanions().map(c => c.name);
+      const randComp = candidates[Math.floor(Math.random() * candidates.length)] || "Tester 1";
       const qId = `sim-ivc-${Date.now()}`;
       const qText = "How do you respond when a mentee exhibits acute auditory defensiveness?";
 
@@ -5690,11 +6813,21 @@
     // INITIALIZATION
     // ==========================================
     window.addEventListener('DOMContentLoaded', () => {
-      // Default to student view on initial load
-      switchView('student');
+      // Route based on current URL path (HTML5 History API)
+      handleRoute(window.location.pathname);
+      if (currentUser) {
+        sendPresenceHeartbeat(true);
+      }
 
       // Check backend health and sync courses & attempts
       syncFromBackend();
+
+      // Periodic presence heartbeat every 8s to keep online status live
+      setInterval(() => {
+        if (currentUser) {
+          sendPresenceHeartbeat(true);
+        }
+      }, 8000);
 
       // Periodic health check every 15s to react to backend starts/stops
       setInterval(() => {
