@@ -49,6 +49,7 @@
       max-width: 100%;
     }
   </style>
+  <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased selection:bg-teal-500 selection:text-white">
 
@@ -5479,6 +5480,15 @@
     let currentActiveInVideoCheckpoint = null;
     let answeredInVideoCheckpointsMap = {};
 
+    let activeYTPlayers = {};
+    let ytProgressIntervals = {};
+
+    function extractYouTubeId(url) {
+      if (!url || typeof url !== 'string') return null;
+      const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+      return match ? match[1] : null;
+    }
+
     function renderUniversalVideoPlayer(videoUrl, titleOverlay, targetId = 'video-player-container', isLxT = false) {
       const container = document.getElementById(targetId);
       if (!container) return;
@@ -5487,16 +5497,105 @@
       const mainModal = document.getElementById(isLxT ? 'lxt-in-video-checkpoint-modal' : 'in-video-checkpoint-modal');
       if (mainModal) mainModal.classList.add('hidden');
 
-      // Native clean HTML5 video with timeupdate listener
-      container.innerHTML = `
-        <video src="${videoUrl}" class="w-full h-full object-contain bg-black focus:outline-none" controls playsinline preload="auto" onplay="onVideoPlayEvent(this, ${isLxT})" onpause="onVideoPauseEvent(this, ${isLxT})" ontimeupdate="${isLxT ? 'onLxTVideoProgress(this)' : 'onVideoProgress(this)'}" onended="${isLxT ? 'onLxTVideoEnded()' : 'onVideoEnded()'}">
-          <source src="${videoUrl}" type="video/mp4">
-        </video>
-        <div class="absolute top-3 left-3 bg-slate-950/80 px-3 py-1.5 rounded-lg text-xs text-teal-300 font-bold flex items-center gap-2 backdrop-blur-sm pointer-events-none">
-          <span class="w-2.5 h-2.5 rounded-full bg-teal-400 animate-ping"></span>
-          <span>${titleOverlay}</span>
-        </div>
-      `;
+      // Clear any prior interval for this container
+      if (ytProgressIntervals[targetId]) {
+        clearInterval(ytProgressIntervals[targetId]);
+        delete ytProgressIntervals[targetId];
+      }
+      if (activeYTPlayers[targetId]) {
+        try { activeYTPlayers[targetId].destroy(); } catch (e) {}
+        delete activeYTPlayers[targetId];
+      }
+
+      const ytId = extractYouTubeId(videoUrl);
+
+      if (ytId) {
+        // YouTube Player Integration
+        const ytDivId = `${targetId}-yt-frame`;
+        container.innerHTML = `
+          <div id="${ytDivId}" class="w-full h-full"></div>
+          <div class="absolute top-3 left-3 bg-slate-950/80 px-3 py-1.5 rounded-lg text-xs text-teal-300 font-bold flex items-center gap-2 backdrop-blur-sm pointer-events-none z-10">
+            <span class="w-2.5 h-2.5 rounded-full bg-teal-400 animate-ping"></span>
+            <span>${titleOverlay}</span>
+          </div>
+        `;
+
+        function mountYT() {
+          if (typeof YT === 'undefined' || !YT.Player) {
+            setTimeout(mountYT, 100);
+            return;
+          }
+          activeYTPlayers[targetId] = new YT.Player(ytDivId, {
+            videoId: ytId,
+            playerVars: {
+              autoplay: 0,
+              modestbranding: 1,
+              rel: 0,
+              playsinline: 1,
+              enablejsapi: 1,
+              origin: window.location.origin
+            },
+            events: {
+              onStateChange: (event) => {
+                if (event.data === YT.PlayerState.PLAYING) {
+                  onVideoPlayEvent({ currentTime: activeYTPlayers[targetId].getCurrentTime(), duration: activeYTPlayers[targetId].getDuration() }, isLxT);
+                  if (!ytProgressIntervals[targetId]) {
+                    ytProgressIntervals[targetId] = setInterval(() => {
+                      if (!activeYTPlayers[targetId] || typeof activeYTPlayers[targetId].getCurrentTime !== 'function') return;
+                      const cur = activeYTPlayers[targetId].getCurrentTime();
+                      const dur = activeYTPlayers[targetId].getDuration();
+                      if (dur > 0) {
+                        const pct = (cur / dur) * 100;
+                        const bar = document.getElementById(isLxT ? 'lxt-video-progress-bar' : 'video-progress-bar');
+                        if (bar) bar.style.width = `${Math.min(pct, 100)}%`;
+                      }
+                      if (isLxT) {
+                        if (currentActiveInVideoCheckpoint) {
+                          activeYTPlayers[targetId].pauseVideo();
+                          return;
+                        }
+                        checkInVideoPlayback(cur, true);
+                      } else {
+                        if (currentActiveInVideoCheckpoint) {
+                          activeYTPlayers[targetId].pauseVideo();
+                          return;
+                        }
+                        checkInVideoPlayback(cur, false);
+                      }
+                    }, 500);
+                  }
+                } else if (event.data === YT.PlayerState.PAUSED) {
+                  onVideoPauseEvent({ currentTime: activeYTPlayers[targetId].getCurrentTime(), duration: activeYTPlayers[targetId].getDuration() }, isLxT);
+                  if (ytProgressIntervals[targetId]) {
+                    clearInterval(ytProgressIntervals[targetId]);
+                    delete ytProgressIntervals[targetId];
+                  }
+                } else if (event.data === YT.PlayerState.ENDED) {
+                  if (ytProgressIntervals[targetId]) {
+                    clearInterval(ytProgressIntervals[targetId]);
+                    delete ytProgressIntervals[targetId];
+                  }
+                  if (isLxT) onLxTVideoEnded();
+                  else onVideoEnded();
+                }
+              }
+            }
+          });
+        }
+        mountYT();
+
+      } else {
+        // Native clean HTML5 video with timeupdate listener
+        container.innerHTML = `
+          <video src="${videoUrl}" class="w-full h-full object-contain bg-black focus:outline-none" controls playsinline preload="auto" onplay="onVideoPlayEvent(this, ${isLxT})" onpause="onVideoPauseEvent(this, ${isLxT})" ontimeupdate="${isLxT ? 'onLxTVideoProgress(this)' : 'onVideoProgress(this)'}" onended="${isLxT ? 'onLxTVideoEnded()' : 'onVideoEnded()'}">
+            <source src="${videoUrl}" type="video/mp4">
+          </video>
+          <div class="absolute top-3 left-3 bg-slate-950/80 px-3 py-1.5 rounded-lg text-xs text-teal-300 font-bold flex items-center gap-2 backdrop-blur-sm pointer-events-none">
+            <span class="w-2.5 h-2.5 rounded-full bg-teal-400 animate-ping"></span>
+            <span>${titleOverlay}</span>
+          </div>
+        `;
+      }
     }
 
     function onVideoPlayEvent(vid, isLxT) {
@@ -5552,12 +5651,18 @@
 
     function pauseVideoPlayback(isLxT) {
       const containerId = isLxT ? 'lxt-video-player-container' : 'video-player-container';
+      if (activeYTPlayers[containerId] && typeof activeYTPlayers[containerId].pauseVideo === 'function') {
+        try { activeYTPlayers[containerId].pauseVideo(); return; } catch(e) {}
+      }
       const v = document.querySelector(`#${containerId} video`);
       if (v) v.pause();
     }
 
     function resumeVideoPlayback(isLxT) {
       const containerId = isLxT ? 'lxt-video-player-container' : 'video-player-container';
+      if (activeYTPlayers[containerId] && typeof activeYTPlayers[containerId].playVideo === 'function') {
+        try { activeYTPlayers[containerId].playVideo(); return; } catch(e) {}
+      }
       const v = document.querySelector(`#${containerId} video`);
       if (v) v.play().catch(() => {});
     }
