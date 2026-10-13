@@ -937,9 +937,7 @@
         </div>
 
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto">
-          <button type="button" onclick="simulateCompanionAttempt()" class="px-4 py-3 sm:py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-black text-xs shadow-md shadow-teal-600/20 flex items-center justify-center gap-1.5 transition-all text-center">
-            <span>⚡</span> <span>Simulate LC Retry</span>
-          </button>
+
           <div class="flex items-center gap-2">
             <button type="button" onclick="exportAttemptsCSV()" class="flex-1 sm:flex-none px-4 py-3 sm:py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-all text-center">
               <span>📥</span> <span>Export CSV</span>
@@ -6923,51 +6921,7 @@
       document.getElementById('admin-inspect-modal').classList.add('hidden');
     }
 
-    function simulateCompanionAttempt() {
-      const candidates = getRegisteredLearningCompanions().map(c => c.name);
-      const randComp = candidates[Math.floor(Math.random() * candidates.length)] || "Tester 1";
-      const qId = `sim-ivc-${Date.now()}`;
-      const qText = "How do you respond when a mentee exhibits acute auditory defensiveness?";
-
-      // Step 1: Simulate Wrong Attempt
-      logAdminAttempt({
-        companionName: randComp,
-        moduleId: "mod-1",
-        moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
-        submoduleId: "sub-1-1",
-        submoduleTitle: "Submodule 1.1: Understanding Neurodiversity",
-        questionId: qId,
-        type: "IN_VIDEO_CHECKPOINT",
-        typeName: "In-Video Reflection (00:45)",
-        question: qText,
-        submittedAnswer: "Repeat instructions in a louder, firmer tone",
-        status: "Incorrect (Retry Needed)",
-        isCorrect: false,
-        attemptNumber: 1,
-        exemplar: "Louder volume severely aggravates auditory overload."
-      });
-
-      // Step 2: Simulate Successful Retry
-      setTimeout(() => {
-        logAdminAttempt({
-          companionName: randComp,
-          moduleId: "mod-1",
-          moduleTitle: "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
-          submoduleId: "sub-1-1",
-          submoduleTitle: "Submodule 1.1: Understanding Neurodiversity",
-          questionId: qId,
-          type: "IN_VIDEO_CHECKPOINT",
-          typeName: "In-Video Reflection (00:45)",
-          question: qText,
-          submittedAnswer: "Offer noise-dampening ear defenders and reduce vocal cadence",
-          status: "Correct (100%)",
-          isCorrect: true,
-          attemptNumber: 2,
-          exemplar: "Noise dampening immediately mitigates fight-or-flight triggers."
-        });
-        showToast(`⚡ Simulated multi-attempt retry for ${randComp}! (1 mistake, then mastered)`);
-      }, 300);
-    }
+    function simulateCompanionAttempt() { /* removed */ }
 
     function exportAttemptsCSV() {
       const diag = getCompanionModuleDiagnostics(adminActiveCompanion, adminActiveModuleId);
