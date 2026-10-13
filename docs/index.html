@@ -4857,8 +4857,10 @@
       let allSubsCompleted = true;
 
       container.innerHTML = submodules.map((sub, sIdx) => {
-        const isFinished = submoduleFinishedMap[sub.id];
-        if (!isFinished) allSubsCompleted = false;
+        // Submodule is only finished if strictly completed (videos watched, pdfs read, all checkpoints answered)
+        const isFinished = submoduleFinishedMap[sub.id] || isSubmoduleFullyCompleted(sub);
+        if (isFinished) submoduleFinishedMap[sub.id] = true;
+        else allSubsCompleted = false;
         const isPdf = sub.format === 'pdf' || (sub.videoSteps?.[0]?.format === 'pdf') || sub.pdfDoc;
 
         return `
@@ -5967,11 +5969,90 @@
       renderSubmoduleReflections(step, selectedSubmodule);
     }
 
+    function isSubmoduleFullyCompleted(sub) {
+      if (!sub) return false;
+      const subId = sub.id;
+      const steps = sub.videoSteps || [];
+
+      // If submodule has videoSteps, evaluate each step strictly
+      if (steps.length > 0) {
+        for (let sIdx = 0; sIdx < steps.length; sIdx++) {
+          const st = steps[sIdx];
+          const isPdf = st.format === 'pdf' || (!st.format && !st.videoUrl && st.pdfUrl);
+
+          if (isPdf) {
+            // PDF Step: Must pass all PDF reading checkpoints
+            const checkpoints = st.pdfCheckpoints || [];
+            if (checkpoints.length > 0) {
+              const allPassed = checkpoints.every((_, cIdx) => !!pdfCheckpointsCompletedMap[`${subId}_pdf_${cIdx}`]);
+              if (!allPassed) return false;
+            }
+          } else if (st.videoUrl) {
+            // Video Step: Video must have ended OR all in-video checkpoints answered
+            const ivcs = st.inVideoCheckpoints || [];
+            if (ivcs.length > 0) {
+              const allIvcsPassed = ivcs.every((_, cIdx) => !!answeredInVideoCheckpointsMap[`${subId}_${sIdx}_${cIdx}`]);
+              if (!allIvcsPassed) return false;
+            }
+            if (!videoCompletedMap[`${subId}_${sIdx}`] && !videoStepFinishedMap[`${subId}_${sIdx}`]) {
+              return false;
+            }
+          }
+
+          // Step Reflections: Must answer all post-lesson MCQs
+          const mcqs = st.mcqs || [];
+          if (mcqs.length > 0) {
+            const allMcqsAnswered = mcqs.every((_, mIdx) => selectedChoicesMap[`${subId}_mcq_${mIdx}`] !== undefined);
+            if (!allMcqsAnswered) return false;
+          }
+        }
+      } else if (sub.pdfDoc) {
+        // Standalone PDF Document: All embedded checkpoints must be passed
+        const checkpoints = sub.pdfDoc.embeddedCheckpoints || [];
+        if (checkpoints.length > 0) {
+          const allPassed = checkpoints.every((_, cIdx) => !!pdfCheckpointsCompletedMap[`${subId}_pdf_${cIdx}`]);
+          if (!allPassed) return false;
+        }
+      }
+
+      return true;
+    }
+
     function finishCurrentVideoStep() {
-      videoStepFinishedMap[`${selectedSubmodule.id}_${activeVideoStepIndex}`] = true;
+      const step = selectedSubmodule.videoSteps?.[activeVideoStepIndex] || selectedSubmodule.pdfDoc;
+      const subId = selectedSubmodule.id;
+
+      // 1. Check if post-lesson reflection MCQs are answered
+      const mcqs = step?.mcqs || [];
+      const unansweredMcqs = mcqs.filter((_, mIdx) => selectedChoicesMap[`${subId}_mcq_${mIdx}`] === undefined);
+      if (unansweredMcqs.length > 0) {
+        alert("Please answer all post-lesson reflection questions before marking this step completed.");
+        return;
+      }
+
+      // Mark current step as finished
+      videoStepFinishedMap[`${subId}_${activeVideoStepIndex}`] = true;
+
+      // If there are more steps in this submodule, advance to the next step
+      const steps = selectedSubmodule.videoSteps || [];
+      if (activeVideoStepIndex < steps.length - 1) {
+        activeVideoStepIndex++;
+        showToast(`✓ Step ${activeVideoStepIndex} completed! Moving to Step ${activeVideoStepIndex + 1}.`);
+        renderSubmoduleContent(selectedSubmodule, getStudentCourses().find(m => m.id === selectedModuleId));
+        return;
+      }
+
+      // Check if ALL steps, videos, PDFs, and checkpoints in this submodule are fully completed
+      if (!isSubmoduleFullyCompleted(selectedSubmodule)) {
+        alert("To complete this submodule, ensure you have watched all videos, read the documents, and completed all checkpoints.");
+        return;
+      }
+
       submoduleFinishedMap[selectedSubmodule.id] = true;
-      showToast("✓ Submodule completed! You unlocked the LxT extension trajectory.");
+      showToast("🎉 Submodule 100% completed! Videos watched, checkpoints passed, and reflections answered.");
       updateLxTCardStatus(selectedSubmodule);
+      const curMod = getStudentCourses().find(m => m.id === selectedModuleId);
+      if (curMod) renderSubmodulesList(curMod);
     }
 
     function updateLxTCardStatus(sub) {
