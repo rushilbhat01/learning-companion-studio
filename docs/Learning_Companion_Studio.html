@@ -70,19 +70,27 @@
         </div>
       </div>
 
-      <!-- 3-Way Responsive View Switcher (Full-width 3-tab segmented control on mobile) -->
-      <nav class="w-full sm:w-auto grid grid-cols-3 sm:flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200 text-xs font-black">
-        <button id="tab-student" onclick="switchView('student')" class="w-full justify-center px-2.5 sm:px-3.5 py-2 rounded-xl transition-all bg-teal-700 text-white shadow-sm flex items-center gap-1.5 whitespace-nowrap text-center text-xs font-black">
-          <span>🎓</span> <span>Companion</span><span class="hidden md:inline">View</span>
-        </button>
-        <button id="tab-author" onclick="switchView('author')" class="w-full justify-center px-2.5 sm:px-3.5 py-2 rounded-xl transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5 whitespace-nowrap text-center text-xs font-black">
-          <span>✏️</span> <span>Authoring</span><span class="hidden md:inline">Desk</span>
-          <span id="nav-draft-indicator" class="hidden w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-        </button>
-        <button id="tab-admin" onclick="switchView('admin')" class="w-full justify-center px-2.5 sm:px-3.5 py-2 rounded-xl transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5 whitespace-nowrap text-center text-xs font-black">
-          <span>📊</span> <span>Admin</span><span class="hidden md:inline">Dashboard</span>
-        </button>
-      </nav>
+      <div class="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 w-full sm:w-auto">
+        <!-- 3-Way Responsive View Switcher (Full-width 3-tab segmented control on mobile) -->
+        <nav class="w-full sm:w-auto grid grid-cols-3 sm:flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200 text-xs font-black">
+          <button id="tab-student" onclick="switchView('student')" class="w-full justify-center px-2.5 sm:px-3.5 py-2 rounded-xl transition-all bg-teal-700 text-white shadow-sm flex items-center gap-1.5 whitespace-nowrap text-center text-xs font-black">
+            <span>🎓</span> <span>Companion</span><span class="hidden md:inline">View</span>
+          </button>
+          <button id="tab-author" onclick="switchView('author')" class="w-full justify-center px-2.5 sm:px-3.5 py-2 rounded-xl transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5 whitespace-nowrap text-center text-xs font-black">
+            <span>✏️</span> <span>Authoring</span><span class="hidden md:inline">Desk</span>
+            <span id="nav-draft-indicator" class="hidden w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+          </button>
+          <button id="tab-admin" onclick="switchView('admin')" class="w-full justify-center px-2.5 sm:px-3.5 py-2 rounded-xl transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5 whitespace-nowrap text-center text-xs font-black">
+            <span>📊</span> <span>Admin</span><span class="hidden md:inline">Dashboard</span>
+          </button>
+        </nav>
+
+        <!-- Backend Online / Offline Mode Badge -->
+        <div id="backend-status-badge" class="self-end sm:self-center px-2.5 py-1 rounded-full text-[11px] font-black flex items-center gap-1.5 border transition-all bg-amber-50 text-amber-800 border-amber-300 shadow-sm cursor-help" title="Checking Express / MongoDB API connection...">
+          <span id="backend-status-dot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+          <span id="backend-status-text">Connecting...</span>
+        </div>
+      </div>
 
     </div>
   </header>
@@ -1965,11 +1973,100 @@
     }
 
     // ==========================================
-    // STATE ENGINE: DRAFT VS PUBLISHED IN LOCALSTORAGE
+    // HYBRID BACKEND & STATE PERSISTENCE ENGINE
     // ==========================================
+    const API_BASE_URL = "http://localhost:5050/api";
+    let isBackendOnline = false;
+
     const STORAGE_KEY_PUBLISHED = "lcs_published_courses_v2";
     const STORAGE_KEY_DRAFT = "lcs_draft_courses_v2";
     const STORAGE_KEY_ATTEMPTS = "lcs_admin_attempts_v2";
+
+    function updateBackendStatusUI(online) {
+      isBackendOnline = online;
+      const badge = document.getElementById('backend-status-badge');
+      const dot = document.getElementById('backend-status-dot');
+      const text = document.getElementById('backend-status-text');
+      if (!badge || !dot || !text) return;
+
+      if (online) {
+        badge.className = "self-end sm:self-center px-2.5 py-1 rounded-full text-[11px] font-black flex items-center gap-1.5 border transition-all bg-emerald-50 text-emerald-800 border-emerald-300 shadow-sm";
+        dot.className = "w-2 h-2 rounded-full bg-emerald-500";
+        text.innerText = "Online (Backend Connected)";
+        badge.title = "Connected to Express API (http://localhost:5050). Courses, drafts, and attempts sync live with backend persistence.";
+      } else {
+        badge.className = "self-end sm:self-center px-2.5 py-1 rounded-full text-[11px] font-black flex items-center gap-1.5 border transition-all bg-amber-50 text-amber-800 border-amber-300 shadow-sm";
+        dot.className = "w-2 h-2 rounded-full bg-amber-500";
+        text.innerText = "Offline (Local Fallback)";
+        badge.title = "Express API offline or running static. Running in seamless LocalStorage & IndexedDB offline fallback mode.";
+      }
+    }
+
+    async function checkBackendHealth() {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        const res = await fetch(`${API_BASE_URL}/health`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (res.ok) {
+          updateBackendStatusUI(true);
+          return true;
+        }
+      } catch (e) {
+        // Fallback
+      }
+      updateBackendStatusUI(false);
+      return false;
+    }
+
+    async function syncFromBackend() {
+      const online = await checkBackendHealth();
+      if (!online) return;
+
+      try {
+        // Fetch published courses from backend
+        const resPub = await fetch(`${API_BASE_URL}/v2/courses`);
+        if (resPub.ok) {
+          const json = await resPub.json();
+          if (json.success && json.data && json.data.length > 0) {
+            publishedDb = json.data;
+            saveToStorage(STORAGE_KEY_PUBLISHED, publishedDb);
+            restorePdfBlobs(publishedDb);
+          }
+        }
+
+        // Fetch draft courses from backend
+        const resDraft = await fetch(`${API_BASE_URL}/v2/courses/draft`);
+        if (resDraft.ok) {
+          const json = await resDraft.json();
+          if (json.success && json.data && json.data.length > 0) {
+            draftDb = json.data;
+            saveToStorage(STORAGE_KEY_DRAFT, draftDb);
+            restorePdfBlobs(draftDb);
+          }
+        }
+
+        // Fetch attempts for Admin Dashboard
+        const resAtt = await fetch(`${API_BASE_URL}/v2/attempts`);
+        if (resAtt.ok) {
+          const json = await resAtt.json();
+          if (json.success && json.data && json.data.length > 0) {
+            adminAttempts = json.data;
+            saveToStorage(STORAGE_KEY_ATTEMPTS, adminAttempts);
+            if (currentView === 'admin') renderAdminDashboard();
+          }
+        }
+
+        // Re-render views if current view requires fresh data
+        if (currentView === 'student') {
+          renderStudentCatalog();
+        } else if (currentView === 'author') {
+          initAuthorDesk();
+        }
+      } catch (err) {
+        console.warn("Backend sync notice:", err);
+      }
+    }
 
     function sanitizeForStorage(val) {
       return JSON.parse(JSON.stringify(val, (k, v) => {
@@ -5066,6 +5163,15 @@
       if (currentView === 'admin') {
         renderAdminDashboard();
       }
+
+      // Sync attempt to backend asynchronously
+      if (isBackendOnline) {
+        fetch(`${API_BASE_URL}/v2/attempts`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newAtt)
+        }).catch(err => console.warn("Failed to push attempt to backend:", err));
+      }
     }
 
     function onAdminFilterChange() {
@@ -5586,6 +5692,14 @@
     window.addEventListener('DOMContentLoaded', () => {
       // Default to student view on initial load
       switchView('student');
+
+      // Check backend health and sync courses & attempts
+      syncFromBackend();
+
+      // Periodic health check every 15s to react to backend starts/stops
+      setInterval(() => {
+        checkBackendHealth();
+      }, 15000);
     });
   </script>
 </body>

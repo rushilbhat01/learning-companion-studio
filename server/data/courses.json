@@ -1,0 +1,421 @@
+[
+  {
+    "id": "mod-1",
+    "title": "Module 1: Foundations of Neurodiversity & Strength-Based Mentorship",
+    "description": "Learn core strategies for mentoring children on the Autism Spectrum, ADHD, and sensory differences.",
+    "level": "Foundational",
+    "lxi": {
+      "questionId": "lxi-mod-1-q1",
+      "question": "Share a practical de-escalation technique you have used when a mentee shows early signs of sensory overload in a classroom.",
+      "submissions": [
+        {
+          "companionName": "Companion Ananya",
+          "timestamp": "Today, 10:14 AM",
+          "answer": "I immediately lower my vocal volume, dim direct overhead lights, and offer a weighted lap pad without demanding eye contact."
+        },
+        {
+          "companionName": "Companion Rahul",
+          "timestamp": "Today, 11:30 AM",
+          "answer": "I match their body positioning by sitting side-by-side on the floor and quietly introduce a 10-second processing pause before asking any follow-up question."
+        }
+      ]
+    },
+    "masterQuiz": [
+      {
+        "type": "mcq",
+        "question": "Master Assessment Q1: What is the core physiological difference between a sensory meltdown and a behavioral tantrum?",
+        "choices": [
+          "Meltdowns are deliberate acts of defiance seeking attention",
+          "Meltdowns stem from neurological involuntary sensory overload; tantrums are goal-oriented",
+          "Tantrums can be resolved with sensory rooms; meltdowns require strict disciplinary timeout",
+          "There is no functional distinction between tantrums and meltdowns"
+        ],
+        "correctIndex": 1,
+        "feedbacks": [
+          "Incorrect. Defiance implies willful intent, which does not define involuntary sensory meltdowns.",
+          "Correct! Sensory meltdowns result from central nervous system overload.",
+          "Incorrect. Meltdowns require calm co-regulation, not punishment.",
+          "Incorrect. Understanding the distinction is the cornerstone of inclusive mentorship."
+        ]
+      },
+      {
+        "type": "subjective",
+        "prompt": "Master Assessment Subjective: Outline a 3-step action plan if your mentee experiences sensory overload during a loud school assembly.",
+        "exemplar": "Author Exemplar Feedback: 1. Prevent escalation by guiding the student calmly to a quiet sensory space. 2. Remove sensory inputs (dim lights, offer noise-canceling headphones). 3. Provide a predictable calming routine without verbal demands until baseline arousal is restored."
+      }
+    ],
+    "submodules": [
+      {
+        "id": "sub-1-1",
+        "title": "Submodule 1.1: Understanding Neurodiversity & Strength-Based Mentoring",
+        "format": "video",
+        "videoSteps": [
+          {
+            "id": "vstep-1-1-1",
+            "format": "video",
+            "videoTitle": "Video Link 1: Core Principles of Strength-Based Mentoring",
+            "pdfTitle": "Neurodiversity & Strength-Based Mentoring Guide",
+            "title": "Video Link 1: Core Principles of Strength-Based Mentoring",
+            "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+            "transcript": "Neurodiversity recognizes that brain differences are natural human variations. Companions move away from a deficit model (fixing behavior) to a strength-based model.",
+            "inVideoCheckpoints": [
+              {
+                "id": "ivc-1-1-1",
+                "timeMin": 0,
+                "timeSec": 15,
+                "type": "mcq",
+                "question": "Mid-Video Reflection Checkpoint (00:15): What is the core focus when mentoring neurodivergent children?",
+                "choices": [
+                  "Building on unique strengths & providing sensory accommodations",
+                  "Enforcing strict behavioral compliance at all times",
+                  "Disallowing communication tools",
+                  "Overloading with loud verbal instructions"
+                ],
+                "correctIndex": 0,
+                "feedbacks": [
+                  "Correct! Strength-based focus builds safety and trust.",
+                  "Incorrect. Compliance-only approaches increase anxiety.",
+                  "Incorrect. Communication tools (AAC/PECS) are vital.",
+                  "Incorrect. Lower sensory input is key."
+                ],
+                "exemplar": "Author Exemplar Feedback: Focus on building rapport and respecting sensory needs."
+              }
+            ],
+            "mcqs": [
+              {
+                "question": "Video Link 1 Reflection: What is the primary goal of strength-based mentoring?",
+                "choices": [
+                  "Forcing the child to mimic neurotypical social behaviors at all times",
+                  "Building upon the child’s unique interests while providing sensory accommodations",
+                  "Keeping a rigid strict timeline without flexibility",
+                  "Preventing the child from using non-verbal communication aids"
+                ],
+                "correctIndex": 1,
+                "feedbacks": [
+                  "Incorrect. Forcing masking causes high anxiety.",
+                  "Correct! Strength-based mentoring fosters trust and respects individual sensory profiles.",
+                  "Incorrect. Rigid timelines increase overwhelm.",
+                  "Incorrect. Non-verbal communication tools should always be encouraged."
+                ]
+              }
+            ],
+            "subjectives": [
+              {
+                "prompt": "Video Link 1 Reflection Subjective: How would you modify your tone if a mentee shows signs of sensory overload?",
+                "exemplar": "Author Exemplar Feedback: Lower voice tone, reduce noise/bright lighting, pause task, offer a quiet break."
+              }
+            ]
+          },
+          {
+            "id": "vstep-1-1-2",
+            "format": "video",
+            "videoTitle": "Video Link 2: Processing Pauses & Non-Verbal Cues",
+            "pdfTitle": "Processing Pauses & Non-Verbal Cues Protocol",
+            "title": "Video Link 2: Processing Pauses & Non-Verbal Cues",
+            "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+            "transcript": "Learn how to adapt communication using 10-second processing pauses.",
+            "inVideoCheckpoints": [
+              {
+                "id": "ivc-1-1-2",
+                "timeMin": 0,
+                "timeSec": 10,
+                "type": "mcq",
+                "question": "Mid-Video Reflection Checkpoint (00:10): Why are processing pauses critical?",
+                "choices": [
+                  "They allow the child's nervous system time to integrate language",
+                  "They are used as a disciplinary timeout",
+                  "They force the companion to stop listening",
+                  "They only help when speaking louder"
+                ],
+                "correctIndex": 0,
+                "feedbacks": [
+                  "Correct! Processing pauses reduce cognitive load significantly.",
+                  "Incorrect. Pauses are therapeutic scaffolding, not timeout.",
+                  "Incorrect. Companions remain actively observant.",
+                  "Incorrect. Louder volume increases overload."
+                ],
+                "exemplar": "Author Exemplar Feedback: Processing pauses allow auditory processing without anxiety."
+              }
+            ],
+            "mcqs": [
+              {
+                "question": "Video Link 2 Reflection: What is the recommended pause duration after giving an instruction?",
+                "choices": [
+                  "0 seconds (repeat immediately)",
+                  "At least 5 to 10 seconds of calm silence",
+                  "30 minutes",
+                  "Only pause if the child starts crying"
+                ],
+                "correctIndex": 1,
+                "feedbacks": [
+                  "Incorrect. Immediate repetition restarts the auditory processing clock.",
+                  "Correct! 5–10 seconds gives neural circuits time to formulate a response.",
+                  "Incorrect. 30 minutes is excessive.",
+                  "Incorrect. Proactive pauses prevent tears."
+                ]
+              }
+            ],
+            "subjectives": []
+          }
+        ],
+        "lxt": {
+          "title": "LxT Extension Trajectory: Advanced Assistive Tech & Case Analysis",
+          "videoSteps": [
+            {
+              "id": "lxt-step-1",
+              "title": "LxT Video 1: Augmentative Communication Devices in the Classroom",
+              "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+              "transcript": "Advanced guide to PECS, high-tech AAC speech-generating devices, and visual schedules.",
+              "inVideoCheckpoints": [
+                {
+                  "id": "lxt-ivc-1",
+                  "timeMin": 0,
+                  "timeSec": 12,
+                  "type": "mcq",
+                  "question": "LxT In-Video Reflection (00:12): When should a companion introduce AAC tools?",
+                  "choices": [
+                    "Immediately to support communication without withholding verbal speech",
+                    "Only after the child passes a spelling test",
+                    "Only as a punishment for silence",
+                    "Never in mainstream classrooms"
+                  ],
+                  "correctIndex": 0,
+                  "feedbacks": [
+                    "Correct! AAC supports and often accelerates natural communication.",
+                    "Incorrect. AAC has zero prerequisite testing requirements.",
+                    "Incorrect. AAC is a fundamental communication right.",
+                    "Incorrect. AAC should be integrated everywhere."
+                  ],
+                  "exemplar": "Author Exemplar Feedback: AAC provides an immediate communication pathway."
+                }
+              ],
+              "mcqs": [
+                {
+                  "question": "LxT Reflection: What is a key indicator that an AAC communication device is working?",
+                  "choices": [
+                    "The mentee initiates spontaneous communication requests",
+                    "The device is kept in a locked drawer",
+                    "The mentee no longer needs adult support",
+                    "The device is only touched by the teacher"
+                  ],
+                  "correctIndex": 0,
+                  "feedbacks": [
+                    "Correct! Spontaneous initiation demonstrates functional communication.",
+                    "Incorrect. AAC must always be within physical reach.",
+                    "Incorrect. Mentorship remains essential.",
+                    "Incorrect. The child must have primary agency."
+                  ]
+                }
+              ],
+              "subjectives": []
+            }
+          ]
+        }
+      },
+      {
+        "id": "sub-1-2",
+        "title": "Submodule 1.2: Multi-Modal Reading Guide — De-escalation & Sensory Toolkits",
+        "format": "pdf",
+        "pdfDoc": {
+          "title": "Inclusive Classrooms De-escalation Protocol & Sensory Regulation Guide",
+          "fileName": "sample_deescalation_guide.pdf",
+          "fileSize": "124 KB",
+          "url": "https://raw.githubusercontent.com/rushilbhat01/learning-companion-studio/main/docs/sample_deescalation_guide.pdf",
+          "embeddedCheckpoints": [
+            {
+              "id": "pdf-cp-1",
+              "section": "Section 1: Recognizing Early Physiological Arousal",
+              "question": "PDF Checkpoint 1: Which of the following is an early physiological indicator of impending sensory overload?",
+              "choices": [
+                "Pupil dilation, rapid breathing, and repetitive tactile fidgeting",
+                "Deep calm abdominal breathing",
+                "Engaged cooperative peer play",
+                "Asking politely for more homework"
+              ],
+              "correctIndex": 0,
+              "feedbacks": [
+                "Correct! Recognizing subtle autonomic signs enables early de-escalation.",
+                "Incorrect. Deep breathing indicates a calm nervous system.",
+                "Incorrect. Cooperative play represents optimal baseline engagement.",
+                "Incorrect. Not an indicator of sensory overwhelm."
+              ],
+              "exemplar": "Author Exemplar Feedback: Autonomic signs (breathing rate, fidgeting, motor pacing) precede verbal distress."
+            },
+            {
+              "id": "pdf-cp-2",
+              "section": "Section 2: The 3-Step Low-Arousal Co-Regulation Protocol",
+              "question": "PDF Checkpoint 2: What is the first priority when initiating low-arousal de-escalation?",
+              "choices": [
+                "Demand an immediate verbal explanation of their misbehavior",
+                "Regulate your own vocal tone and minimize ambient sensory inputs",
+                "Call the principal and issue a formal written reprimand",
+                "Restrain the child in their chair"
+              ],
+              "correctIndex": 1,
+              "feedbacks": [
+                "Incorrect. Demanding explanations elevates cortisol and panic.",
+                "Correct! Adult co-regulation sets the emotional baseline for the child.",
+                "Incorrect. Escort and administrative threats escalate fight-or-flight.",
+                "Incorrect. Physical restraint is dangerous and prohibited."
+              ],
+              "exemplar": "Author Exemplar Feedback: Co-regulation precedes de-escalation. Your calm nervous system grounds the student."
+            }
+          ]
+        },
+        "videoSteps": [
+          {
+            "id": "vstep-sub1-2-pdf",
+            "format": "pdf",
+            "videoTitle": "De-escalation & Sensory Toolkit Video Lesson",
+            "pdfTitle": "Inclusive Classrooms De-escalation Protocol & Sensory Regulation Guide",
+            "title": "Inclusive Classrooms De-escalation Protocol & Sensory Regulation Guide",
+            "pdfFileName": "sample_deescalation_guide.pdf",
+            "pdfFileSize": "124 KB",
+            "pdfUrl": "https://raw.githubusercontent.com/rushilbhat01/learning-companion-studio/main/docs/sample_deescalation_guide.pdf",
+            "pdfCheckpoints": [
+              {
+                "id": "pdf-cp-1",
+                "section": "Section 1: Recognizing Early Physiological Arousal",
+                "question": "PDF Checkpoint 1: Which of the following is an early physiological indicator of impending sensory overload?",
+                "choices": [
+                  "Pupil dilation, rapid breathing, and repetitive tactile fidgeting",
+                  "Deep calm abdominal breathing",
+                  "Engaged cooperative peer play",
+                  "Asking politely for more homework"
+                ],
+                "correctIndex": 0,
+                "feedbacks": [
+                  "Correct! Recognizing subtle autonomic signs enables early de-escalation.",
+                  "Incorrect. Deep breathing indicates a calm nervous system.",
+                  "Incorrect. Cooperative play represents optimal baseline engagement.",
+                  "Incorrect. Not an indicator of sensory overwhelm."
+                ],
+                "exemplar": "Author Exemplar Feedback: Autonomic signs (breathing rate, fidgeting, motor pacing) precede verbal distress."
+              },
+              {
+                "id": "pdf-cp-2",
+                "section": "Section 2: The 3-Step Low-Arousal Co-Regulation Protocol",
+                "question": "PDF Checkpoint 2: What is the first priority when initiating low-arousal de-escalation?",
+                "choices": [
+                  "Demand an immediate verbal explanation of their misbehavior",
+                  "Regulate your own vocal tone and minimize ambient sensory inputs",
+                  "Call the principal and issue a formal written reprimand",
+                  "Restrain the child in their chair"
+                ],
+                "correctIndex": 1,
+                "feedbacks": [
+                  "Incorrect. Demanding explanations elevates cortisol and panic.",
+                  "Correct! Adult co-regulation sets the emotional baseline for the child.",
+                  "Incorrect. Escort and administrative threats escalate fight-or-flight.",
+                  "Incorrect. Physical restraint is dangerous and prohibited."
+                ],
+                "exemplar": "Author Exemplar Feedback: Co-regulation precedes de-escalation. Your calm nervous system grounds the student."
+              }
+            ],
+            "transcript": "Clinical protocol covering early physiological warnings of sensory meltdowns and trauma-informed de-escalation sequences."
+          }
+        ],
+        "mcqs": [
+          {
+            "question": "PDF Synthesis: What is the primary purpose of a sensory diet toolkit in a classroom?",
+            "choices": [
+              "To provide scheduled, proactive sensory inputs that maintain optimal nervous system regulation",
+              "To withhold food until the student completes tasks",
+              "To isolate the student from peers permanently",
+              "To replace academic learning with games"
+            ],
+            "correctIndex": 0,
+            "feedbacks": [
+              "Correct! Proactive sensory diets prevent arousal spikes before meltdowns occur.",
+              "Incorrect. Sensory diet refers to sensory inputs, not culinary food withholding.",
+              "Incorrect. Inclusion remains the goal.",
+              "Incorrect. Regulation supports academic readiness."
+            ]
+          }
+        ],
+        "subjectives": [
+          {
+            "prompt": "PDF Synthesis Reflection: Describe how you would customize a sensory break corner for a child sensitive to loud sounds and fluorescent flicker.",
+            "exemplar": "Author Exemplar Feedback: Use warm indirect desk lamps, acoustic noise-dampening panels or headphones, a beanbag chair facing away from foot traffic, and tactile resistance putty."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "mod-2",
+    "title": "Module 2: Behavioral Support & Calm Co-Regulation Techniques",
+    "description": "Master calm co-regulation, sensory regulation protocols, and collaborative problem solving for learning companions.",
+    "level": "Intermediate",
+    "lxi": {
+      "questionId": "lxi-mod-2-q1",
+      "question": "When a mentee refuses an activity due to anxiety, what is one non-punitive phrasing you use to scaffold participation?",
+      "submissions": [
+        {
+          "companionName": "Companion Tanya",
+          "timestamp": "Yesterday, 3:15 PM",
+          "answer": "I say: 'We can do the first problem together, and you can pick whether we use markers or the keyboard.'"
+        }
+      ]
+    },
+    "masterQuiz": [
+      {
+        "type": "mcq",
+        "question": "Module 2 Quiz Q1: Which statement best describes 'Co-Regulation'?",
+        "choices": [
+          "The adult using their own calm physiological state to guide the student back to safety",
+          "Giving two commands at once to keep the child busy",
+          "Leaving the child alone in an empty room without monitoring",
+          "Using louder voices to overpower the child"
+        ],
+        "correctIndex": 0,
+        "feedbacks": [
+          "Correct! Co-regulation is the neurological foundation for self-regulation.",
+          "Incorrect. Multiple commands cause auditory overwhelm.",
+          "Incorrect. Isolation triggers abandonment panic.",
+          "Incorrect. Louder voices escalate autonomic arousal."
+        ]
+      }
+    ],
+    "submodules": [
+      {
+        "id": "sub-2-1",
+        "title": "Submodule 2.1: Collaborative Problem Solving & Visual Schedules",
+        "format": "video",
+        "videoSteps": [
+          {
+            "id": "vstep-2-1-1",
+            "title": "Video Link 1: Transition Warnings & Visual Timers",
+            "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+            "transcript": "How to use countdown timers and 'First-Then' boards to make transitions predictable and stress-free.",
+            "inVideoCheckpoints": [
+              {
+                "id": "ivc-2-1-1",
+                "timeMin": 0,
+                "timeSec": 10,
+                "type": "mcq",
+                "question": "Mid-Video Reflection Checkpoint (00:10): What is the core function of a 'First-Then' visual schedule?",
+                "choices": [
+                  "It provides predictable visual clarity, reducing the cognitive anxiety of unexpected transitions",
+                  "It acts as a bribery mechanism",
+                  "It replaces the role of the teacher",
+                  "It must only be used in exams"
+                ],
+                "correctIndex": 0,
+                "feedbacks": [
+                  "Correct! Visual structures anchor predictability for neurodivergent minds.",
+                  "Incorrect. It is cognitive scaffolding, not bribery.",
+                  "Incorrect. It supports the learning companion's co-teaching.",
+                  "Incorrect. It applies across all daily routines."
+                ],
+                "exemplar": "Author Exemplar Feedback: Predictability lowers transition anxiety significantly."
+              }
+            ],
+            "mcqs": [],
+            "subjectives": []
+          }
+        ]
+      }
+    ]
+  }
+]
