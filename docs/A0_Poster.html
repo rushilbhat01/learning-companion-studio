@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Learning Companion Studio — A0 Landscape Conference Poster</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    @page {
+      size: 1189mm 841mm;
+      margin: 0;
+    }
+    html, body {
+      width: 1189mm;
+      height: 841mm;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #0f172a;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    .poster-container {
+      width: 1189mm;
+      height: 841mm;
+      padding: 16mm 20mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: radial-gradient(circle at 50% 0%, #134e4a 0%, #0f172a 65%);
+      color: #0f172a;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.98);
+      border: 2px solid rgba(226, 232, 240, 0.9);
+      border-radius: 20px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+    }
+  </style>
+</head>
+<body class="antialiased">
+
+  <div class="poster-container">
+
+    <!-- ==================== HEADER BANNER ==================== -->
+    <header class="w-full bg-slate-900/95 border-2 border-teal-500/40 rounded-3xl p-8 px-12 shadow-2xl flex items-center justify-between gap-8 backdrop-blur-md">
+      <div class="flex items-center gap-8">
+        <div class="h-28 w-28 rounded-3xl bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-white font-black text-5xl shadow-xl shadow-teal-500/30 flex-shrink-0">
+          LC
+        </div>
+        <div>
+          <div class="flex items-center gap-4">
+            <h1 class="text-6xl font-black text-white tracking-tight">LEARNING COMPANION STUDIO</h1>
+            <span class="px-4 py-1.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-400/40 text-xl font-black uppercase tracking-wider">v2.0 Full-Stack</span>
+          </div>
+          <p class="text-2xl font-bold text-teal-300 mt-2">
+            A Multi-Modal Training Platform & Pedagogical Diagnostics System for Neurodivergent Mentorship
+          </p>
+        </div>
+      </div>
+
+      <!-- Academic Metadata Block -->
+      <div class="text-right border-l-2 border-slate-700/80 pl-8 space-y-1">
+        <div class="text-2xl font-black text-white">Group 12 • Rushil Bhat & Aniruddha Shelke</div>
+        <div class="text-lg font-bold text-slate-300">Project Lead: <span class="text-teal-400 font-extrabold">Prof. Sridhar Iyer</span> • Content Lead: <span class="text-teal-400 font-extrabold">Farah</span></div>
+        <div class="text-base font-semibold text-slate-400">Client: InclusiveMinds Learning Collective (IMLC) • ET 617 Educational Application Development</div>
+      </div>
+    </header>
+
+
+    <!-- ==================== 4-COLUMN HORIZONTAL GRID ==================== -->
+    <main class="grid grid-cols-4 gap-7 flex-1 my-6 min-h-0">
+
+      <!-- ==================== COLUMN 1 ==================== -->
+      <div class="flex flex-col gap-6 h-full">
+        <div class="bg-teal-700 text-white p-4 px-6 rounded-2xl shadow-md flex items-center justify-between">
+          <span class="text-xl font-black uppercase tracking-wider">1. Problem & LCM Pedagogy</span>
+          <span class="text-2xl">🧠</span>
+        </div>
+
+        <!-- Problem Statement -->
+        <div class="glass-card p-6 space-y-3 flex-1 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xs font-black uppercase tracking-wider text-rose-600 bg-rose-50 border border-rose-200 px-3 py-1 rounded-lg">Critical Bottleneck</span>
+            </div>
+            <h3 class="text-2xl font-black text-slate-900 leading-tight">1-to-1 Mentorship Scaling Crisis</h3>
+            <p class="text-sm font-semibold text-slate-600 mt-2 leading-relaxed">
+              InclusiveMinds (IMLC) mentors children with Autism and ADHD through strengths-based plans. Only <strong>one fully qualified companion</strong> existed. Training new companions was 100% manual, slow, and unstandardized.
+            </p>
+          </div>
+          <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 space-y-1">
+            <div>⚠️ <strong>Preparation Overhead:</strong> Hours spent searching internet for activities.</div>
+            <div>⚠️ <strong>Cognitive Risk:</strong> Inconsistent handling of sensory overload meltdowns.</div>
+          </div>
+        </div>
+
+        <!-- 4 Pillars of LCM -->
+        <div class="glass-card p-6 space-y-3 flex-1">
+          <h3 class="text-2xl font-black text-slate-900 flex items-center justify-between">
+            <span>The 4 LCM Pillars</span>
+            <span class="text-xs font-black bg-teal-100 text-teal-800 px-2.5 py-1 rounded-lg uppercase">Pedagogy</span>
+          </h3>
+          <div class="space-y-2.5 text-xs font-bold text-slate-700">
+            <div class="p-3 bg-teal-50/70 border border-teal-200 rounded-xl">
+              <span class="text-teal-900 font-black text-sm block mb-0.5">🎬 LED (Learning by Dialogue/Exposition)</span>
+              Video simulations with synchronized, non-skippable reflection pause stops.
+            </div>
+            <div class="p-3 bg-indigo-50/70 border border-indigo-200 rounded-xl">
+              <span class="text-indigo-900 font-black text-sm block mb-0.5">📄 LBD (Learning by Doing)</span>
+              Sequential PDF milestone reading guides with anti-spoiler reflection questions.
+            </div>
+            <div class="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl">
+              <span class="text-emerald-900 font-black text-sm block mb-0.5">🚀 LxT (Extension Trajectory)</span>
+              Advanced multi-video clinical case studies unlocked only upon lesson completion.
+            </div>
+            <div class="p-3 bg-blue-50/70 border border-blue-200 rounded-xl">
+              <span class="text-blue-900 font-black text-sm block mb-0.5">💬 LxI (Interactive Peer Space)</span>
+              Module-scoped discussion forum with anti-stale prompt answer protection.
+            </div>
+          </div>
+        </div>
+
+        <!-- Personas -->
+        <div class="glass-card p-5 space-y-2">
+          <h4 class="text-sm font-black uppercase text-slate-400">Target Stakeholder Personas</h4>
+          <div class="grid grid-cols-3 gap-2 text-center text-[11px] font-black text-slate-800">
+            <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">🎓 Trainee LCs</div>
+            <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">✏️ Authors</div>
+            <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">🛡️ Supervisors</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== COLUMN 2 ==================== -->
+      <div class="flex flex-col gap-6 h-full">
+        <div class="bg-indigo-700 text-white p-4 px-6 rounded-2xl shadow-md flex items-center justify-between">
+          <span class="text-xl font-black uppercase tracking-wider">2. Architecture & Resilience</span>
+          <span class="text-2xl">⚙️</span>
+        </div>
+
+        <!-- Dual Engine -->
+        <div class="glass-card p-6 space-y-4 flex-1">
+          <h3 class="text-2xl font-black text-slate-900">Hybrid Dual-Engine Architecture</h3>
+          <p class="text-xs font-semibold text-slate-600 leading-relaxed">
+            Engineered with a fail-safe hybrid pipeline that bridges full-stack cloud capabilities with offline local continuity during grading:
+          </p>
+          
+          <!-- Block Diagram -->
+          <div class="space-y-2 text-center font-black text-xs">
+            <div class="p-3 bg-teal-50 border-2 border-teal-500 rounded-xl text-teal-900 shadow-sm">
+              🖥️ Frontend SPA (HTML5 • TailwindCSS • Vite Bundler)
+            </div>
+            <div class="text-slate-400 font-black text-lg">↓ ↑ REST & Telemetry Sync</div>
+            <div class="p-3 bg-indigo-50 border-2 border-indigo-500 rounded-xl text-indigo-900 shadow-sm">
+              ⚙️ Full-Stack Backend API (Express.js :5050 • JWT Auth)
+            </div>
+            <div class="text-slate-400 font-black text-lg">↓ ↑ Fail-Safe Persistence</div>
+            <div class="grid grid-cols-2 gap-2 text-[11px]">
+              <div class="p-2.5 bg-emerald-50 border border-emerald-400 rounded-xl text-emerald-900">
+                🍃 MongoDB Atlas
+              </div>
+              <div class="p-2.5 bg-amber-50 border border-amber-400 rounded-xl text-amber-900">
+                💾 File-Backed Fallback
+              </div>
+            </div>
+          </div>
+
+          <!-- Status Indicator Card -->
+          <div class="p-3.5 bg-slate-900 text-white rounded-2xl border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between text-xs font-black">
+              <span class="text-slate-400 uppercase">Live Dynamic Status Pill</span>
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-black text-[10px]">🟢 Online Mode</span>
+            </div>
+            <p class="text-[11px] text-slate-300 font-medium">
+              If MongoDB or server drops, the UI transitions to 🟡 Offline LocalStorage mode with <strong>zero crashes and 100% data retention</strong>.
+            </p>
+          </div>
+        </div>
+
+        <!-- IndexedDB & Authoring -->
+        <div class="glass-card p-6 space-y-3 flex-1">
+          <h3 class="text-xl font-black text-slate-900">IndexedDB PDF Vault & Draft Isolation</h3>
+          <div class="space-y-3 text-xs font-semibold text-slate-700">
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+              <span class="font-black text-slate-900 block text-sm">🗄️ IndexedDB Vault (lcs_pdf_vault)</span>
+              Stores multi-page clinical protocols directly in client binary storage, completely bypassing the 5MB LocalStorage quota.
+            </div>
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+              <span class="font-black text-slate-900 block text-sm">🔄 Draft vs. Live Publishing Isolation</span>
+              Authors modify drafts in <code class="text-teal-700 font-bold">draftDb</code> without interrupting active companion training sessions until explicit one-click publishing to <code class="text-indigo-700 font-bold">publishedDb</code>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== COLUMN 3 ==================== -->
+      <div class="flex flex-col gap-6 h-full">
+        <div class="bg-emerald-700 text-white p-4 px-6 rounded-2xl shadow-md flex items-center justify-between">
+          <span class="text-xl font-black uppercase tracking-wider">3. Interactive Delivery</span>
+          <span class="text-2xl">🎯</span>
+        </div>
+
+        <!-- Video Integration -->
+        <div class="glass-card p-6 space-y-3 flex-1">
+          <div class="flex items-center justify-between">
+            <h3 class="text-2xl font-black text-slate-900">Universal Video Engine</h3>
+            <span class="text-xs font-black bg-rose-100 text-rose-800 px-2 py-0.5 rounded">YouTube API</span>
+          </div>
+          <p class="text-xs font-semibold text-slate-600 leading-relaxed">
+            Full-featured media layer supporting both MP4 video streams and raw YouTube links with automated ID extraction.
+          </p>
+          <div class="p-3.5 bg-amber-50/70 border border-amber-300 rounded-xl space-y-1.5 text-xs font-bold text-amber-950">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+              <span class="font-black">Non-Skippable In-Video Checkpoint Pause</span>
+            </div>
+            <p class="text-[11px] font-medium text-amber-900">
+              Continuous 500ms timestamp polling automatically forces pause at reflection intervals (e.g. 00:15). Playback resumes only upon submitting a valid intervention.
+            </p>
+          </div>
+        </div>
+
+        <!-- Gated PDF Milestones -->
+        <div class="glass-card p-6 space-y-3 flex-1">
+          <div class="flex items-center justify-between">
+            <h3 class="text-2xl font-black text-slate-900">Gated PDF Reading Stops</h3>
+            <span class="text-xs font-black bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">Anti-Spoiler</span>
+          </div>
+          <p class="text-xs font-semibold text-slate-600 leading-relaxed">
+            Checkpoints are not thrown out all at once. Trainees advance through reading milestones page-by-page.
+          </p>
+          <!-- Stepper Visual -->
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+            <div class="flex justify-between text-[11px] font-black text-slate-500">
+              <span>Milestone 1</span>
+              <span>Milestone 2</span>
+              <span>Milestone 3</span>
+            </div>
+            <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden flex">
+              <div class="bg-emerald-500 h-full w-1/3"></div>
+              <div class="bg-indigo-600 h-full w-1/3"></div>
+              <div class="bg-slate-300 h-full w-1/3"></div>
+            </div>
+            <div class="text-[11px] font-bold text-indigo-900 text-center">
+              ✓ Page 1 Read → ❓ Checkpoint Unlocked → 🔒 Next Milestone
+            </div>
+          </div>
+        </div>
+
+        <!-- Strict Gating -->
+        <div class="glass-card p-5 space-y-2 border-2 border-emerald-500/50">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">🔒</span>
+            <h4 class="text-lg font-black text-slate-900">Strict Master Quiz Gating</h4>
+          </div>
+          <p class="text-xs font-semibold text-slate-600">
+            Certification assessments stay locked until <strong>100% of submodules, videos, PDFs, and reflections</strong> are completed.
+          </p>
+        </div>
+      </div>
+
+      <!-- ==================== COLUMN 4 ==================== -->
+      <div class="flex flex-col gap-6 h-full">
+        <div class="bg-slate-900 text-white p-4 px-6 rounded-2xl shadow-md flex items-center justify-between">
+          <span class="text-xl font-black uppercase tracking-wider">4. Analytics & Live Demo</span>
+          <span class="text-2xl">📊</span>
+        </div>
+
+        <!-- Pedagogical Diagnostics -->
+        <div class="glass-card p-6 space-y-3 flex-1">
+          <h3 class="text-2xl font-black text-slate-900">Pedagogical Friction Metrics</h3>
+          <p class="text-xs font-semibold text-slate-600 leading-relaxed">
+            Replaced uninformative vanity clickstream counts with authentic pedagogical diagnostic indicators:
+          </p>
+          <div class="grid grid-cols-2 gap-2 text-center">
+            <div class="p-3 bg-teal-50 border border-teal-200 rounded-xl">
+              <span class="text-2xl font-black text-teal-800 block">3.2</span>
+              <span class="text-[10px] font-black uppercase text-teal-600">Attempts-to-Mastery</span>
+            </div>
+            <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl">
+              <span class="text-2xl font-black text-rose-800 block">5 Mistakes</span>
+              <span class="text-[10px] font-black uppercase text-rose-600">Friction Hotspots</span>
+            </div>
+            <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-xl">
+              <span class="text-2xl font-black text-indigo-800 block">85%</span>
+              <span class="text-[10px] font-black uppercase text-indigo-600">First-Try Pass Rate</span>
+            </div>
+            <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+              <span class="text-2xl font-black text-emerald-800 block">100%</span>
+              <span class="text-[10px] font-black uppercase text-emerald-600">Master Exam Score</span>
+            </div>
+          </div>
+          <p class="text-[11px] font-bold text-slate-500">
+            Inspects historical choice progression trails (e.g. Try 1: Incorrect → Try 2: Correct).
+          </p>
+        </div>
+
+        <!-- Mobile-First UX -->
+        <div class="glass-card p-5 space-y-2">
+          <h4 class="text-sm font-black uppercase text-slate-400">Universal Mobile Experience</h4>
+          <p class="text-xs font-semibold text-slate-700 leading-snug">
+            Responsive bottom slide-up sheets for touch checkpoint modals with zero horizontal viewport shift.
+          </p>
+        </div>
+
+        <!-- Live Deployment & QR Code -->
+        <div class="glass-card p-6 text-center space-y-3 border-2 border-teal-500 bg-gradient-to-b from-white to-teal-50/50">
+          <div class="flex items-center justify-center gap-6">
+            <!-- Scannable High-Res QR Code -->
+            <div class="p-2 bg-white rounded-2xl border-2 border-slate-800 shadow-md">
+              <img src="qr_code.png" alt="Scan QR Code" class="w-28 h-28 object-contain">
+            </div>
+            <div class="text-left space-y-1">
+              <span class="text-xs font-black uppercase text-teal-700 tracking-wider">Live Cloud App</span>
+              <h4 class="text-base font-black text-slate-900 leading-tight">Scan to Test on Mobile</h4>
+              <p class="text-[11px] font-bold text-slate-500">Instant access to training portal</p>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-200 text-xs font-bold text-slate-700 space-y-1 text-left">
+            <div>🌐 <strong>Live Cloud URL:</strong> <a href="https://learning-companion-studio.vercel.app" class="text-teal-700 underline font-extrabold">learning-companion-studio.vercel.app</a></div>
+            <div>📂 <strong>Academic Repo:</strong> <span class="text-slate-900 font-mono text-[11px]">github.com/EAD-Labs/Group-12_2026</span></div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+
+    <!-- ==================== FOOTER BAR ==================== -->
+    <footer class="w-full bg-slate-900/95 border-2 border-teal-500/40 rounded-3xl p-5 px-10 shadow-2xl flex items-center justify-between text-white text-base font-bold">
+      <div class="flex items-center gap-3">
+        <span class="text-teal-400 font-black uppercase tracking-wider text-sm">Tech Stack:</span>
+        <div class="flex items-center gap-2 text-sm font-black text-slate-300">
+          <span class="px-3 py-1 rounded-xl bg-slate-800 border border-slate-700">Node.js</span>
+          <span class="px-3 py-1 rounded-xl bg-slate-800 border border-slate-700">Express.js</span>
+          <span class="px-3 py-1 rounded-xl bg-slate-800 border border-slate-700">MongoDB Atlas</span>
+          <span class="px-3 py-1 rounded-xl bg-slate-800 border border-slate-700">TailwindCSS</span>
+          <span class="px-3 py-1 rounded-xl bg-slate-800 border border-slate-700">IndexedDB</span>
+          <span class="px-3 py-1 rounded-xl bg-slate-800 border border-slate-700">YouTube IFrame API</span>
+          <span class="px-3 py-1 rounded-xl bg-slate-800 border border-slate-700">Vercel</span>
+        </div>
+      </div>
+
+      <div class="text-slate-400 text-sm">
+        Educational Technology Department, <span class="text-white font-extrabold">IIT Bombay</span> & <span class="text-white font-extrabold">InclusiveMinds Learning Collective</span>
+      </div>
+    </footer>
+
+  </div>
+
+</body>
+</html>
