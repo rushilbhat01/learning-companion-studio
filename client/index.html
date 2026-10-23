@@ -772,42 +772,6 @@
                 </div>
               </div>
 
-              <!-- ========================================== -->
-              <!-- COMPANION LIVE CLINICAL & SCAFFOLDING NOTES -->
-              <!-- ========================================== -->
-              <div id="companion-notes-panel" class="p-4 sm:p-5 bg-gradient-to-br from-slate-900 to-indigo-950 text-white rounded-2xl border border-indigo-500/30 shadow-lg space-y-3">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-2.5">
-                  <div class="flex items-center gap-2">
-                    <span class="text-xl">📝</span>
-                    <div>
-                      <h4 class="text-xs sm:text-sm font-black text-white tracking-wide">Companion Scaffolding & Clinical Notes</h4>
-                      <p class="text-[10px] text-indigo-200">Take timestamped observations while watching video or reading guides to document classroom interventions.</p>
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-2 self-start sm:self-auto">
-                    <button type="button" onclick="tagCurrentMediaContextInNotes()" class="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all shadow-sm">
-                      <span id="btn-tag-context-icon">⏱️</span> <span id="btn-tag-context-label">Tag Current Time</span>
-                    </button>
-                    <button type="button" onclick="exportCompanionNotes()" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl text-xs font-bold flex items-center gap-1 transition-all">
-                      <span>📥</span> <span>Copy / Export</span>
-                    </button>
-                    <span id="companion-notes-save-status" class="text-[11px] text-emerald-400 font-bold hidden sm:inline-flex items-center gap-1">✓ Saved</span>
-                  </div>
-                </div>
-
-                <!-- Quick Clinical Strategy Cue Chips -->
-                <div class="flex flex-wrap items-center gap-1.5 text-[11px] font-bold">
-                  <span class="text-indigo-300 text-[10px] uppercase tracking-wider font-extrabold mr-1">Quick Tags:</span>
-                  <button type="button" onclick="insertNoteTag('⚡ Sensory Trigger: ')" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-indigo-100 border border-white/15 transition-all">+ Sensory Trigger</button>
-                  <button type="button" onclick="insertNoteTag('🌿 Low-Arousal Co-Regulation: ')" class="px-2.5 py-1 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 text-teal-200 border border-teal-500/30 transition-all">+ Co-Regulation</button>
-                  <button type="button" onclick="insertNoteTag('📋 IEP Accommodation Idea: ')" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 transition-all">+ IEP Accommodation</button>
-                  <button type="button" onclick="insertNoteTag('🎯 Behavioral Win / Progress: ')" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-500/30 transition-all">+ Win / Progress</button>
-                </div>
-
-                <!-- Notes Textarea -->
-                <textarea id="companion-live-notes-area" rows="3" oninput="saveCompanionNotes(this.value)" placeholder="Type clinical observations or click '+ Quick Tags' / '⏱️ Tag Current Time' to anchor notes to video timestamps and PDF pages..." class="w-full bg-slate-950/80 rounded-xl border border-indigo-400/30 p-3 text-xs sm:text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 font-mono leading-relaxed resize-y"></textarea>
-              </div>
-
               <!-- Lecture / Reading Notes -->
               <div class="pt-4 border-t border-slate-100">
                 <h4 class="text-xs font-extrabold uppercase text-slate-400 mb-1">Lesson & Lecture Notes</h4>
@@ -5179,7 +5143,6 @@
 
       renderSubmoduleReflections(currentStep, sub);
       updateLxTCardStatus(sub);
-      renderCompanionNotesWorkbench(currentStep, sub, isCurrentStepPdf);
     }
 
     function changeVideoStep(idx) {
@@ -5525,116 +5488,6 @@
         showToast(`🎉 All reading checkpoints completed! Final reflections unlocked.`, 'emerald');
         renderStudentPDFView(currentStep);
       }
-    }
-
-    // =========================================================================
-    // COMPANION LIVE CLINICAL & SCAFFOLDING NOTES WORKBENCH
-    // =========================================================================
-    function renderCompanionNotesWorkbench(currentStep, sub, isPdf) {
-      const notesPanel = document.getElementById('companion-notes-panel');
-      if (!notesPanel || !sub) return;
-
-      const tagIcon = document.getElementById('btn-tag-context-icon');
-      const tagLabel = document.getElementById('btn-tag-context-label');
-      const notesArea = document.getElementById('companion-live-notes-area');
-
-      if (isPdf) {
-        if (tagIcon) tagIcon.innerText = '📄';
-        if (tagLabel) tagLabel.innerText = 'Tag Reading Guide';
-      } else {
-        if (tagIcon) tagIcon.innerText = '⏱️';
-        if (tagLabel) tagLabel.innerText = 'Tag Video Time';
-      }
-
-      if (notesArea) {
-        const saved = localStorage.getItem(`lcs_notes_${sub.id}`) || '';
-        notesArea.value = saved;
-      }
-    }
-
-    function saveCompanionNotes(text) {
-      if (!selectedSubmodule) return;
-      localStorage.setItem(`lcs_notes_${selectedSubmodule.id}`, text);
-      const status = document.getElementById('companion-notes-save-status');
-      if (status) {
-        status.classList.remove('hidden');
-        status.innerText = '✓ Saved';
-      }
-    }
-
-    function tagCurrentMediaContextInNotes() {
-      if (!selectedSubmodule) return;
-      const notesArea = document.getElementById('companion-live-notes-area');
-      if (!notesArea) return;
-
-      const steps = selectedSubmodule.videoSteps || [];
-      const currentStep = steps[activeVideoStepIndex] || selectedSubmodule;
-      const isPdf = currentStep && (currentStep.format === 'pdf' || (!currentStep.format && !currentStep.videoUrl && currentStep.pdfUrl));
-
-      let tag = '';
-      if (isPdf) {
-        tag = `\n[Reading Guide: ${currentStep.title || 'PDF Protocol'}] `;
-      } else {
-        let seconds = 0;
-        if (activeYTPlayers['video-player-container'] && typeof activeYTPlayers['video-player-container'].getCurrentTime === 'function') {
-          seconds = Math.floor(activeYTPlayers['video-player-container'].getCurrentTime() || 0);
-        } else {
-          const vid = document.querySelector('#video-player-container video');
-          if (vid) seconds = Math.floor(vid.currentTime || 0);
-        }
-        const m = String(Math.floor(seconds / 60)).padStart(2, '0');
-        const s = String(seconds % 60).padStart(2, '0');
-        tag = `\n[${m}:${s}] `;
-      }
-
-      const start = notesArea.selectionStart || notesArea.value.length;
-      const end = notesArea.selectionEnd || notesArea.value.length;
-      const val = notesArea.value;
-      notesArea.value = val.substring(0, start) + tag + val.substring(end);
-      notesArea.focus();
-      notesArea.setSelectionRange(start + tag.length, start + tag.length);
-      saveCompanionNotes(notesArea.value);
-      showToast(`Tagged ${tag.trim()} in notes!`, 'indigo');
-    }
-
-    function insertNoteTag(tagText) {
-      const notesArea = document.getElementById('companion-live-notes-area');
-      if (!notesArea) return;
-      const start = notesArea.selectionStart || notesArea.value.length;
-      const end = notesArea.selectionEnd || notesArea.value.length;
-      const val = notesArea.value;
-      const insert = (val.length > 0 && !val.endsWith('\n') ? '\n' : '') + tagText;
-      notesArea.value = val.substring(0, start) + insert + val.substring(end);
-      notesArea.focus();
-      notesArea.setSelectionRange(start + insert.length, start + insert.length);
-      saveCompanionNotes(notesArea.value);
-    }
-
-    function exportCompanionNotes() {
-      const notesArea = document.getElementById('companion-live-notes-area');
-      const val = notesArea ? notesArea.value.trim() : '';
-      if (!val) {
-        showToast('Notes are empty. Type some observations first!', 'amber');
-        return;
-      }
-      const subTitle = selectedSubmodule ? selectedSubmodule.title : 'Module Notes';
-      const compName = currentUser ? currentUser.name : 'Learning Companion';
-      const formatted = `========================================================\nLEARNING COMPANION STUDIO - CLINICAL & SCAFFOLDING NOTES\n========================================================\nCompanion: ${compName}\nSubmodule: ${subTitle}\nDate: ${new Date().toLocaleString()}\n--------------------------------------------------------\n\n${val}\n\n========================================================\nExported from Learning Companion Studio (v2.0)\n========================================================`;
-
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(formatted).catch(() => {});
-      }
-
-      const blob = new Blob([formatted], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `companion_notes_${(selectedSubmodule?.id || 'lesson')}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showToast('📋 Clinical notes copied to clipboard & downloaded!', 'emerald');
     }
 
     function unlockPDFReflections() {
