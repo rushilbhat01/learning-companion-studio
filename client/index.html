@@ -742,42 +742,20 @@
                     <span>For the best mobile reading experience, tap <strong>Open / Download PDF</strong> above to view full-screen in your phone's reader.</span>
                   </div>
 
-                  <!-- Interactive PDF Page Stepper Bar -->
-                  <div id="pdf-page-navigation-bar" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-white rounded-2xl border-2 border-indigo-200 shadow-sm">
-                    <div class="flex items-center gap-2">
-                      <button id="pdf-btn-prev-page" type="button" onclick="navigatePdfPage(-1)" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 rounded-xl text-xs font-black transition disabled:opacity-40 disabled:cursor-not-allowed">
-                        ◀ Prev Page
-                      </button>
-                      <div class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-black flex items-center gap-1.5 shadow-sm">
-                        <span>📄 Page</span>
-                        <span id="pdf-nav-current-page" class="font-black text-amber-300">1</span>
-                        <span class="text-indigo-200">/</span>
-                        <span id="pdf-nav-total-pages" class="text-indigo-100">2</span>
-                      </div>
-                      <button id="pdf-btn-next-page" type="button" onclick="navigatePdfPage(1)" class="px-3 py-1.5 bg-indigo-700 hover:bg-indigo-600 text-white rounded-xl text-xs font-black transition shadow-sm disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1">
-                        <span>Next Page</span> <span>▶</span>
-                      </button>
-                    </div>
-                    <div id="pdf-page-indicator-pills" class="flex flex-wrap items-center gap-1.5"></div>
-                  </div>
-
-                  <!-- PDF Document Reader Frame with In-PDF Checkpoint Modal Overlay -->
-                  <div class="relative w-full h-[450px] sm:h-[550px] rounded-2xl overflow-hidden border border-indigo-200 bg-slate-100 shadow-inner">
+                  <!-- PDF Document Reader Frame -->
+                  <div class="relative w-full h-96 sm:h-[500px] rounded-2xl overflow-hidden border border-indigo-200 bg-slate-100 shadow-inner">
                     <object id="pdf-embed-object" data="" type="application/pdf" class="w-full h-full">
                       <iframe id="pdf-embed-frame" src="" class="w-full h-full border-0"></iframe>
                     </object>
-
-                    <!-- IN-PDF UNSKIPPABLE CHECKPOINT OVERLAY MODAL -->
-                    <div id="in-pdf-checkpoint-modal" class="hidden absolute inset-0 z-50 bg-slate-950/95 p-4 sm:p-6 flex flex-col justify-between text-white border-2 border-indigo-500/50 shadow-2xl overflow-y-auto backdrop-blur-md rounded-2xl"></div>
                   </div>
 
                   <!-- PDF READING CHECKPOINTS CONTAINER -->
                   <div class="space-y-3 pt-2">
                     <div class="flex items-center justify-between">
                       <span class="text-xs font-black uppercase text-indigo-900 flex items-center gap-1.5">
-                        <span>⏱️</span> <span>Page Reading Checkpoints & Comprehension Gates</span>
+                        <span>⏱️</span> <span>Embedded PDF Reading Checkpoints</span>
                       </span>
-                      <span class="text-[11px] font-bold text-indigo-700">Answer checkpoints to unlock next pages</span>
+                      <span class="text-[11px] font-bold text-indigo-700">Answer checkpoints to complete reading</span>
                     </div>
                     <div id="pdf-checkpoints-list" class="space-y-4"></div>
                   </div>
@@ -1556,9 +1534,8 @@
               embeddedCheckpoints: [
                 {
                   id: "pdf-cp-1",
-                  pageNumber: 1,
-                  section: "Page 1: Recognizing Early Physiological Arousal",
-                  question: "Page 1 Checkpoint: Which of the following is an early physiological indicator of impending sensory overload?",
+                  section: "Section 1: Recognizing Early Physiological Arousal",
+                  question: "PDF Checkpoint 1: Which of the following is an early physiological indicator of impending sensory overload?",
                   choices: [
                     "Pupil dilation, rapid breathing, and repetitive tactile fidgeting",
                     "Deep calm abdominal breathing",
@@ -1576,9 +1553,8 @@
                 },
                 {
                   id: "pdf-cp-2",
-                  pageNumber: 2,
-                  section: "Page 2: The 3-Step Low-Arousal Co-Regulation Protocol",
-                  question: "Page 2 Checkpoint: What is the first priority when initiating low-arousal de-escalation?",
+                  section: "Section 2: The 3-Step Low-Arousal Co-Regulation Protocol",
+                  question: "PDF Checkpoint 2: What is the first priority when initiating low-arousal de-escalation?",
                   choices: [
                     "Demand an immediate verbal explanation of their misbehavior",
                     "Regulate your own vocal tone and minimize ambient sensory inputs",
@@ -1609,9 +1585,8 @@
                 pdfCheckpoints: [
                   {
                     id: "pdf-cp-1",
-                    pageNumber: 1,
-                    section: "Page 1: Recognizing Early Physiological Arousal",
-                    question: "Page 1 Checkpoint: Which of the following is an early physiological indicator of impending sensory overload?",
+                    section: "Section 1: Recognizing Early Physiological Arousal",
+                    question: "PDF Checkpoint 1: Which of the following is an early physiological indicator of impending sensory overload?",
                     choices: [
                       "Pupil dilation, rapid breathing, and repetitive tactile fidgeting",
                       "Deep calm abdominal breathing",
@@ -1629,9 +1604,8 @@
                   },
                   {
                     id: "pdf-cp-2",
-                    pageNumber: 2,
-                    section: "Page 2: The 3-Step Low-Arousal Co-Regulation Protocol",
-                    question: "Page 2 Checkpoint: What is the first priority when initiating low-arousal de-escalation?",
+                    section: "Section 2: The 3-Step Low-Arousal Co-Regulation Protocol",
+                    question: "PDF Checkpoint 2: What is the first priority when initiating low-arousal de-escalation?",
                     choices: [
                       "Demand an immediate verbal explanation of their misbehavior",
                       "Regulate your own vocal tone and minimize ambient sensory inputs",
@@ -4470,15 +4444,9 @@
                             <span class="text-[11px] font-black uppercase text-indigo-800">Reading Checkpoint #${pIdx + 1}</span>
                             <button type="button" onclick="deletePDFCheckpoint(${vIdx}, ${pIdx})" class="text-xs font-bold text-rose-500 hover:underline">Delete</button>
                           </div>
-                          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                            <div class="sm:col-span-2">
-                              <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Target Reading Section / Title</label>
-                              <input type="text" value="${pcp.section || ''}" placeholder="e.g. Section 1: Sensory Indicators" oninput="selectedSubmodule.videoSteps[${vIdx}].pdfCheckpoints[${pIdx}].section = this.value; markDraftDirty()" class="w-full rounded-lg border border-slate-200 px-3 py-1 text-xs font-bold" />
-                            </div>
-                            <div>
-                              <label class="block text-[10px] font-black uppercase text-indigo-700 mb-1">📄 Trigger on Page #</label>
-                              <input type="number" min="1" max="100" value="${pcp.pageNumber || (pIdx + 1)}" oninput="selectedSubmodule.videoSteps[${vIdx}].pdfCheckpoints[${pIdx}].pageNumber = parseInt(this.value) || 1; markDraftDirty()" class="w-full rounded-lg border border-indigo-200 bg-indigo-50/50 px-3 py-1 text-xs font-black text-indigo-900" />
-                            </div>
+                          <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Target Reading Section / Milestone</label>
+                            <input type="text" value="${pcp.section || ''}" placeholder="e.g. Section 1: Sensory Indicators" oninput="selectedSubmodule.videoSteps[${vIdx}].pdfCheckpoints[${pIdx}].section = this.value; markDraftDirty()" class="w-full rounded-lg border border-slate-200 px-3 py-1 text-xs font-bold" />
                           </div>
                           <div>
                             <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Checkpoint Question</label>
@@ -4552,9 +4520,8 @@
       const num = step.pdfCheckpoints.length + 1;
       step.pdfCheckpoints.push({
         id: `pdf-cp-${Date.now()}-${num}`,
-        pageNumber: num,
-        section: `Page ${num}: Core Protocol Section`,
-        question: `Page ${num} Reading Checkpoint: Key Strategy`,
+        section: `Section ${num}: Therapeutic Application`,
+        question: `PDF Reading Checkpoint #${num}: Key Strategy`,
         choices: ["Option A: Calm low-arousal approach", "Option B: Forced eye contact", "Option C: Rapid demands", "Option D: Loud alarms"],
         correctIndex: 0,
         feedbacks: ["Correct! Low-arousal approaches are standard of care.", "Incorrect.", "Incorrect.", "Incorrect."],
@@ -5222,11 +5189,9 @@
     }
 
     // =========================================================================
-    // MULTI-MODAL PDF DOCUMENT VIEWER & IN-PAGE CHECKPOINTS (DELIVERABLE #4)
+    // MULTI-MODAL PDF DOCUMENT VIEWER & EMBEDDED CHECKPOINTS (DELIVERABLE #4)
     // =========================================================================
     let activePdfMilestoneIndexMap = {}; // submoduleId -> number (0-indexed current milestone)
-    let currentPdfPageMap = {}; // submoduleId -> number (1-indexed current page)
-    let currentActiveInPdfCheckpoint = null;
 
     function renderStudentPDFView(step) {
       const titleEl = document.getElementById('pdf-doc-title');
@@ -5234,7 +5199,6 @@
       const embedFrame = document.getElementById('pdf-embed-frame');
       const embedObj = document.getElementById('pdf-embed-object');
       const checkpointsList = document.getElementById('pdf-checkpoints-list');
-      const subId = selectedSubmodule ? selectedSubmodule.id : 'sub-1-2';
 
       // Hydrate from blob cache if key exists
       if (step.pdfStorageKey && pdfBlobUrlCache[step.pdfStorageKey]) {
@@ -5251,405 +5215,316 @@
         downloadBtn.href = pdfUrl;
         downloadBtn.download = fileName;
       }
+      if (embedFrame) embedFrame.src = pdfUrl + "#toolbar=0";
+      if (embedObj) embedObj.data = pdfUrl + "#toolbar=0";
 
-      const checkpoints = step.pdfCheckpoints || step.embeddedCheckpoints || [];
-      const totalPages = step.pdfTotalPages || Math.max(2, ...checkpoints.map(cp => cp.pageNumber || 1));
-      let curPage = currentPdfPageMap[subId] || 1;
-      curPage = Math.max(1, Math.min(curPage, totalPages));
-      currentPdfPageMap[subId] = curPage;
+      const checkpoints = step.pdfCheckpoints || [];
+      if (!checkpointsList) return;
 
-      // Update embed URL to target current page
-      const pageTargetUrl = pdfUrl + "#page=" + curPage + "&toolbar=0&navpanes=0";
-      if (embedFrame) embedFrame.src = pageTargetUrl;
-      if (embedObj) embedObj.data = pageTargetUrl;
-
-      // Update Top Page Navigation Bar
-      const navCurPageEl = document.getElementById('pdf-nav-current-page');
-      const navTotalPagesEl = document.getElementById('pdf-nav-total-pages');
-      const prevBtn = document.getElementById('pdf-btn-prev-page');
-      const nextBtn = document.getElementById('pdf-btn-next-page');
-      const pillsContainer = document.getElementById('pdf-page-indicator-pills');
-
-      if (navCurPageEl) navCurPageEl.innerText = curPage;
-      if (navTotalPagesEl) navTotalPagesEl.innerText = totalPages;
-      if (prevBtn) prevBtn.disabled = (curPage <= 1);
-      if (nextBtn) nextBtn.disabled = (curPage >= totalPages);
-
-      // Render interactive Page Pills
-      if (pillsContainer) {
-        let pillsHtml = '';
-        for (let p = 1; p <= totalPages; p++) {
-          const cpIdx = checkpoints.findIndex(cp => (cp.pageNumber || 1) === p);
-          const hasCp = cpIdx !== -1;
-          const isPassed = hasCp && pdfCheckpointsCompletedMap[`${subId}_pdf_${cpIdx}`];
-          const isCurrent = (p === curPage);
-
-          if (hasCp) {
-            if (isPassed) {
-              pillsHtml += `
-                <button type="button" onclick="jumpToPdfPage(${p})" class="px-2.5 py-1 rounded-xl text-xs font-black transition flex items-center gap-1 ${isCurrent ? 'bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-300' : 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100'}">
-                  <span>Page ${p}</span> <span class="text-[10px]">✓</span>
-                </button>
-              `;
-            } else {
-              pillsHtml += `
-                <button type="button" onclick="jumpToPdfPage(${p})" class="px-2.5 py-1 rounded-xl text-xs font-black transition flex items-center gap-1.5 ${isCurrent ? 'bg-amber-600 text-white shadow-sm ring-2 ring-amber-300' : 'bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100'}">
-                  <span>Page ${p}</span> <span class="text-[10px]">🔒 Checkpoint</span>
-                </button>
-              `;
-            }
-          } else {
-            pillsHtml += `
-              <button type="button" onclick="jumpToPdfPage(${p})" class="px-2.5 py-1 rounded-xl text-xs font-bold transition ${isCurrent ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">
-                Page ${p}
-              </button>
-            `;
-          }
-        }
-        pillsContainer.innerHTML = pillsHtml;
+      if (checkpoints.length === 0) {
+        checkpointsList.innerHTML = `<div class="p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100 text-xs font-bold text-slate-600">No embedded checkpoints for this reading.</div>`;
+        unlockPDFReflections();
+        return;
       }
 
-      // Check overall completion
-      const allPdfCheckpointsPassed = checkpoints.length === 0 || checkpoints.every((_, idx) => pdfCheckpointsCompletedMap[`${subId}_pdf_${idx}`]);
+      const subId = selectedSubmodule.id;
+      if (activePdfMilestoneIndexMap[subId] === undefined) {
+        // default to first unpassed checkpoint
+        const firstUnpassed = checkpoints.findIndex((_, idx) => !pdfCheckpointsCompletedMap[`${subId}_pdf_${idx}`]);
+        activePdfMilestoneIndexMap[subId] = firstUnpassed === -1 ? checkpoints.length - 1 : firstUnpassed;
+      }
+      let currentMilestone = activePdfMilestoneIndexMap[subId];
+      if (currentMilestone >= checkpoints.length) {
+        currentMilestone = checkpoints.length - 1;
+      }
+
+      const allPdfCheckpointsPassed = checkpoints.every((_, idx) => pdfCheckpointsCompletedMap[`${subId}_pdf_${idx}`]);
       if (allPdfCheckpointsPassed) {
         unlockPDFReflections();
       }
 
-      // Render Checkpoints List & In-Flow Page Action Card
-      if (!checkpointsList) return;
+      const completedCount = checkpoints.filter((_, idx) => pdfCheckpointsCompletedMap[`${subId}_pdf_${idx}`]).length;
+      const progressPct = Math.round((completedCount / checkpoints.length) * 100);
 
-      const curPageCpIdx = checkpoints.findIndex(cp => (cp.pageNumber || 1) === curPage);
-      const curPageHasCp = curPageCpIdx !== -1;
-      const curPageCpPassed = curPageHasCp && pdfCheckpointsCompletedMap[`${subId}_pdf_${curPageCpIdx}`];
-
-      let listHtml = `<div class="space-y-4">`;
-
-      if (curPageHasCp && !curPageCpPassed) {
-        const cp = checkpoints[curPageCpIdx];
-        listHtml += `
-          <div class="p-4 sm:p-5 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent rounded-2xl border-2 border-amber-400/80 shadow-sm space-y-3">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-200/60 pb-2.5">
-              <span class="px-2.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 w-fit">
-                <span>⏱️</span> <span>Page ${curPage} Required Reading Checkpoint</span>
+      let html = `
+        <div class="space-y-4">
+          <!-- Sequential Milestone Stepper Bar -->
+          <div class="p-4 bg-indigo-50/70 rounded-2xl border border-indigo-200 space-y-2.5 shadow-sm">
+            <div class="flex items-center justify-between text-xs font-black uppercase text-indigo-950">
+              <span class="flex items-center gap-1.5">
+                <span>⏱️</span> <span>Reading Milestones Progression</span>
               </span>
-              <span class="text-xs font-black text-amber-900">Unskippable Gate</span>
+              <span class="text-indigo-700 font-extrabold">
+                ${allPdfCheckpointsPassed ? '✓ All Completed (100%)' : `Milestone ${currentMilestone + 1} of ${checkpoints.length} (${progressPct}%)`}
+              </span>
             </div>
-            <div>
-              <span class="text-[11px] font-extrabold uppercase text-amber-800">${cp.section || `Page ${curPage} Concept`}</span>
-              <h4 class="text-sm font-extrabold text-slate-900 mt-0.5">${cp.question}</h4>
+
+            <!-- Progress bar -->
+            <div class="w-full bg-indigo-200/60 h-2.5 rounded-full overflow-hidden">
+              <div class="bg-indigo-600 h-full rounded-full transition-all duration-500" style="width: ${progressPct}%"></div>
             </div>
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-              <p class="text-xs text-slate-600 font-medium">Answer on-screen to unlock subsequent pages and final reflections.</p>
-              <button type="button" onclick="triggerInPdfCheckpointModal(null, ${curPageCpIdx}, ${curPage})" class="px-4 py-2 bg-indigo-700 hover:bg-indigo-600 text-white rounded-xl text-xs font-black shadow-md flex items-center gap-1.5 self-start sm:self-auto transition-all animate-pulse">
-                <span>⚡ Answer Checkpoint Now</span> <span>→</span>
-              </button>
+
+            <!-- Milestone Step Badges -->
+            <div class="flex flex-wrap items-center gap-2 pt-1">
+              ${checkpoints.map((cp, idx) => {
+                const isPassed = pdfCheckpointsCompletedMap[`${subId}_pdf_${idx}`];
+                const isCurrent = idx === currentMilestone && !allPdfCheckpointsPassed;
+                let badgeClass = "px-3 py-1 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all ";
+                if (isPassed) {
+                  badgeClass += "bg-emerald-100 text-emerald-800 border border-emerald-300";
+                } else if (isCurrent) {
+                  badgeClass += "bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-300";
+                } else {
+                  badgeClass += "bg-slate-100 text-slate-400 border border-slate-200 opacity-60";
+                }
+                const shortLabel = cp.section ? cp.section.split(':')[0] : `Milestone ${idx + 1}`;
+                return `
+                  <div class="${badgeClass}">
+                    <span>${isPassed ? '✓' : (isCurrent ? '🎯' : '🔒')}</span>
+                    <span>${shortLabel}</span>
+                  </div>
+                `;
+              }).join('')}
             </div>
           </div>
+      `;
+
+      if (allPdfCheckpointsPassed) {
+        // Celebration Banner
+        html += `
+          <div class="p-5 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-2xl shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <span class="text-3xl">🎉</span>
+              <div>
+                <h5 class="text-sm font-black">All Reading Milestones Mastered!</h5>
+                <p class="text-xs opacity-90 mt-0.5">You have verified your comprehension across all sections of this protocol. The reflections below are unlocked.</p>
+              </div>
+            </div>
+            <button type="button" onclick="activePdfMilestoneIndexMap['${subId}'] = 0; renderStudentPDFView(selectedSubmodule.videoSteps[activeVideoStepIndex] || selectedSubmodule);" class="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-xl text-xs font-bold whitespace-nowrap self-start sm:self-auto border border-white/30">
+              ↺ Review Questions
+            </button>
+          </div>
+        `;
+      } else {
+        // Active Milestone Gated Card
+        const cp = checkpoints[currentMilestone];
+        const key = `${subId}_pdf_${currentMilestone}`;
+        const hasAnswered = pdfCheckpointsCompletedMap[key];
+        const selected = selectedChoicesMap[key];
+        const isCorrect = selected !== undefined && cp.correctIndex === selected;
+
+        html += `
+          <div class="p-5 sm:p-6 bg-white rounded-2xl border-2 border-indigo-200 shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-indigo-100 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 rounded-xl bg-indigo-600 text-white text-[10px] font-black uppercase tracking-wider">
+                  Active Milestone ${currentMilestone + 1} of ${checkpoints.length}
+                </span>
+                <span class="text-xs font-black text-indigo-950">${cp.section || `Milestone ${currentMilestone + 1}`}</span>
+              </div>
+              <span class="text-xs font-bold ${hasAnswered ? 'text-emerald-600' : 'text-amber-600'} flex items-center gap-1">
+                <span>${hasAnswered ? '✓ Mastered' : '⏱️ Reading in Progress'}</span>
+              </span>
+            </div>
+
+            <!-- Target Reading Section Notice -->
+            <div class="p-3.5 bg-indigo-50/70 rounded-xl border border-indigo-100 text-xs text-indigo-950 flex items-start gap-2.5">
+              <span class="text-lg flex-shrink-0">📖</span>
+              <div>
+                <span class="font-black uppercase text-[10px] text-indigo-800">Target Document Section:</span>
+                <p class="font-bold text-slate-800 mt-0.5">${cp.section || 'Read this section in the PDF document above before answering:'}</p>
+              </div>
+            </div>
+
+            <!-- Question Prompt -->
+            <div class="space-y-1">
+              <h4 class="text-sm font-extrabold text-slate-900">${cp.question}</h4>
+              <p class="text-[11px] text-slate-500">Select the correct response according to the reading material to proceed.</p>
+            </div>
+
+            <!-- 4 Options -->
+            <div class="space-y-2 pt-1">
+              ${(cp.choices || []).map((ch, chIdx) => {
+                const isSelected = selected === chIdx;
+                const isChoiceCorrect = cp.correctIndex === chIdx;
+                let optClass = "p-3 rounded-xl border text-xs font-bold cursor-pointer transition-all flex items-center justify-between ";
+                if (hasAnswered) {
+                  if (isChoiceCorrect) optClass += "bg-emerald-50 border-emerald-400 text-emerald-900 shadow-sm";
+                  else if (isSelected) optClass += "bg-rose-50 border-rose-400 text-rose-900";
+                  else optClass += "bg-slate-50 border-slate-200 text-slate-400 opacity-60";
+                } else {
+                  optClass += "bg-slate-50 border-slate-200 hover:bg-indigo-50/70 hover:border-indigo-300 text-slate-700";
+                }
+
+                return `
+                  <div onclick="submitPDFSequentialAnswer('${key}', ${currentMilestone}, ${chIdx})" class="${optClass}">
+                    <span>${ch}</span>
+                    ${hasAnswered && isChoiceCorrect ? '<span class="text-emerald-600 font-black">✓ Correct</span>' : ''}
+                    ${hasAnswered && isSelected && !isChoiceCorrect ? '<span class="text-rose-600 font-black">✕ Try Again</span>' : ''}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+
+            <!-- Feedback & Next Action Gate -->
+            ${hasAnswered ? `
+              <div class="pt-3 border-t border-indigo-100 space-y-3">
+                <div class="p-3.5 rounded-xl bg-teal-50 border border-teal-200 text-xs text-teal-900 space-y-1">
+                  <span class="font-extrabold uppercase text-[10px] text-teal-800">Author Exemplar Explanation:</span>
+                  <p>${cp.exemplar || cp.feedbacks?.[cp.correctIndex] || "Mastered! Low-demand and emotional grounding precede de-escalation."}</p>
+                </div>
+
+                <div class="flex justify-end pt-1">
+                  <button type="button" onclick="advancePDFMilestone(${currentMilestone + 1})" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-md transition flex items-center gap-1.5 animate-pulse">
+                    <span>${currentMilestone + 1 < checkpoints.length ? `Unlock & Continue to Milestone ${currentMilestone + 2} →` : 'Complete Reading & Unlock Final Reflections →'}</span>
+                  </button>
+                </div>
+              </div>
+            ` : `
+              <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800 flex items-center gap-2">
+                <span>🔒</span>
+                <span class="font-bold">You cannot advance to the next reading section without answering this checkpoint.</span>
+              </div>
+            `}
+          </div>
+        `;
+
+        // Render LOCKED FUTURE MILESTONES (Questions are hidden!)
+        if (currentMilestone + 1 < checkpoints.length) {
+          html += `
+            <div class="space-y-2 pt-2">
+              <span class="text-[10px] font-black uppercase text-slate-400 px-1">Upcoming Locked Milestones</span>
+              ${checkpoints.slice(currentMilestone + 1).map((futureCp, fIdx) => `
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex items-center justify-between opacity-60">
+                  <span class="text-xs font-bold text-slate-500 flex items-center gap-2">
+                    <span>🔒</span> <span>Milestone ${currentMilestone + 2 + fIdx}: ${futureCp.section || 'Next Reading Section'}</span>
+                  </span>
+                  <span class="text-[9px] font-black uppercase bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full">
+                    Complete Milestone ${currentMilestone + 1} to Unlock
+                  </span>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        }
+      }
+
+      // Past Milestones Accordion (if any completed previously)
+      const passedIndices = checkpoints.map((_, i) => i).filter(i => pdfCheckpointsCompletedMap[`${subId}_pdf_${i}`] && (allPdfCheckpointsPassed || i < currentMilestone));
+      if (passedIndices.length > 0 && !allPdfCheckpointsPassed) {
+        html += `
+          <details class="group bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden mt-3">
+            <summary class="p-3 text-xs font-bold text-slate-700 flex items-center justify-between cursor-pointer hover:bg-slate-100">
+              <span class="flex items-center gap-2"><span>✓</span> <span>View Completed Reading Milestones (${passedIndices.length})</span></span>
+              <span class="text-[10px] text-teal-700 font-bold group-open:hidden">Expand</span>
+            </summary>
+            <div class="p-4 border-t border-slate-200 space-y-3 bg-white">
+              ${passedIndices.map(pIdx => {
+                const pCp = checkpoints[pIdx];
+                return `
+                  <div class="p-3 bg-emerald-50/40 rounded-xl border border-emerald-200 text-xs space-y-1">
+                    <div class="flex items-center justify-between">
+                      <span class="font-black text-emerald-900">${pCp.section || `Milestone ${pIdx + 1}`}</span>
+                      <span class="text-emerald-700 font-bold text-[10px]">Passed</span>
+                    </div>
+                    <p class="text-slate-800 font-bold">${pCp.question}</p>
+                    <p class="text-emerald-700 text-[11px]">✓ Answer: ${pCp.choices?.[pCp.correctIndex] || ''}</p>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </details>
         `;
       }
 
-      // Checkpoint Summary Cards
-      listHtml += `
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          ${checkpoints.map((cp, idx) => {
-            const pageNum = cp.pageNumber || (idx + 1);
-            const isPassed = pdfCheckpointsCompletedMap[`${subId}_pdf_${idx}`];
-            const isCur = pageNum === curPage;
-            return `
-              <div onclick="jumpToPdfPage(${pageNum})" class="p-3.5 rounded-xl border transition-all cursor-pointer ${isPassed ? 'bg-emerald-50/60 border-emerald-300' : (isCur ? 'bg-indigo-50/70 border-indigo-400 ring-1 ring-indigo-300' : 'bg-slate-50 border-slate-200')}">
-                <div class="flex items-center justify-between">
-                  <span class="text-[10px] font-black uppercase ${isPassed ? 'text-emerald-800' : (isCur ? 'text-indigo-800' : 'text-slate-500')}">
-                    Page ${pageNum} • Checkpoint #${idx + 1}
-                  </span>
-                  <span class="text-[11px] font-extrabold ${isPassed ? 'text-emerald-700' : 'text-amber-700'}">
-                    ${isPassed ? '✓ Passed' : '🔒 Unskippable'}
-                  </span>
-                </div>
-                <p class="text-xs font-bold text-slate-800 mt-1 line-clamp-2">${cp.question}</p>
-                <div class="mt-2 flex items-center justify-between text-[11px] font-bold">
-                  <span class="${isCur ? 'text-indigo-700 font-black' : 'text-slate-500'}">${isCur ? '👁️ Current Page' : 'Go to Page ' + pageNum + ' →'}</span>
-                  ${!isPassed ? `<button type="button" onclick="event.stopPropagation(); triggerInPdfCheckpointModal(null, ${idx}, ${pageNum});" class="text-xs text-indigo-700 font-extrabold hover:underline">Answer Checkpoint</button>` : ''}
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      `;
+      html += `</div>`;
+      checkpointsList.innerHTML = html;
 
-      listHtml += `</div>`;
-      checkpointsList.innerHTML = listHtml;
-
-      // Completion Banner
       const btnUnlock = document.getElementById('btn-unlock-pdf-reflections');
       const lockText = document.getElementById('pdf-lock-text');
       if (btnUnlock && lockText) {
         if (allPdfCheckpointsPassed) {
           btnUnlock.disabled = false;
           btnUnlock.className = "bg-teal-700 hover:bg-teal-600 text-white cursor-pointer px-5 py-2.5 rounded-xl text-xs font-extrabold self-end sm:self-auto shadow-md";
-          btnUnlock.innerText = "✓ All Checkpoints Passed! Proceed to Reflections →";
-          lockText.innerText = "✓ All in-page PDF checkpoints verified. Final reflections are unlocked.";
+          btnUnlock.innerText = "✓ Checkpoints Completed! Unlock Final Reflections →";
+          lockText.innerText = "✓ All PDF checkpoints verified. Click to proceed to final reflections.";
         } else {
           btnUnlock.disabled = true;
           btnUnlock.className = "bg-slate-300 text-slate-500 cursor-not-allowed px-5 py-2.5 rounded-xl text-xs font-extrabold self-end sm:self-auto";
-          btnUnlock.innerText = "🔒 Answer Page Checkpoints to Unlock";
-          lockText.innerText = `📖 Answer all in-page checkpoints to unlock final submodule reflections.`;
+          btnUnlock.innerText = "🔒 Answer Checkpoints to Unlock";
+          lockText.innerText = `📖 Complete Milestone ${currentMilestone + 1} of ${checkpoints.length} to unlock final reflections.`;
         }
       }
     }
 
-    function navigatePdfPage(delta) {
-      const sub = selectedSubmodule;
-      if (!sub) return;
-      const subId = sub.id;
-      const steps = sub.videoSteps || [];
-      const currentStep = steps[activeVideoStepIndex] || (sub.pdfDoc ? { format: 'pdf', title: sub.pdfDoc.title, pdfUrl: sub.pdfDoc.url, pdfCheckpoints: sub.pdfDoc.embeddedCheckpoints } : null);
-      if (!currentStep) return;
-
-      const checkpoints = currentStep.pdfCheckpoints || currentStep.embeddedCheckpoints || [];
-      const totalPages = currentStep.pdfTotalPages || Math.max(2, ...checkpoints.map(cp => cp.pageNumber || 1));
-      let curPage = currentPdfPageMap[subId] || 1;
-      const targetPage = curPage + delta;
-
-      if (targetPage < 1 || targetPage > totalPages) return;
-
-      // If advancing forward, check if current page has an unpassed checkpoint
-      if (delta > 0) {
-        const cpIdx = checkpoints.findIndex(cp => (cp.pageNumber || 1) === curPage);
-        if (cpIdx !== -1 && !pdfCheckpointsCompletedMap[`${subId}_pdf_${cpIdx}`]) {
-          showToast(`🔒 Answer the Page ${curPage} checkpoint to advance to Page ${targetPage}!`, 'amber');
-          triggerInPdfCheckpointModal(checkpoints[cpIdx], cpIdx, curPage, targetPage);
-          return;
-        }
+    function submitPDFSequentialAnswer(key, cpIdx, chIdx) {
+      const steps = selectedSubmodule?.videoSteps || [];
+      let currentStep = steps[activeVideoStepIndex];
+      if (!currentStep && selectedSubmodule?.pdfDoc) {
+        currentStep = {
+          format: 'pdf',
+          title: selectedSubmodule.pdfDoc.title,
+          pdfUrl: selectedSubmodule.pdfDoc.url,
+          pdfCheckpoints: selectedSubmodule.pdfDoc.embeddedCheckpoints || [],
+          transcript: ""
+        };
       }
-
-      currentPdfPageMap[subId] = targetPage;
-      renderStudentPDFView(currentStep);
-      renderCompanionNotesWorkbench(currentStep, sub, true);
-    }
-
-    function jumpToPdfPage(targetPage) {
-      const sub = selectedSubmodule;
-      if (!sub) return;
-      const subId = sub.id;
-      const steps = sub.videoSteps || [];
-      const currentStep = steps[activeVideoStepIndex] || (sub.pdfDoc ? { format: 'pdf', title: sub.pdfDoc.title, pdfUrl: sub.pdfDoc.url, pdfCheckpoints: sub.pdfDoc.embeddedCheckpoints } : null);
-      if (!currentStep) return;
-
-      const checkpoints = currentStep.pdfCheckpoints || currentStep.embeddedCheckpoints || [];
-      const curPage = currentPdfPageMap[subId] || 1;
-
-      if (targetPage > curPage) {
-        // Check intermediate pages for unpassed checkpoints
-        for (let p = curPage; p < targetPage; p++) {
-          const cpIdx = checkpoints.findIndex(cp => (cp.pageNumber || 1) === p);
-          if (cpIdx !== -1 && !pdfCheckpointsCompletedMap[`${subId}_pdf_${cpIdx}`]) {
-            showToast(`🔒 Cannot skip ahead! Answer Page ${p} checkpoint first.`, 'amber');
-            triggerInPdfCheckpointModal(checkpoints[cpIdx], cpIdx, p, targetPage);
-            return;
-          }
-        }
-      }
-
-      currentPdfPageMap[subId] = targetPage;
-      renderStudentPDFView(currentStep);
-      renderCompanionNotesWorkbench(currentStep, sub, true);
-    }
-
-    function triggerInPdfCheckpointModal(cp, cpIdx, pageNum, pendingTargetPage = null) {
-      const sub = selectedSubmodule;
-      if (!sub) return;
-      const subId = sub.id;
-      const steps = sub.videoSteps || [];
-      const currentStep = steps[activeVideoStepIndex] || (sub.pdfDoc ? { format: 'pdf', title: sub.pdfDoc.title, pdfUrl: sub.pdfDoc.url, pdfCheckpoints: sub.pdfDoc.embeddedCheckpoints } : null);
       const checkpoints = currentStep?.pdfCheckpoints || currentStep?.embeddedCheckpoints || [];
-      const activeCp = cp || checkpoints[cpIdx];
-      if (!activeCp) return;
+      const cp = checkpoints[cpIdx];
+      if (!cp) return;
 
-      const modal = document.getElementById('in-pdf-checkpoint-modal');
-      if (!modal) return;
-
-      currentActiveInPdfCheckpoint = {
-        cp: activeCp,
-        cpIdx,
-        pageNum,
-        pendingTargetPage,
-        key: `${subId}_pdf_${cpIdx}`
-      };
-
-      const selected = selectedChoicesMap[currentActiveInPdfCheckpoint.key];
-      const isPassed = pdfCheckpointsCompletedMap[currentActiveInPdfCheckpoint.key];
-
-      modal.innerHTML = `
-        <div class="space-y-4">
-          <div class="flex items-center justify-between border-b border-indigo-500/30 pb-3">
-            <span class="px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-black uppercase border border-amber-400/30 flex items-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
-              <span>Page ${pageNum} In-PDF Checkpoint</span>
-            </span>
-            <button type="button" onclick="closeInPdfCheckpointModal()" class="text-xs font-bold text-slate-300 hover:text-white px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 transition">
-              ✕ Close to Re-read Page ${pageNum}
-            </button>
-          </div>
-
-          <div>
-            <span class="text-[10px] font-black uppercase text-indigo-400 tracking-wider">${activeCp.section || `Page ${pageNum} Protocol Focus`}</span>
-            <h3 class="text-base sm:text-lg font-black text-white mt-1 leading-snug">${activeCp.question}</h3>
-            <p class="text-xs text-indigo-200 mt-0.5 font-medium">Unskippable milestone: answer correctly to unlock subsequent pages and reflection activities.</p>
-          </div>
-
-          <!-- 4 MCQ Options -->
-          <div class="space-y-2 pt-1" id="in-pdf-modal-choices">
-            ${(activeCp.choices || []).map((ch, chIdx) => {
-              const isSelected = selected === chIdx;
-              const isCorrect = activeCp.correctIndex === chIdx;
-              let btnClass = "w-full text-left p-3.5 rounded-xl border text-xs font-bold transition flex items-center justify-between ";
-              if (isPassed) {
-                if (isCorrect) btnClass += "bg-emerald-600/30 border-emerald-400 text-emerald-100 shadow-sm";
-                else if (isSelected) btnClass += "bg-rose-600/30 border-rose-400 text-rose-100";
-                else btnClass += "bg-white/5 border-white/10 text-slate-400 opacity-60";
-              } else {
-                btnClass += "bg-white/10 border-white/20 hover:bg-white/20 text-white cursor-pointer";
-              }
-              return `
-                <div onclick="submitInPdfModalChoice(${chIdx})" class="${btnClass}">
-                  <span>${ch}</span>
-                  ${isPassed && isCorrect ? '<span class="text-emerald-400 font-black">✓ Correct</span>' : ''}
-                  ${!isPassed && isSelected && !isCorrect ? '<span class="text-rose-400 font-black">✕ Try Again</span>' : ''}
-                </div>
-              `;
-            }).join('')}
-          </div>
-
-          <!-- Dynamic Feedback Container -->
-          <div id="in-pdf-modal-feedback-box" class="${isPassed ? '' : 'hidden'} p-3.5 rounded-xl bg-teal-900/50 border border-teal-500/40 text-xs text-teal-100 space-y-1">
-            <span class="font-black uppercase text-[10px] text-teal-300">Author Pedagogical Exemplar:</span>
-            <p id="in-pdf-modal-feedback-text">${activeCp.exemplar || activeCp.feedbacks?.[activeCp.correctIndex] || "Comprehension verified. Connection precedes correction."}</p>
-          </div>
-        </div>
-
-        <div class="pt-4 border-t border-indigo-500/30 flex items-center justify-between">
-          <button type="button" onclick="closeInPdfCheckpointModal()" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-slate-200 rounded-xl text-xs font-bold transition">
-            ← Review Page ${pageNum}
-          </button>
-          <button id="btn-in-pdf-modal-continue" type="button" onclick="onInPdfCheckpointSuccessContinue()" class="${isPassed ? '' : 'hidden'} px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black shadow-lg transition flex items-center gap-1.5 animate-pulse">
-            <span>Continue Reading</span> <span>→</span>
-          </button>
-        </div>
-      `;
-
-      modal.classList.remove('hidden');
-    }
-
-    function submitInPdfModalChoice(chIdx) {
-      if (!currentActiveInPdfCheckpoint) return;
-      const { cp, cpIdx, pageNum, pendingTargetPage, key } = currentActiveInPdfCheckpoint;
       selectedChoicesMap[key] = chIdx;
       const isCorrect = cp.correctIndex === chIdx;
 
-      // Log attempt to Admin
+      if (isCorrect) {
+        pdfCheckpointsCompletedMap[key] = true;
+        showToast(`✓ Correct! Reading Milestone ${cpIdx + 1} mastered.`, 'emerald');
+      } else {
+        delete pdfCheckpointsCompletedMap[key];
+        showToast(`✕ Incorrect. Review ${cp.section ? cp.section.split(':')[0] : 'the section'} and try again.`, 'rose');
+      }
+
+      // Log attempt to Admin Dashboard (DELIVERABLE #8)
       const qId = cp.id || `pdf-cp-${cpIdx}`;
       const mod = getStudentCourses().find(m => m.id === selectedModuleId);
       const currentActiveName = currentUser ? currentUser.name : "Tester 1";
+      const prevPdfAtts = adminAttempts.filter(a => a.companionName === currentActiveName && a.questionId === qId);
       logAdminAttempt({
         companionName: currentActiveName,
         moduleId: selectedModuleId || "mod-1",
         moduleTitle: mod ? mod.title : (selectedSubmodule ? selectedSubmodule.title : "Module 1"),
         submoduleId: selectedSubmodule ? selectedSubmodule.id : "sub-1-2",
-        submoduleTitle: selectedSubmodule ? `${selectedSubmodule.title} (Page ${pageNum} Checkpoint)` : `Page ${pageNum} Checkpoint`,
+        submoduleTitle: selectedSubmodule ? `${selectedSubmodule.title} (${cp.section || 'Reading'})` : "Submodule 1.2",
         questionId: qId,
         type: "PDF_CHECKPOINT",
-        typeName: `PDF Page #${pageNum} Checkpoint`,
+        typeName: `PDF Reading Milestone #${cpIdx + 1}`,
         question: cp.question,
-        submittedAnswer: cp.choices?.[chIdx] || `Option ${chIdx + 1}`,
+        submittedAnswer: cp.choices[chIdx],
         status: isCorrect ? "Correct (100%)" : "Incorrect (Retry Needed)",
         isCorrect: isCorrect,
-        attemptNumber: 1,
+        attemptNumber: prevPdfAtts.length + 1,
         exemplar: cp.exemplar || cp.feedbacks?.[cp.correctIndex] || "Review low-arousal de-escalation guidelines."
       });
 
-      const feedbackBox = document.getElementById('in-pdf-modal-feedback-box');
-      const feedbackText = document.getElementById('in-pdf-modal-feedback-text');
-      const continueBtn = document.getElementById('btn-in-pdf-modal-continue');
-
-      if (isCorrect) {
-        pdfCheckpointsCompletedMap[key] = true;
-        showToast(`✓ Correct! Page ${pageNum} Checkpoint mastered.`, 'emerald');
-
-        if (feedbackBox) {
-          feedbackBox.className = "p-3.5 rounded-xl bg-teal-900/60 border border-teal-400 text-xs text-teal-100 space-y-1";
-          feedbackBox.classList.remove('hidden');
-        }
-        if (feedbackText) {
-          feedbackText.innerText = cp.exemplar || cp.feedbacks?.[chIdx] || "Mastered! Co-regulation precedes de-escalation.";
-        }
-        if (continueBtn) {
-          continueBtn.classList.remove('hidden');
-        }
-
-        // Re-render choices to show green highlight
-        const choicesContainer = document.getElementById('in-pdf-modal-choices');
-        if (choicesContainer) {
-          choicesContainer.innerHTML = (cp.choices || []).map((ch, idx) => {
-            const isChoiceCorrect = cp.correctIndex === idx;
-            let btnClass = "w-full text-left p-3.5 rounded-xl border text-xs font-bold transition flex items-center justify-between ";
-            if (isChoiceCorrect) btnClass += "bg-emerald-600/40 border-emerald-400 text-emerald-100 shadow-sm";
-            else btnClass += "bg-white/5 border-white/10 text-slate-400 opacity-60";
-            return `
-              <div class="${btnClass}">
-                <span>${ch}</span>
-                ${isChoiceCorrect ? '<span class="text-emerald-400 font-black">✓ Correct</span>' : ''}
-              </div>
-            `;
-          }).join('');
-        }
-
-        const steps = selectedSubmodule?.videoSteps || [];
-        const currentStep = steps[activeVideoStepIndex] || selectedSubmodule;
-        renderStudentPDFView(currentStep);
-
-      } else {
-        delete pdfCheckpointsCompletedMap[key];
-        showToast(`✕ Incorrect. Review Page ${pageNum} and try again.`, 'rose');
-
-        if (feedbackBox) {
-          feedbackBox.className = "p-3.5 rounded-xl bg-rose-900/60 border border-rose-400 text-xs text-rose-100 space-y-1";
-          feedbackBox.classList.remove('hidden');
-        }
-        if (feedbackText) {
-          feedbackText.innerText = cp.feedbacks?.[chIdx] || `Incorrect. Please review Page ${pageNum} of the document and try again.`;
-        }
-        if (continueBtn) {
-          continueBtn.classList.add('hidden');
-        }
-      }
+      renderStudentPDFView(currentStep);
     }
 
-    function onInPdfCheckpointSuccessContinue() {
-      if (!currentActiveInPdfCheckpoint) {
-        closeInPdfCheckpointModal();
-        return;
-      }
-      const { pageNum, pendingTargetPage } = currentActiveInPdfCheckpoint;
-      closeInPdfCheckpointModal();
-
-      const sub = selectedSubmodule;
-      if (!sub) return;
-      const subId = sub.id;
-      const steps = sub.videoSteps || [];
+    function advancePDFMilestone(nextIdx) {
+      const subId = selectedSubmodule.id;
+      const steps = selectedSubmodule?.videoSteps || [];
       const currentStep = steps[activeVideoStepIndex] || selectedSubmodule;
       const checkpoints = currentStep?.pdfCheckpoints || currentStep?.embeddedCheckpoints || [];
-      const totalPages = currentStep?.pdfTotalPages || Math.max(2, ...checkpoints.map(c => c.pageNumber || 1));
-
-      const nextTarget = pendingTargetPage || Math.min(pageNum + 1, totalPages);
-      currentPdfPageMap[subId] = nextTarget;
-      renderStudentPDFView(currentStep);
-      renderCompanionNotesWorkbench(currentStep, sub, true);
-    }
-
-    function closeInPdfCheckpointModal() {
-      const modal = document.getElementById('in-pdf-checkpoint-modal');
-      if (modal) modal.classList.add('hidden');
-      currentActiveInPdfCheckpoint = null;
+      
+      if (nextIdx < checkpoints.length) {
+        activePdfMilestoneIndexMap[subId] = nextIdx;
+        showToast(`Unlocked Milestone ${nextIdx + 1}!`, 'teal');
+        renderStudentPDFView(currentStep);
+      } else {
+        // All completed!
+        unlockPDFReflections();
+        showToast(`🎉 All reading checkpoints completed! Final reflections unlocked.`, 'emerald');
+        renderStudentPDFView(currentStep);
+      }
     }
 
     // =========================================================================
@@ -5664,9 +5539,8 @@
       const notesArea = document.getElementById('companion-live-notes-area');
 
       if (isPdf) {
-        const curPage = currentPdfPageMap[sub.id] || 1;
         if (tagIcon) tagIcon.innerText = '📄';
-        if (tagLabel) tagLabel.innerText = `Tag Page [Page ${curPage}]`;
+        if (tagLabel) tagLabel.innerText = 'Tag Reading Guide';
       } else {
         if (tagIcon) tagIcon.innerText = '⏱️';
         if (tagLabel) tagLabel.innerText = 'Tag Video Time';
@@ -5699,8 +5573,7 @@
 
       let tag = '';
       if (isPdf) {
-        const curPage = currentPdfPageMap[selectedSubmodule.id] || 1;
-        tag = `\n[Page ${curPage}] `;
+        tag = `\n[Reading Guide: ${currentStep.title || 'PDF Protocol'}] `;
       } else {
         let seconds = 0;
         if (activeYTPlayers['video-player-container'] && typeof activeYTPlayers['video-player-container'].getCurrentTime === 'function') {
