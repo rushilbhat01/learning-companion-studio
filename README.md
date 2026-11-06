@@ -1,6 +1,6 @@
 # Learning Companion Studio (LCS v2.0)
 
-> 🌐 **[Project Introduction Page (For Non-Technical Visitors)](https://learning-companion-studio.vercel.app/about.html)** — *Start here for a visual, plain-language overview of the educational problem, target users, and how Learning Companion Studio works.*
+> 🌐 **[Project Introduction Page](https://learning-companion-studio.vercel.app/about.html)** — *Start here for a visual, plain-language overview of the educational problem, target users, and how Learning Companion Studio works.*
 >
 > 🚀 **[Launch Live Application](https://learning-companion-studio.vercel.app)**
 
