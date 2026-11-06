@@ -54,7 +54,7 @@
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased selection:bg-teal-500 selection:text-white">
 
   <!-- ==================== HEADER ==================== -->
-  <header id="main-header" class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-md transition-all shadow-sm">
+  <header id="main-header" class="hidden sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-md transition-all shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       
       <!-- Brand Logo -->
@@ -108,7 +108,7 @@
   <!-- ========================================================================= -->
   <!-- DEDICATED AUTHENTICATION VIEW (FULL SCREEN LOGIN / SIGNUP PAGE) -->
   <!-- ========================================================================= -->
-  <section id="view-auth" class="hidden min-h-screen w-full flex-col justify-center items-center py-12 px-4 bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950 text-slate-100 relative overflow-hidden">
+  <section id="view-auth" class="flex min-h-screen w-full flex-col justify-center items-center py-12 px-4 bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950 text-slate-100 relative overflow-hidden">
     <!-- Ambient background glows -->
     <div class="absolute -top-32 -left-32 w-96 h-96 bg-teal-600/15 rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-emerald-600/15 rounded-full blur-3xl pointer-events-none"></div>
@@ -249,7 +249,7 @@
   </div>
 
   <!-- ==================== MAIN CONTAINER ==================== -->
-  <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-grow w-full">
+  <main id="main-content" class="hidden max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-grow w-full">
 
     <!-- ========================================================================= -->
     <!-- VIEW 1: AUTHORING DESK (REDESIGNED 2-COLUMN CURRICULUM STUDIO) -->
@@ -2362,9 +2362,31 @@
     // ==========================================
     // AUTHENTICATION, RBAC & TELEMETRY ENGINE
     // ==========================================
-    const STORAGE_KEY_AUTH_USER = "lcs_auth_user_v2";
+    const STORAGE_KEY_AUTH_USER = "lcs_auth_session_v2";
     const STORAGE_KEY_USERS_DB = "lcs_users_db_v2";
     const STORAGE_KEY_MOVEMENTS = "lcs_user_movements_v2";
+
+    // Clear any legacy persistent localStorage login so launching the app always opens the login screen
+    try { localStorage.removeItem("lcs_auth_user_v2"); } catch (e) {}
+
+    function loadAuthSession() {
+      try {
+        const raw = sessionStorage.getItem(STORAGE_KEY_AUTH_USER);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function saveAuthSession(user) {
+      try {
+        if (user) {
+          sessionStorage.setItem(STORAGE_KEY_AUTH_USER, JSON.stringify(user));
+        } else {
+          sessionStorage.removeItem(STORAGE_KEY_AUTH_USER);
+        }
+      } catch (e) {}
+    }
 
     const FIXED_AUTHOR = {
       id: "AUTH-001",
@@ -2373,7 +2395,7 @@
       role: "author"
     };
 
-    let currentUser = loadFromStorage(STORAGE_KEY_AUTH_USER, null);
+    let currentUser = loadAuthSession();
     let selectedSignupRole = 'companion';
     let userMovementLogs = loadFromStorage(STORAGE_KEY_MOVEMENTS, []);
 
@@ -2422,10 +2444,16 @@
       const mainContent = document.getElementById('main-content');
       const authSection = document.getElementById('view-auth');
 
+      const isAuthEntryRoute = (normPath === '/login' || normPath === '/signup' || normPath === '/' || normPath === '/learning_companion_studio.html' || normPath === '/index.html');
+
       // -------------------------------------------------------------
-      // Case 1: Unauthenticated Visitor
+      // Case 1: Entry / Auth Route OR Unauthenticated Visitor
       // -------------------------------------------------------------
-      if (!currentUser) {
+      if (isAuthEntryRoute || !currentUser) {
+        if (isAuthEntryRoute && currentUser) {
+          currentUser = null;
+          saveAuthSession(null);
+        }
         // Hide studio header and main workspace
         if (header) header.classList.add('hidden');
         if (mainContent) mainContent.classList.add('hidden');
@@ -2454,7 +2482,7 @@
       }
 
       // -------------------------------------------------------------
-      // Case 2: Authenticated User
+      // Case 2: Authenticated User on Workspace Routes (/author, /admin, /home)
       // -------------------------------------------------------------
       if (authSection) {
         authSection.classList.remove('flex');
@@ -2463,13 +2491,6 @@
       if (header) header.classList.remove('hidden');
       if (mainContent) mainContent.classList.remove('hidden');
       updateUserHeaderUI();
-
-      // If authenticated user visits /login, /signup, root, or legacy HTML: redirect to role default
-      if (normPath === '/login' || normPath === '/signup' || normPath === '/' || normPath === '/learning_companion_studio.html' || normPath === '/index.html') {
-        const dest = currentUser.role === 'author' ? '/author' : '/home';
-        navigateTo(dest, true);
-        return;
-      }
 
       // Route: /author
       if (normPath === '/author') {
@@ -2730,7 +2751,7 @@
 
     function loginUserSuccess(user) {
       currentUser = user;
-      saveToStorage(STORAGE_KEY_AUTH_USER, currentUser);
+      saveAuthSession(currentUser);
       updateUserHeaderUI();
 
       // Log movement event
@@ -2759,7 +2780,8 @@
         });
       }
       currentUser = null;
-      localStorage.removeItem(STORAGE_KEY_AUTH_USER);
+      saveAuthSession(null);
+      localStorage.removeItem("lcs_auth_user_v2");
       localStorage.removeItem('lcs_auth_token_v2');
       updateUserHeaderUI();
       navigateTo('/login');
